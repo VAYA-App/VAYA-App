@@ -3,6 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
+import '../../shared/widgets/theme_picker_sheet.dart';
 
 /// ทริปของฉัน. Layout skeleton in the Stitch style; the saved trips list
 /// and its empty/delete states are built in #42.
@@ -83,6 +84,12 @@ class _Brand extends StatelessWidget {
             ),
             Text('VAYA', style: theme.textTheme.titleLarge),
           ],
+        ),
+        const Spacer(),
+        IconButton(
+          icon: const Icon(Icons.palette_outlined),
+          tooltip: 'เปลี่ยนธีม',
+          onPressed: () => showThemePicker(context),
         ),
       ],
     );
