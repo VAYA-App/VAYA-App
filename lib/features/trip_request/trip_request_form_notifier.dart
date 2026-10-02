@@ -52,6 +52,11 @@ final class TripRequestFormState {
   static const maxBudget = 1000000;
   static const maxNoteLength = 300;
 
+  /// Intercity Transport is only asked for when the trip may leave the
+  /// Origin province: the user picked another province or lets the AI
+  /// choose. A trip that stays in the Origin has no intercity cost.
+  bool get needsIntercity => destinationId == null || destinationId != originId;
+
   bool get isFirstStep => step == TripRequestStep.values.first;
   bool get isLastStep => step == TripRequestStep.values.last;
 
@@ -195,7 +200,7 @@ class TripRequestFormNotifier extends Notifier<TripRequestFormState> {
       budget: s.budget!,
       originId: s.originId,
       destinationId: s.destinationId,
-      intercityMode: s.intercityMode,
+      intercityMode: s.needsIntercity ? s.intercityMode : null,
       localTransportMode: s.localTransportMode,
       preferenceTags: s.preferenceTags,
       pace: s.pace,
