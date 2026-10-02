@@ -6,6 +6,7 @@ import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
+import '../../shared/widgets/coming_soon.dart';
 import 'trip_plan_view_provider.dart';
 import 'widgets/stop_detail_sheet.dart';
 import 'widgets/stop_timeline.dart';
@@ -191,7 +192,19 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
                 toggle,
                 const SizedBox(height: 12),
                 _dayChips(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                _MapPreview(
+                  day: _dayPlan,
+                  dayIndex: _day,
+                  map: TripMap(
+                    day: _dayPlan,
+                    catalog: widget.view.catalog,
+                    nightStay: _nightStay,
+                    interactive: false,
+                  ),
+                  onOpen: () => setState(() => _showMap = true),
+                ),
+                const SizedBox(height: 24),
                 dayHeader,
                 const SizedBox(height: 16),
                 _timeline(),
@@ -210,8 +223,150 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
                 onPressed: () => context.go(AppRoutes.home),
               ),
         title: const Text('แผนการเดินทาง'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.ios_share_outlined),
+            tooltip: 'แชร์แผน',
+            onPressed: () => showComingSoon(context, 'แชร์แผน', issue: 48),
+          ),
+        ],
       ),
       body: SafeArea(child: body),
+      bottomNavigationBar: const _BottomActions(),
+    );
+  }
+}
+
+/// A small, non-interactive map of the selected day; tap to open the map.
+class _MapPreview extends StatelessWidget {
+  const _MapPreview({
+    required this.day,
+    required this.dayIndex,
+    required this.map,
+    required this.onOpen,
+  });
+
+  final DayPlan day;
+  final int dayIndex;
+  final Widget map;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final km = day.stops.fold<double>(0, (sum, s) => sum + s.travelFromPrevKm);
+
+    return Semantics(
+      button: true,
+      label: 'เปิดแผนที่วันที่ ${dayIndex + 1}',
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: SizedBox(
+          height: 200,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              ExcludeSemantics(child: map),
+              Positioned(
+                left: 12,
+                bottom: 12,
+                right: 12,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.surfaceContainerLowest.withValues(
+                        alpha: 0.92,
+                      ),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.route, size: 16, color: colors.primary),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              'วันที่ ${dayIndex + 1}: ${day.stops.length} จุด '
+                              '· รวม ~${km.round()} กม.',
+                              style: theme.textTheme.labelMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Material(
+                type: MaterialType.transparency,
+                child: InkWell(onTap: onOpen),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Actions for features that come next: saving (#43) and AI edits (#46).
+class _BottomActions extends StatelessWidget {
+  const _BottomActions();
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border(
+          top: BorderSide(color: colors.outlineVariant.withValues(alpha: 0.5)),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Center(
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 600),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () =>
+                          showComingSoon(context, 'บันทึกทริป', issue: 43),
+                      icon: const Icon(Icons.bookmark_border),
+                      label: const Text('บันทึกทริป'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: colors.tertiary,
+                        foregroundColor: colors.onTertiary,
+                      ),
+                      onPressed: () =>
+                          showComingSoon(context, 'ให้ AI ปรับแผน', issue: 46),
+                      icon: const Icon(Icons.auto_awesome),
+                      label: const Text('ให้ AI ปรับแผน'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
