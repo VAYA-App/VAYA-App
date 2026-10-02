@@ -4,7 +4,7 @@
 
 ## กติกาหลัก
 
-1. **1 issue = 1 branch = 1 PR** ทุกงานต้องมี issue ก่อน (ดูได้จาก [Project board](https://github.com/orgs/VAYA-App/projects))
+1. **1 issue = 1 branch = 1 PR** ทุกงานต้องมี issue ก่อน (ดูได้จาก [Project board](https://github.com/users/Kritternai/projects/4))
 2. **ห้าม push ตรงเข้า `main`** ทุกอย่างต้องผ่าน PR
 3. **Merge ด้วย "Squash and merge" เท่านั้น** แล้วกด **Delete branch** (ห้ามใช้ "Create a merge commit" หรือ "Rebase and merge")
 4. **ผู้รีวิว:** @Kritternai หรือ @tp-job คนใดคนหนึ่ง approve 1 คนก็ merge ได้
