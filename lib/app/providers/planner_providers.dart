@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../planner/cost_calculator.dart';
 import '../../planner/destination_suggester.dart';
 import '../../planner/over_budget_advisor.dart';
+import '../../planner/mock_planner_service.dart';
 import '../../planner/planner_service.dart';
+import 'mock_providers.dart';
 
 /// Replace the body with the real implementation in #34.
 final costCalculatorProvider = Provider<CostCalculator>(
@@ -20,7 +22,8 @@ final destinationSuggesterProvider = Provider<DestinationSuggester>(
   (ref) => throw UnimplementedError('DestinationSuggester: see #25'),
 );
 
-/// Replace the body with the real implementation in #31.
+/// Mock for now: replays the bundled plan. The real pipeline lands in #31.
 final plannerServiceProvider = Provider<PlannerService>(
-  (ref) => throw UnimplementedError('PlannerService: see #31'),
+  (ref) =>
+      MockPlannerService(loadPlan: () => ref.read(mockTripPlanProvider.future)),
 );

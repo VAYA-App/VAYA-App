@@ -83,7 +83,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: 'generating',
-            builder: (context, state) => const GeneratingScreen(),
+            builder: (context, state) => GeneratingScreen(
+              destinationId: state.uri.queryParameters['destination'],
+            ),
           ),
         ],
       ),
