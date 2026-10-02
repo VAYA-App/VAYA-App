@@ -1,5 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 
+import 'theme_palette.dart';
+
 /// Material 3 theme for the whole app, styled after the team's Stitch
 /// design ("Siam Wanderlust"): emerald primary, warm stone surfaces, white
 /// cards and a sunset accent mapped to the tertiary role.
@@ -8,64 +10,80 @@ import 'package:material_ui/material_ui.dart';
 /// See docs/DESIGN.md.
 abstract final class AppTheme {
   /// Andaman emerald, the brand colour.
-  static const Color seedColor = Color(0xFF006948);
+  static Color get seedColor => ThemePalette.emerald.seed;
 
   /// Bundled Prompt font, covering both Thai and Latin.
   static const String fontFamily = 'Prompt';
 
-  static ThemeData light() => _build(_lightScheme);
+  static ThemeData light([ThemePalette palette = ThemePalette.emerald]) =>
+      _build(_scheme(palette, Brightness.light));
 
-  static ThemeData dark() => _build(_darkScheme);
+  static ThemeData dark([ThemePalette palette = ThemePalette.emerald]) =>
+      _build(_scheme(palette, Brightness.dark));
 
-  static final ColorScheme _lightScheme =
-      ColorScheme.fromSeed(seedColor: seedColor).copyWith(
-        primary: seedColor,
-        onPrimary: const Color(0xFFFFFFFF),
-        // Selection highlights (chips, segmented buttons, navigation) use a
-        // soft emerald tint instead of a second hue.
-        secondaryContainer: const Color(0xFFD5F0E3),
-        onSecondaryContainer: const Color(0xFF005137),
-        // Sunset accent for per-person cost, alerts and highlights.
-        tertiary: const Color(0xFFA73A00),
-        onTertiary: const Color(0xFFFFFFFF),
-        tertiaryContainer: const Color(0xFFFFDBCE),
-        onTertiaryContainer: const Color(0xFF370E00),
-        surface: const Color(0xFFFFF8F5),
-        onSurface: const Color(0xFF1F1B17),
-        onSurfaceVariant: const Color(0xFF3D4A42),
-        surfaceDim: const Color(0xFFE2D8D2),
-        surfaceBright: const Color(0xFFFFF8F5),
-        surfaceContainerLowest: const Color(0xFFFFFFFF),
-        surfaceContainerLow: const Color(0xFFFCF2EB),
-        surfaceContainer: const Color(0xFFF6ECE6),
-        surfaceContainerHigh: const Color(0xFFF0E6E0),
-        surfaceContainerHighest: const Color(0xFFEAE1DA),
-        outline: const Color(0xFF6D7A72),
-        outlineVariant: const Color(0xFFBCCAC0),
-        inverseSurface: const Color(0xFF342F2B),
-        onInverseSurface: const Color(0xFFF9EFE8),
-      );
+  /// Every palette shares the warm stone surfaces; only the accent roles
+  /// come from its seed. Emerald gets the exact Stitch brand accents.
+  static ColorScheme _scheme(ThemePalette palette, Brightness brightness) {
+    final seeded = ColorScheme.fromSeed(
+      seedColor: palette.seed,
+      brightness: brightness,
+    );
+    final light = brightness == Brightness.light;
+    final scheme = light ? _lightSurfaces(seeded) : _darkSurfaces(seeded);
+    if (palette != ThemePalette.emerald) return scheme;
+    return light ? _emeraldLight(scheme) : _emeraldDark(scheme);
+  }
 
-  static final ColorScheme _darkScheme =
-      ColorScheme.fromSeed(
-        seedColor: seedColor,
-        brightness: Brightness.dark,
-      ).copyWith(
-        tertiary: const Color(0xFFFFB599),
-        onTertiary: const Color(0xFF5A1B00),
-        tertiaryContainer: const Color(0xFF7F2B00),
-        onTertiaryContainer: const Color(0xFFFFDBCE),
-        surface: const Color(0xFF16120F),
-        onSurface: const Color(0xFFEAE1DA),
-        onSurfaceVariant: const Color(0xFFBCCAC0),
-        surfaceContainerLowest: const Color(0xFF110D0A),
-        surfaceContainerLow: const Color(0xFF1F1B17),
-        surfaceContainer: const Color(0xFF231F1B),
-        surfaceContainerHigh: const Color(0xFF2E2925),
-        surfaceContainerHighest: const Color(0xFF393430),
-        outline: const Color(0xFF87948B),
-        outlineVariant: const Color(0xFF3D4A42),
-      );
+  static ColorScheme _lightSurfaces(ColorScheme c) => c.copyWith(
+    surface: const Color(0xFFFFF8F5),
+    onSurface: const Color(0xFF1F1B17),
+    onSurfaceVariant: const Color(0xFF3D4A42),
+    surfaceDim: const Color(0xFFE2D8D2),
+    surfaceBright: const Color(0xFFFFF8F5),
+    surfaceContainerLowest: const Color(0xFFFFFFFF),
+    surfaceContainerLow: const Color(0xFFFCF2EB),
+    surfaceContainer: const Color(0xFFF6ECE6),
+    surfaceContainerHigh: const Color(0xFFF0E6E0),
+    surfaceContainerHighest: const Color(0xFFEAE1DA),
+    outline: const Color(0xFF6D7A72),
+    outlineVariant: const Color(0xFFBCCAC0),
+    inverseSurface: const Color(0xFF342F2B),
+    onInverseSurface: const Color(0xFFF9EFE8),
+  );
+
+  static ColorScheme _darkSurfaces(ColorScheme c) => c.copyWith(
+    surface: const Color(0xFF16120F),
+    onSurface: const Color(0xFFEAE1DA),
+    onSurfaceVariant: const Color(0xFFBCCAC0),
+    surfaceContainerLowest: const Color(0xFF110D0A),
+    surfaceContainerLow: const Color(0xFF1F1B17),
+    surfaceContainer: const Color(0xFF231F1B),
+    surfaceContainerHigh: const Color(0xFF2E2925),
+    surfaceContainerHighest: const Color(0xFF393430),
+    outline: const Color(0xFF87948B),
+    outlineVariant: const Color(0xFF3D4A42),
+  );
+
+  static ColorScheme _emeraldLight(ColorScheme c) => c.copyWith(
+    primary: ThemePalette.emerald.seed,
+    onPrimary: const Color(0xFFFFFFFF),
+    // Selection highlights (chips, segmented buttons, navigation) use a
+    // soft emerald tint instead of a second hue.
+    secondaryContainer: const Color(0xFFD5F0E3),
+    onSecondaryContainer: const Color(0xFF005137),
+    // Sunset accent for per-person cost, alerts and highlights.
+    tertiary: const Color(0xFFA73A00),
+    onTertiary: const Color(0xFFFFFFFF),
+    tertiaryContainer: const Color(0xFFFFDBCE),
+    onTertiaryContainer: const Color(0xFF370E00),
+  );
+
+  static ColorScheme _emeraldDark(ColorScheme c) => c.copyWith(
+    tertiary: const Color(0xFFFFB599),
+    onTertiary: const Color(0xFF5A1B00),
+    tertiaryContainer: const Color(0xFF7F2B00),
+    onTertiaryContainer: const Color(0xFFFFDBCE),
+  );
 
   static ThemeData _build(ColorScheme c) {
     final base = ThemeData(
