@@ -61,15 +61,17 @@ flutter:
   uses-material-design: true
 
   fonts:
-    # Thai glyph fallback for the platform font (see lib/app/theme/app_theme.dart).
-    - family: NotoSansThai
+    # Prompt covers Thai and Latin (lib/app/theme/app_theme.dart).
+    - family: Prompt
       fonts:
-        - asset: assets/fonts/NotoSansThai-Regular.ttf
-        - asset: assets/fonts/NotoSansThai-Medium.ttf
+        - asset: assets/fonts/Prompt-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Prompt-Regular.ttf
+        - asset: assets/fonts/Prompt-Medium.ttf
           weight: 500
-        - asset: assets/fonts/NotoSansThai-SemiBold.ttf
+        - asset: assets/fonts/Prompt-SemiBold.ttf
           weight: 600
-        - asset: assets/fonts/NotoSansThai-Bold.ttf
+        - asset: assets/fonts/Prompt-Bold.ttf
           weight: 700
 
   assets:

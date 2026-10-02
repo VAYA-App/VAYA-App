@@ -10,8 +10,8 @@ abstract final class AppTheme {
   /// Andaman emerald, the brand colour.
   static const Color seedColor = Color(0xFF006948);
 
-  /// Bundled font used for Thai glyphs; Latin text keeps the platform font.
-  static const String thaiFontFamily = 'NotoSansThai';
+  /// Bundled Prompt font, covering both Thai and Latin.
+  static const String fontFamily = 'Prompt';
 
   static ThemeData light() => _build(_lightScheme);
 
@@ -70,11 +70,11 @@ abstract final class AppTheme {
   static ThemeData _build(ColorScheme c) {
     final base = ThemeData(
       colorScheme: c,
-      fontFamilyFallback: const [thaiFontFamily],
+      fontFamily: fontFamily,
       visualDensity: VisualDensity.standard,
       materialTapTargetSize: MaterialTapTargetSize.padded,
     );
-    final text = base.textTheme;
+    final text = _textTheme(base.textTheme);
     final soft = BorderSide(color: c.outlineVariant.withValues(alpha: 0.6));
     OutlineInputBorder field(Color color, [double width = 1]) =>
         OutlineInputBorder(
@@ -83,6 +83,7 @@ abstract final class AppTheme {
         );
 
     return base.copyWith(
+      textTheme: text,
       scaffoldBackgroundColor: c.surface,
       appBarTheme: AppBarTheme(
         backgroundColor: c.surface,
@@ -178,6 +179,32 @@ abstract final class AppTheme {
       snackBarTheme: const SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
       ),
+    );
+  }
+
+  /// Stitch type rhythm: semi-bold headlines, light body text and open line
+  /// heights so Thai tone marks never collide.
+  static TextTheme _textTheme(TextTheme t) {
+    const semiBold = FontWeight.w600, medium = FontWeight.w500;
+    return t.copyWith(
+      displaySmall: t.displaySmall?.copyWith(fontWeight: semiBold),
+      headlineLarge: t.headlineLarge?.copyWith(fontWeight: semiBold),
+      headlineMedium: t.headlineMedium?.copyWith(fontWeight: semiBold),
+      headlineSmall: t.headlineSmall?.copyWith(fontWeight: semiBold),
+      titleLarge: t.titleLarge?.copyWith(fontWeight: semiBold),
+      titleMedium: t.titleMedium?.copyWith(fontWeight: medium),
+      titleSmall: t.titleSmall?.copyWith(fontWeight: medium),
+      bodyLarge: t.bodyLarge?.copyWith(
+        fontWeight: FontWeight.w300,
+        height: 1.6,
+      ),
+      bodyMedium: t.bodyMedium?.copyWith(
+        fontWeight: FontWeight.w300,
+        height: 1.55,
+      ),
+      bodySmall: t.bodySmall?.copyWith(height: 1.5),
+      labelLarge: t.labelLarge?.copyWith(fontWeight: medium),
+      labelMedium: t.labelMedium?.copyWith(fontWeight: medium),
     );
   }
 }
