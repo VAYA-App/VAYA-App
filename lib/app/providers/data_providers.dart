@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/asset_place_catalog.dart';
 import '../../data/auth_repository.dart';
+import '../../data/mock/in_memory_trip_repository.dart';
+import '../../data/mock/mock_auth_repository.dart';
 import '../../data/trip_repository.dart';
 import '../../domain/domain.dart';
 
@@ -10,12 +12,16 @@ final placeCatalogProvider = FutureProvider<PlaceCatalog>(
   (ref) => loadPlaceCatalog(rootBundle),
 );
 
-/// Replace the body with the Firebase implementation in #14.
-final authRepositoryProvider = Provider<AuthRepository>(
-  (ref) => throw UnimplementedError('AuthRepository: see #14'),
-);
+/// Mock for now; the Firebase implementation is deferred (#14).
+final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  final repository = MockAuthRepository();
+  ref.onDispose(repository.dispose);
+  return repository;
+});
 
-/// Replace the body with the Firestore implementation in #41.
-final tripRepositoryProvider = Provider<TripRepository>(
-  (ref) => throw UnimplementedError('TripRepository: see #41'),
-);
+/// Mock for now; the Firestore implementation is deferred (#41).
+final tripRepositoryProvider = Provider<TripRepository>((ref) {
+  final repository = InMemoryTripRepository();
+  ref.onDispose(repository.dispose);
+  return repository;
+});
