@@ -9,6 +9,7 @@ import '../../shared/formatters.dart';
 import 'trip_plan_view_provider.dart';
 import 'widgets/stop_detail_sheet.dart';
 import 'widgets/stop_timeline.dart';
+import 'widgets/trip_map.dart';
 
 /// A Trip Plan shown day by day (#39).
 class TripPlanScreen extends ConsumerWidget {
@@ -47,7 +48,17 @@ class _TripPlanBodyState extends State<_TripPlanBody>
   late final TabController _tabs = TabController(
     length: widget.view.plan.days.length,
     vsync: this,
-  );
+  )..addListener(_onDayChanged);
+
+  /// Compact windows show either the timeline or the map.
+  var _showMap = false;
+
+  /// Highlighted Stop of the selected day, shared by timeline and map.
+  int? _selectedStop;
+
+  void _onDayChanged() {
+    if (!_tabs.indexIsChanging) setState(() => _selectedStop = null);
+  }
 
   @override
   void dispose() {
@@ -63,11 +74,128 @@ class _TripPlanBodyState extends State<_TripPlanBody>
     return null;
   }
 
+  void _selectStop(int dayIndex, int stopIndex) {
+    setState(() => _selectedStop = stopIndex);
+    final day = widget.view.plan.days[dayIndex];
+    final stop = day.stops[stopIndex];
+    showStopDetailSheet(
+      context,
+      number: stopIndex + 1,
+      stop: stop,
+      place: widget.view.catalog.place(stop.placeId),
+      date: day.date,
+    );
+  }
+
+  Widget _timeline(int dayIndex, double margin) {
+    final view = widget.view;
+    return ListView(
+      padding: EdgeInsets.all(margin),
+      children: [
+        _TripSummary(view: view),
+        const SizedBox(height: 24),
+        StopTimeline(
+          day: view.plan.days[dayIndex],
+          catalog: view.catalog,
+          transport: view.request.localTransportMode,
+          nightStay: _nightStayAfter(dayIndex),
+          selectedIndex: dayIndex == _tabs.index ? _selectedStop : null,
+          onSelect: (stop) => _selectStop(dayIndex, stop),
+        ),
+      ],
+    );
+  }
+
+  Widget _map(int dayIndex) {
+    final view = widget.view;
+    return TripMap(
+      day: view.plan.days[dayIndex],
+      catalog: view.catalog,
+      nightStay: _nightStayAfter(dayIndex),
+      selectedIndex: dayIndex == _tabs.index ? _selectedStop : null,
+      onSelect: (stop) => _selectStop(dayIndex, stop),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final view = widget.view;
     final plan = view.plan;
-    final margin = context.windowSizeClass.pageMargin;
+    final sizeClass = context.windowSizeClass;
+    final margin = sizeClass.pageMargin;
+    final days = [for (var i = 0; i < plan.days.length; i++) i];
+
+    final Widget body;
+    if (sizeClass.isAtLeast(WindowSizeClass.expanded)) {
+      body = Row(
+        children: [
+          Expanded(
+            flex: 5,
+            child: TabBarView(
+              controller: _tabs,
+              children: [for (final i in days) _timeline(i, margin)],
+            ),
+          ),
+          Expanded(
+            flex: 6,
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(0, margin, margin, margin),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: _map(_tabs.index),
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      body = Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(margin, 12, margin, 0),
+            child: SizedBox(
+              width: double.infinity,
+              child: SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment(
+                    value: false,
+                    icon: Icon(Icons.view_timeline_outlined),
+                    label: Text('ไทม์ไลน์'),
+                  ),
+                  ButtonSegment(
+                    value: true,
+                    icon: Icon(Icons.map_outlined),
+                    label: Text('แผนที่'),
+                  ),
+                ],
+                selected: {_showMap},
+                showSelectedIcon: false,
+                onSelectionChanged: (s) => setState(() => _showMap = s.single),
+              ),
+            ),
+          ),
+          Expanded(
+            child: TabBarView(
+              controller: _tabs,
+              // Map gestures would fight the swipe between days.
+              physics: _showMap ? const NeverScrollableScrollPhysics() : null,
+              children: [
+                for (final i in days)
+                  _showMap
+                      ? Padding(
+                          padding: EdgeInsets.all(margin),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: _map(i),
+                          ),
+                        )
+                      : _timeline(i, margin),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -88,34 +216,7 @@ class _TripPlanBodyState extends State<_TripPlanBody>
           ],
         ),
       ),
-      body: SafeArea(
-        child: TabBarView(
-          controller: _tabs,
-          children: [
-            for (final (i, day) in plan.days.indexed)
-              ListView(
-                padding: EdgeInsets.all(margin),
-                children: [
-                  _TripSummary(view: view),
-                  const SizedBox(height: 24),
-                  StopTimeline(
-                    day: day,
-                    catalog: view.catalog,
-                    transport: view.request.localTransportMode,
-                    nightStay: _nightStayAfter(i),
-                    onSelect: (stopIndex) => showStopDetailSheet(
-                      context,
-                      number: stopIndex + 1,
-                      stop: day.stops[stopIndex],
-                      place: view.catalog.place(day.stops[stopIndex].placeId),
-                      date: day.date,
-                    ),
-                  ),
-                ],
-              ),
-          ],
-        ),
-      ),
+      body: SafeArea(child: body),
     );
   }
 }
