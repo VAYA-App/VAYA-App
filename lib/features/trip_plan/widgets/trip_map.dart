@@ -18,6 +18,7 @@ class TripMap extends ConsumerStatefulWidget {
     this.nightStay,
     this.selectedIndex,
     this.onSelect,
+    this.interactive = true,
   });
 
   final DayPlan day;
@@ -25,6 +26,9 @@ class TripMap extends ConsumerStatefulWidget {
   final NightStay? nightStay;
   final int? selectedIndex;
   final ValueChanged<int>? onSelect;
+
+  /// `false` for small previews: no gestures and no controls.
+  final bool interactive;
 
   @override
   ConsumerState<TripMap> createState() => _TripMapState();
@@ -78,8 +82,10 @@ class _TripMapState extends ConsumerState<TripMap> {
       mapController: _controller,
       options: MapOptions(
         initialCameraFit: _fitAll,
-        interactionOptions: const InteractionOptions(
-          flags: InteractiveFlag.all & ~InteractiveFlag.rotate,
+        interactionOptions: InteractionOptions(
+          flags: widget.interactive
+              ? InteractiveFlag.all & ~InteractiveFlag.rotate
+              : InteractiveFlag.none,
         ),
       ),
       children: [
@@ -127,19 +133,20 @@ class _TripMapState extends ConsumerState<TripMap> {
               ),
           ],
         ),
-        Align(
-          alignment: Alignment.bottomRight,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
-            child: FloatingActionButton.small(
-              // Several maps can live in one TabBarView.
-              heroTag: null,
-              tooltip: 'ดูทุกจุดของวันนี้',
-              onPressed: () => _controller.fitCamera(_fitAll),
-              child: const Icon(Icons.fit_screen_outlined),
+        if (widget.interactive)
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+              child: FloatingActionButton.small(
+                // Several maps can live in one TabBarView.
+                heroTag: null,
+                tooltip: 'ดูทุกจุดของวันนี้',
+                onPressed: () => _controller.fitCamera(_fitAll),
+                child: const Icon(Icons.fit_screen_outlined),
+              ),
             ),
           ),
-        ),
         SimpleAttributionWidget(
           source: Text(
             'OpenStreetMap contributors',

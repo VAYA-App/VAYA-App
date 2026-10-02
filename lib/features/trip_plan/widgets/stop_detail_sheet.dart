@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/domain.dart';
 import '../../../shared/formatters.dart';
+import '../../../shared/widgets/coming_soon.dart';
 import 'stop_timeline.dart';
 
 /// Opens the details of one Stop as a modal bottom sheet.
@@ -14,7 +15,6 @@ Future<void> showStopDetailSheet(
 }) {
   return showModalBottomSheet<void>(
     context: context,
-    showDragHandle: true,
     isScrollControlled: true,
     builder: (context) =>
         _StopDetail(number: number, stop: stop, place: place, date: date),
@@ -39,6 +39,9 @@ class _StopDetail extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final hours = place.hoursOn(date);
+    final muted = theme.textTheme.bodyMedium?.copyWith(
+      color: colors.onSurfaceVariant,
+    );
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -46,70 +49,139 @@ class _StopDetail extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'จุดที่ $number · ${stop.slot.label}',
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: colors.primary,
-              ),
+            Row(
+              children: [
+                CategoryPill(category: place.category),
+                const SizedBox(width: 8),
+                Text(
+                  'จุดที่ $number · ${stop.slot.label}',
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colors.primary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             Text(place.name, style: theme.textTheme.headlineSmall),
-            const SizedBox(height: 8),
-            Text(
-              place.shortDescription,
-              style: theme.textTheme.bodyLarge?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
+            const SizedBox(height: 4),
+            Wrap(
+              spacing: 6,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                if (place.rating case final rating?) ...[
+                  Icon(Icons.star_rounded, size: 18, color: colors.tertiary),
+                  Text(
+                    rating.toStringAsFixed(1),
+                    style: theme.textTheme.labelLarge,
+                  ),
+                  Text('·', style: muted),
+                ],
+                Text('฿' * place.priceLevel, style: theme.textTheme.labelLarge),
+                Text('·', style: muted),
+                Text(
+                  stop.cost == 0
+                      ? 'ไม่มีค่าใช้จ่าย'
+                      : 'ประมาณ ${formatBaht(stop.cost)}',
+                  style: muted,
+                ),
+              ],
             ),
             const SizedBox(height: 16),
-            _DetailRow(
-              icon: categoryIcon(place.category),
-              label: [place.category.label, ?place.area].join(' · '),
+            Text(place.shortDescription, style: theme.textTheme.bodyLarge),
+            const SizedBox(height: 20),
+            _InfoRow(
+              icon: Icons.near_me_outlined,
+              title: place.area ?? place.category.label,
+              detail: stop.travelFromPrevMin > 0
+                  ? 'ห่างจากจุดก่อนหน้า ${stop.travelFromPrevKm.toStringAsFixed(1)} กม. '
+                        '· เดินทางราว ${formatMinutes(stop.travelFromPrevMin)}'
+                  : null,
             ),
-            _DetailRow(
+            _InfoRow(
               icon: Icons.schedule_outlined,
-              label:
-                  '${stop.start.toJson()}–${stop.end.toJson()} '
+              title:
+                  '${stop.start.toJson()} – ${stop.end.toJson()} '
                   '(${formatMinutes(stop.durationMin)})',
             ),
-            _DetailRow(
-              icon: Icons.door_front_door_outlined,
-              label: !place.hasKnownOpeningHours
+            _InfoRow(
+              icon: Icons.storefront_outlined,
+              title: 'เวลาเปิดทำการ',
+              detail: !place.hasKnownOpeningHours
                   ? 'ไม่มีข้อมูลเวลาเปิด-ปิด'
                   : hours == null
                   ? 'ปิดวันนี้'
-                  : 'เปิด ${hours.open.toJson()}–${hours.close.toJson()}',
+                  : 'เปิด ${hours.open.toJson()} – ${hours.close.toJson()}',
             ),
-            _DetailRow(
-              icon: Icons.payments_outlined,
-              label: stop.cost == 0
-                  ? 'ไม่มีค่าใช้จ่าย'
-                  : '${formatBaht(stop.cost)} (ราคาโดยประมาณ)',
-            ),
-            if (place.rating != null)
-              _DetailRow(
-                icon: Icons.star_outline,
-                label: 'คะแนน ${place.rating!.toStringAsFixed(1)}',
-              ),
             if (stop.note != null) ...[
-              const SizedBox(height: 16),
-              Card.filled(
-                margin: EdgeInsets.zero,
-                child: ListTile(
-                  leading: const Icon(Icons.auto_awesome_outlined),
-                  title: const Text('ทำไมถึงเลือกที่นี่'),
-                  subtitle: Text(stop.note!),
+              const SizedBox(height: 8),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: 20,
+                        color: colors.tertiary,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'ทำไม AI เลือกที่นี่',
+                              style: theme.textTheme.titleSmall,
+                            ),
+                            Text(stop.note!, style: muted),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
             for (final warning in stop.warnings) ...[
-              const SizedBox(height: 8),
-              _DetailRow(
-                icon: Icons.warning_amber_outlined,
-                label: warning,
-                color: colors.error,
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    Icons.warning_amber_outlined,
+                    size: 20,
+                    color: colors.error,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      warning,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colors.error,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                onPressed: () => showComingSoon(
+                  context,
+                  'สลับเป็นสถานที่ใกล้เคียง',
+                  issue: 45,
+                ),
+                icon: const Icon(Icons.swap_horiz),
+                label: const Text('สลับเป็นสถานที่ใกล้เคียง'),
+              ),
+            ),
           ],
         ),
       ),
@@ -117,31 +189,46 @@ class _StopDetail extends StatelessWidget {
   }
 }
 
-class _DetailRow extends StatelessWidget {
-  const _DetailRow({required this.icon, required this.label, this.color});
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.icon, required this.title, this.detail});
 
   final IconData icon;
-  final String label;
-  final Color? color;
+  final String title;
+  final String? detail;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final c = color ?? theme.colorScheme.onSurface;
+    final colors = theme.colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: color ?? theme.colorScheme.onSurfaceVariant,
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.secondaryContainer,
+              shape: BoxShape.circle,
+            ),
+            child: SizedBox.square(
+              dimension: 36,
+              child: Icon(icon, size: 18, color: colors.primary),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label,
-              style: theme.textTheme.bodyMedium?.copyWith(color: c),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: theme.textTheme.titleSmall),
+                if (detail != null)
+                  Text(
+                    detail!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+              ],
             ),
           ),
         ],

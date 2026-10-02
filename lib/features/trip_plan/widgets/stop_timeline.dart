@@ -24,8 +24,49 @@ IconData localTransportIcon(LocalTransportMode mode) => switch (mode) {
   LocalTransportMode.publicTransport => Icons.directions_transit_outlined,
 };
 
-/// One Day Plan as a vertical timeline: numbered Stops joined by travel
-/// segments, ending with the Night Stay. Numbers match the map markers.
+/// Small pill naming a Place's category, coloured per category.
+class CategoryPill extends StatelessWidget {
+  const CategoryPill({super.key, required this.category});
+
+  final PlaceCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final (bg, fg) = switch (category) {
+      PlaceCategory.attraction => (
+        colors.secondaryContainer,
+        colors.onSecondaryContainer,
+      ),
+      PlaceCategory.restaurant => (
+        colors.tertiaryContainer,
+        colors.onTertiaryContainer,
+      ),
+      PlaceCategory.accommodation => (
+        colors.surfaceContainerHighest,
+        colors.onSurfaceVariant,
+      ),
+    };
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+        child: Text(
+          category.label,
+          style: theme.textTheme.labelSmall?.copyWith(color: fg),
+        ),
+      ),
+    );
+  }
+}
+
+/// One Day Plan as a minimal vertical timeline: numbered Stops on a thin
+/// emerald rail, travel rows between them, and the Night Stay at the end.
+/// Numbers match the map markers.
 class StopTimeline extends StatelessWidget {
   const StopTimeline({
     super.key,
@@ -52,31 +93,27 @@ class StopTimeline extends StatelessWidget {
       children: [
         for (final (i, stop) in day.stops.indexed) ...[
           if (stop.travelFromPrevMin > 0)
-            _TravelSegment(stop: stop, icon: localTransportIcon(transport)),
-          _StopTile(
+            _TravelRow(stop: stop, icon: localTransportIcon(transport)),
+          _StopEntry(
             number: i + 1,
             stop: stop,
             place: catalog.place(stop.placeId),
             selected: selectedIndex == i,
+            isLast: i == day.stops.length - 1 && stay == null,
             onTap: onSelect == null ? null : () => onSelect!(i),
           ),
         ],
         if (stay != null)
-          _NightStayTile(stay: stay, place: catalog.place(stay.placeId)),
+          _NightStayEntry(stay: stay, place: catalog.place(stay.placeId)),
       ],
     );
   }
 }
 
-/// Fixed-width time column + rail so every row lines up.
-class _TimelineRow extends StatelessWidget {
-  const _TimelineRow({
-    required this.leading,
-    required this.rail,
-    required this.child,
-  });
+/// Rail column + content, so every row lines up on the same rail.
+class _Row extends StatelessWidget {
+  const _Row({required this.rail, required this.child});
 
-  final Widget leading;
   final Widget rail;
   final Widget child;
 
@@ -86,8 +123,8 @@ class _TimelineRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(width: 52, child: leading),
           SizedBox(width: 40, child: rail),
+          const SizedBox(width: 8),
           Expanded(child: child),
         ],
       ),
@@ -95,12 +132,26 @@ class _TimelineRow extends StatelessWidget {
   }
 }
 
-class _StopTile extends StatelessWidget {
-  const _StopTile({
+class _Line extends StatelessWidget {
+  const _Line();
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: VerticalDivider(
+      width: 2,
+      thickness: 2,
+      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.25),
+    ),
+  );
+}
+
+class _StopEntry extends StatelessWidget {
+  const _StopEntry({
     required this.number,
     required this.stop,
     required this.place,
     required this.selected,
+    required this.isLast,
     required this.onTap,
   });
 
@@ -108,6 +159,7 @@ class _StopTile extends StatelessWidget {
   final Stop stop;
   final Place place;
   final bool selected;
+  final bool isLast;
   final VoidCallback? onTap;
 
   @override
@@ -117,21 +169,20 @@ class _StopTile extends StatelessWidget {
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: colors.onSurfaceVariant,
     );
+    final costLabel = stop.cost == 0
+        ? 'ไม่มีค่าใช้จ่าย'
+        : '${formatBaht(stop.cost)} · '
+              '${place.category == PlaceCategory.restaurant ? 'ค่าอาหาร' : 'ค่าเข้าชม'}';
 
-    return _TimelineRow(
-      leading: Padding(
-        padding: const EdgeInsets.only(top: 14),
-        child: Text(stop.start.toJson(), style: theme.textTheme.labelLarge),
-      ),
+    return _Row(
       rail: Column(
         children: [
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           Semantics(
             label: 'จุดที่ $number',
             child: CircleAvatar(
               radius: 14,
               backgroundColor: colors.primary,
-              foregroundColor: colors.onPrimary,
               child: Text(
                 '$number',
                 style: theme.textTheme.labelLarge?.copyWith(
@@ -140,62 +191,105 @@ class _StopTile extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            child: VerticalDivider(
-              width: 2,
-              thickness: 2,
-              color: colors.outlineVariant,
-            ),
-          ),
+          if (!isLast) const Expanded(child: _Line()),
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.only(bottom: 4),
         child: Card(
-          margin: EdgeInsets.zero,
-          color: selected
-              ? colors.secondaryContainer
-              : colors.surfaceContainerLow,
-          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(
+              color: selected
+                  ? colors.primary
+                  : colors.outlineVariant.withValues(alpha: 0.6),
+              width: selected ? 1.5 : 1,
+            ),
+          ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(place.name, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 4),
-                  Wrap(
-                    spacing: 12,
-                    runSpacing: 4,
-                    crossAxisAlignment: WrapCrossAlignment.center,
+                  Row(
                     children: [
-                      _IconLabel(
-                        icon: categoryIcon(place.category),
-                        label: place.area ?? place.category.label,
+                      Icon(Icons.schedule, size: 16, color: colors.primary),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          '${stop.start.toJson()} – ${stop.end.toJson()} '
+                          '(${formatMinutes(stop.durationMin)})',
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: colors.primary,
+                          ),
+                        ),
                       ),
-                      _IconLabel(
-                        icon: Icons.schedule_outlined,
-                        label: formatMinutes(stop.durationMin),
-                      ),
-                      _IconLabel(
-                        icon: Icons.payments_outlined,
-                        label: stop.cost == 0 ? 'ฟรี' : formatBaht(stop.cost),
-                      ),
+                      CategoryPill(category: place.category),
                     ],
                   ),
+                  const SizedBox(height: 8),
+                  Text(place.name, style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 2),
+                  Text(
+                    [?place.area, place.shortDescription].join(' · '),
+                    style: muted,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    costLabel,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colors.primary,
+                    ),
+                  ),
                   if (stop.note != null) ...[
-                    const SizedBox(height: 8),
-                    Text(stop.note!, style: muted),
+                    const SizedBox(height: 12),
+                    DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainerLow,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.auto_awesome,
+                              size: 16,
+                              color: colors.tertiary,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(stop.note!, style: muted)),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                   for (final warning in stop.warnings) ...[
                     const SizedBox(height: 8),
-                    _IconLabel(
-                      icon: Icons.warning_amber_outlined,
-                      label: warning,
-                      color: colors.error,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.warning_amber_outlined,
+                          size: 16,
+                          color: colors.error,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            warning,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colors.error,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],
@@ -208,38 +302,42 @@ class _StopTile extends StatelessWidget {
   }
 }
 
-class _TravelSegment extends StatelessWidget {
-  const _TravelSegment({required this.stop, required this.icon});
+class _TravelRow extends StatelessWidget {
+  const _TravelRow({required this.stop, required this.icon});
 
   final Stop stop;
   final IconData icon;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return _TimelineRow(
-      leading: const SizedBox.shrink(),
-      rail: Center(
-        child: VerticalDivider(
-          width: 2,
-          thickness: 2,
-          color: colors.outlineVariant,
-        ),
-      ),
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return _Row(
+      rail: const _Line(),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
-        child: _IconLabel(
-          icon: icon,
-          label:
-              '${formatMinutes(stop.travelFromPrevMin)} · ${stop.travelFromPrevKm.toStringAsFixed(1)} กม.',
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: colors.onSurfaceVariant),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'เดินทาง ${stop.travelFromPrevKm.toStringAsFixed(1)} กม. '
+                '(ประมาณ ${formatMinutes(stop.travelFromPrevMin)})',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _NightStayTile extends StatelessWidget {
-  const _NightStayTile({required this.stay, required this.place});
+class _NightStayEntry extends StatelessWidget {
+  const _NightStayEntry({required this.stay, required this.place});
 
   final NightStay stay;
   final Place place;
@@ -248,56 +346,33 @@ class _NightStayTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    return _TimelineRow(
-      leading: const SizedBox.shrink(),
+    return _Row(
       rail: Column(
         children: [
-          const SizedBox(height: 10),
+          const SizedBox(height: 16),
           CircleAvatar(
             radius: 14,
             backgroundColor: colors.tertiaryContainer,
-            foregroundColor: colors.onTertiaryContainer,
-            child: const Icon(Icons.bed_outlined, size: 16),
+            child: Icon(
+              Icons.bed_outlined,
+              size: 16,
+              color: colors.onTertiaryContainer,
+            ),
           ),
         ],
       ),
-      child: Card.outlined(
-        margin: EdgeInsets.zero,
-        child: ListTile(
-          title: Text('พักคืนที่ ${stay.night} · ${place.name}'),
-          subtitle: Text(
-            '${stay.rooms} ห้อง · ${formatBaht(stay.cost)}'
-            '${place.breakfastIncluded ? ' · รวมอาหารเช้า' : ''}',
+      child: Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Card(
+          child: ListTile(
+            title: Text('พักคืนที่ ${stay.night} · ${place.name}'),
+            subtitle: Text(
+              '${stay.rooms} ห้อง · ${formatBaht(stay.cost)}'
+              '${place.breakfastIncluded ? ' · รวมอาหารเช้า' : ''}',
+            ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _IconLabel extends StatelessWidget {
-  const _IconLabel({required this.icon, required this.label, this.color});
-
-  final IconData icon;
-  final String label;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final c = color ?? theme.colorScheme.onSurfaceVariant;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: c),
-        const SizedBox(width: 4),
-        Flexible(
-          child: Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(color: c),
-          ),
-        ),
-      ],
     );
   }
 }
