@@ -7,6 +7,7 @@ import '../../app/router.dart';
 import 'trip_request_form_notifier.dart';
 import 'widgets/budget_step.dart';
 import 'widgets/dates_step.dart';
+import 'widgets/preferences_step.dart';
 import 'widgets/transport_step.dart';
 
 /// Multi-step Trip Request form (#18). State lives in
@@ -127,7 +128,7 @@ class _StepPage extends StatelessWidget {
                 TripRequestStep.datesAndTravellers => const DatesStep(),
                 TripRequestStep.budgetAndPlaces => const BudgetStep(),
                 TripRequestStep.transport => const TransportStep(),
-                TripRequestStep.preferences => const _PendingStep(),
+                TripRequestStep.preferences => const PreferencesStep(),
               },
             ],
           ),
@@ -135,13 +136,6 @@ class _StepPage extends StatelessWidget {
       ),
     );
   }
-}
-
-class _PendingStep extends StatelessWidget {
-  const _PendingStep();
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 class _BottomBar extends StatelessWidget {
