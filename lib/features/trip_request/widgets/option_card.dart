@@ -58,7 +58,7 @@ class OptionCard extends StatelessWidget {
       child: Material(
         color: selected
             ? colors.secondaryContainer
-            : colors.surfaceContainerLowest,
+            : theme.cardTheme.color ?? colors.surfaceContainerLowest,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
