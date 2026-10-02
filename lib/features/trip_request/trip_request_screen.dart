@@ -78,17 +78,84 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
           ),
         ),
         body: SafeArea(
-          child: Column(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: _StepPage(step: form.step)),
-              _BottomBar(
-                error: _showError ? _form.currentError : null,
-                isFirstStep: form.isFirstStep,
-                isLastStep: form.isLastStep,
-                onBack: _back,
-                onContinue: _continue,
+              if (context.windowSizeClass.isAtLeast(WindowSizeClass.expanded))
+                _StepList(
+                  current: form.step,
+                  onSelect: (step) {
+                    setState(() => _showError = false);
+                    _form.goBackTo(step);
+                  },
+                ),
+              Expanded(
+                child: Column(
+                  children: [
+                    Expanded(child: _StepPage(step: form.step)),
+                    _BottomBar(
+                      error: _showError ? _form.currentError : null,
+                      isFirstStep: form.isFirstStep,
+                      isLastStep: form.isLastStep,
+                      onBack: _back,
+                      onContinue: _continue,
+                    ),
+                  ],
+                ),
               ),
             ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Left pane on expanded windows: every step with its status. Earlier
+/// steps can be revisited; later ones open only through "ถัดไป".
+class _StepList extends StatelessWidget {
+  const _StepList({required this.current, required this.onSelect});
+
+  final TripRequestStep current;
+  final ValueChanged<TripRequestStep> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 0, 24),
+      child: Material(
+        color: colors.surfaceContainerLow,
+        borderRadius: BorderRadius.circular(16),
+        clipBehavior: Clip.antiAlias,
+        child: SizedBox(
+          width: 280,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                for (final step in TripRequestStep.values)
+                  ListTile(
+                    leading: Icon(
+                      step.index < current.index
+                          ? Icons.check_circle
+                          : step == current
+                          ? Icons.radio_button_checked
+                          : Icons.radio_button_unchecked,
+                      color: step.index <= current.index
+                          ? colors.primary
+                          : colors.outline,
+                    ),
+                    title: Text(step.label),
+                    subtitle: Text('ขั้นที่ ${step.index + 1}'),
+                    selected: step == current,
+                    enabled: step.index <= current.index,
+                    onTap: () => onSelect(step),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

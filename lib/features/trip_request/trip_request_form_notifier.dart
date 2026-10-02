@@ -182,6 +182,11 @@ class TripRequestFormNotifier extends Notifier<TripRequestFormState> {
     state = state.copyWith(step: TripRequestStep.values[state.step.index - 1]);
   }
 
+  /// Jumps back to an earlier step; later steps must go through [next].
+  void goBackTo(TripRequestStep step) {
+    if (step.index < state.step.index) state = state.copyWith(step: step);
+  }
+
   void reset() => state = const TripRequestFormState();
 
   /// The request built from the current values. Throws [StateError] when
