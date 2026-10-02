@@ -47,8 +47,45 @@ final class TripRequestFormState {
   final Pace pace;
   final String note;
 
+  static const maxDays = 7;
+  static const maxTravellers = 10;
+  static const maxBudget = 1000000;
+  static const maxNoteLength = 300;
+
   bool get isFirstStep => step == TripRequestStep.values.first;
   bool get isLastStep => step == TripRequestStep.values.last;
+
+  /// Thai message explaining what is missing in [step], or `null` when the
+  /// step is complete.
+  String? errorFor(TripRequestStep step, {required DateTime today}) {
+    switch (step) {
+      case TripRequestStep.datesAndTravellers:
+        final start = startDate, end = endDate;
+        if (start == null || end == null) return 'เลือกวันไปและวันกลับ';
+        if (start.isBefore(today)) return 'วันไปต้องไม่ใช่วันที่ผ่านมาแล้ว';
+        if (end.isBefore(start)) return 'วันกลับต้องไม่ก่อนวันไป';
+        if (end.difference(start).inDays + 1 > maxDays) {
+          return 'วางแผนได้ครั้งละไม่เกิน $maxDays วัน';
+        }
+        if (travellerCount < 1 || travellerCount > maxTravellers) {
+          return 'จำนวนผู้เดินทาง 1–$maxTravellers คน';
+        }
+      case TripRequestStep.budgetAndPlaces:
+        final b = budget;
+        if (b == null || b <= 0) return 'กรอกงบรวมของทริป';
+        if (b > maxBudget) return 'งบรวมต้องไม่เกิน ฿1,000,000';
+      case TripRequestStep.transport:
+        break;
+      case TripRequestStep.preferences:
+        if (preferenceTags.isEmpty) {
+          return 'เลือกสไตล์การเที่ยวอย่างน้อย 1 อย่าง';
+        }
+        if (note.length > maxNoteLength) {
+          return 'ข้อความเพิ่มเติมยาวเกิน $maxNoteLength ตัวอักษร';
+        }
+    }
+    return null;
+  }
 
   TripRequestFormState copyWith({
     TripRequestStep? step,
@@ -81,6 +118,12 @@ final class TripRequestFormState {
 
 /// Form state for the trip request flow. Kept alive across the suggestion
 /// and generating screens so going back never loses what was typed.
+/// Today's date; override in tests.
+final todayProvider = Provider<DateTime>((ref) {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day);
+});
+
 final tripRequestFormProvider =
     NotifierProvider<TripRequestFormNotifier, TripRequestFormState>(
       TripRequestFormNotifier.new,
@@ -119,8 +162,13 @@ class TripRequestFormNotifier extends Notifier<TripRequestFormState> {
 
   void setNote(String note) => state = state.copyWith(note: note);
 
+  /// What blocks the current step, or `null` when the user may continue.
+  String? get currentError =>
+      state.errorFor(state.step, today: ref.read(todayProvider));
+
+  /// Moves on only when the current step is complete.
   void next() {
-    if (state.isLastStep) return;
+    if (state.isLastStep || currentError != null) return;
     state = state.copyWith(step: TripRequestStep.values[state.step.index + 1]);
   }
 
@@ -131,9 +179,15 @@ class TripRequestFormNotifier extends Notifier<TripRequestFormState> {
 
   void reset() => state = const TripRequestFormState();
 
-  /// The request built from the current values.
+  /// The request built from the current values. Throws [StateError] when
+  /// any step is incomplete.
   TripRequest submit() {
     final s = state;
+    final today = ref.read(todayProvider);
+    for (final step in TripRequestStep.values) {
+      final error = s.errorFor(step, today: today);
+      if (error != null) throw StateError('${step.name}: $error');
+    }
     return TripRequest(
       startDate: s.startDate!,
       endDate: s.endDate!,
