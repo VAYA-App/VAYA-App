@@ -1,0 +1,36 @@
+{
+  "provinces": [
+    {
+      "id": "bangkok",
+      "name": "กรุงเทพมหานคร",
+      "center": { "lat": 13.7563, "lng": 100.5018 },
+      "regionTag": "central",
+      "tags": ["templeHistory", "artCulture", "localFood", "shopping", "cafe", "nightlife"],
+      "seasonality": ["good", "good", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "good", "good"],
+      "seasonNote": "ตัวอย่าง: พ.ย.–ก.พ. อากาศเย็นสบาย มี.ค.–พ.ค. ร้อนจัด มิ.ย.–ต.ค. ฝนตกบ่อย (#20 ตรวจสอบ)",
+      "intercity": {
+        "chonburi": {
+          "bus": { "durationMin": 150, "farePerPerson": 131 },
+          "train": { "durationMin": 240, "farePerPerson": 31 },
+          "car": { "durationMin": 120, "distanceKm": 150, "toll": 120 }
+        }
+      }
+    },
+    {
+      "id": "chonburi",
+      "name": "ชลบุรี",
+      "center": { "lat": 13.0827, "lng": 100.9192 },
+      "regionTag": "east",
+      "tags": ["beach", "seafood", "nightlife", "viewpoint", "family", "cafe"],
+      "seasonality": ["good", "good", "good", "good", "ok", "ok", "ok", "ok", "ok", "ok", "good", "good"],
+      "seasonNote": "ตัวอย่าง: พ.ย.–เม.ย. ทะเลสวย คลื่นลมสงบ พ.ค.–ต.ค. มีฝนและคลื่นแรงบางวัน (#20 ตรวจสอบ)",
+      "intercity": {
+        "bangkok": {
+          "bus": { "durationMin": 150, "farePerPerson": 131 },
+          "train": { "durationMin": 240, "farePerPerson": 31 },
+          "car": { "durationMin": 120, "distanceKm": 150, "toll": 120 }
+        }
+      }
+    }
+  ]
+}

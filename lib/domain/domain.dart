@@ -9,6 +9,7 @@ export 'destination_suggestion.dart';
 export 'enums.dart';
 export 'geo_point.dart';
 export 'place.dart';
+export 'place_catalog.dart';
 export 'province.dart';
 export 'trip.dart';
 export 'trip_plan.dart';

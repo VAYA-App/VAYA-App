@@ -1,0 +1,40 @@
+{
+  "destinationId": "chonburi",
+  "status": "ok",
+  "intercity": { "mode": "bus", "durationMin": 150, "cost": 524 },
+  "nightStays": [
+    { "night": 1, "placeId": "chonburi-accommodation-hard-rock-pattaya", "rooms": 1, "cost": 3000 }
+  ],
+  "days": [
+    {
+      "date": "2026-11-14",
+      "stops": [
+        { "placeId": "chonburi-attraction-sanctuary-of-truth", "slot": "morning", "start": "10:45", "durationMin": 120, "travelFromPrevMin": 15, "travelFromPrevKm": 8.0, "cost": 1000, "note": "งานไม้แกะสลักริมทะเล เหมาะกับสายถ่ายรูป" },
+        { "placeId": "chonburi-restaurant-lan-pho-naklua", "slot": "lunch", "start": "12:50", "durationMin": 60, "travelFromPrevMin": 5, "travelFromPrevKm": 2.0, "cost": 400, "note": "อาหารทะเลสดใกล้ปราสาทสัจธรรม" },
+        { "placeId": "chonburi-attraction-pattaya-viewpoint", "slot": "afternoon", "start": "14:15", "durationMin": 45, "travelFromPrevMin": 25, "travelFromPrevKm": 10.0, "cost": 0, "note": "เห็นอ่าวพัทยาทั้งอ่าว", "warnings": ["ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน"] },
+        { "placeId": "chonburi-restaurant-pier21-pattaya", "slot": "dinner", "start": "17:30", "durationMin": 60, "travelFromPrevMin": 10, "travelFromPrevKm": 4.0, "cost": 160 }
+      ]
+    },
+    {
+      "date": "2026-11-15",
+      "stops": [
+        { "placeId": "chonburi-attraction-jomtien-beach", "slot": "morning", "start": "09:00", "durationMin": 120, "travelFromPrevMin": 20, "travelFromPrevKm": 9.0, "cost": 0, "note": "หาดเงียบกว่าพัทยา เหมาะกับการเที่ยวชิล" },
+        { "placeId": "chonburi-restaurant-nong-mon-market", "slot": "lunch", "start": "12:00", "durationMin": 60, "travelFromPrevMin": 60, "travelFromPrevKm": 48.0, "cost": 160 },
+        { "placeId": "chonburi-attraction-bang-saen-beach", "slot": "afternoon", "start": "13:10", "durationMin": 90, "travelFromPrevMin": 10, "travelFromPrevKm": 4.0, "cost": 0 },
+        { "placeId": "chonburi-attraction-khao-sam-muk", "slot": "afternoon", "start": "14:50", "durationMin": 45, "travelFromPrevMin": 10, "travelFromPrevKm": 3.0, "cost": 0, "note": "ชมวิวก่อนเดินทางกลับกรุงเทพฯ" }
+      ]
+    }
+  ],
+  "cost": {
+    "intercity": 524,
+    "accommodation": 3000,
+    "food": 720,
+    "entrance": 1000,
+    "localTransport": 480,
+    "buffer": 572,
+    "total": 6296,
+    "perPerson": 3148,
+    "budget": 7000
+  },
+  "overBudgetAdvice": []
+}
