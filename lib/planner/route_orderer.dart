@@ -43,6 +43,17 @@ class RouteOrderer {
 
   /// Used when a Place has no `dwellMinutes`.
   static const defaultDwellMinutes = 90;
+  static const defaultMealMinutes = 60;
+
+  /// Meals start inside these windows (PROJECT-PLAN §10).
+  static const lunchWindow = OpeningPeriod(
+    ClockTime.hm(11, 30),
+    ClockTime.hm(13, 30),
+  );
+  static const dinnerWindow = OpeningPeriod(
+    ClockTime.hm(17, 30),
+    ClockTime.hm(19, 30),
+  );
 
   /// [start] is where the day begins: the previous night's accommodation,
   /// or the arrival point on the first day. Costs are left at 0 for the
@@ -55,8 +66,36 @@ class RouteOrderer {
     required PlaceCatalog catalog,
   }) {
     final day = _DayBuilder(start: start, time: dayStart, catalog: catalog);
-    for (final pick in nearestNeighbor(start, picks, catalog)) {
-      day.visit(pick);
+    SlotPick? lunch, dinner;
+    final sights = <SlotPick>[], evening = <SlotPick>[];
+    for (final pick in picks) {
+      switch (pick.slot) {
+        case Slot.lunch:
+          lunch ??= pick;
+        case Slot.dinner:
+          dinner ??= pick;
+        case Slot.evening:
+          evening.add(pick);
+        case Slot.morning || Slot.afternoon:
+          sights.add(pick);
+      }
+    }
+
+    for (final sight in nearestNeighbor(start, sights, catalog)) {
+      if (lunch != null && day.mealIsDue(lunchWindow, before: sight)) {
+        day.visit(lunch, notBefore: lunchWindow.open);
+        lunch = null;
+      }
+      if (dinner != null && day.mealIsDue(dinnerWindow, before: sight)) {
+        day.visit(dinner, notBefore: dinnerWindow.open);
+        dinner = null;
+      }
+      day.visit(sight);
+    }
+    if (lunch != null) day.visit(lunch, notBefore: lunchWindow.open);
+    if (dinner != null) day.visit(dinner, notBefore: dinnerWindow.open);
+    for (final night in nearestNeighbor(day.here, evening, catalog)) {
+      day.visit(night);
     }
     return DayPlan(date: date, stops: day.stops);
   }
@@ -76,14 +115,34 @@ class _DayBuilder {
   GeoPoint _here;
   ClockTime _now;
 
-  void visit(SlotPick pick) {
+  GeoPoint get here => _here;
+
+  int _durationOf(SlotPick pick) =>
+      catalog.place(pick.placeId).dwellMinutes ??
+      (pick.slot.isMeal
+          ? RouteOrderer.defaultMealMinutes
+          : RouteOrderer.defaultDwellMinutes);
+
+  /// Eat now when it is already meal time, or when visiting [before] first
+  /// would run past the end of the meal [window].
+  bool mealIsDue(OpeningPeriod window, {required SlotPick before}) {
+    if (!_now.isBefore(window.open)) return true;
+    final travel = travelBetween(_here, catalog.place(before.placeId).location);
+    final end = _now.addMinutes(travel.minutes + _durationOf(before));
+    return end.isAfter(window.close);
+  }
+
+  /// Goes to [pick]; waits until [notBefore] if it arrives early.
+  void visit(SlotPick pick, {ClockTime? notBefore}) {
     final place = catalog.place(pick.placeId);
     final travel = travelBetween(_here, place.location);
+    var start = _now.addMinutes(travel.minutes);
+    if (notBefore != null && start.isBefore(notBefore)) start = notBefore;
     final stop = Stop(
       placeId: place.id,
       slot: pick.slot,
-      start: _now.addMinutes(travel.minutes),
-      durationMin: place.dwellMinutes ?? RouteOrderer.defaultDwellMinutes,
+      start: start,
+      durationMin: _durationOf(pick),
       travelFromPrevMin: travel.minutes,
       travelFromPrevKm: travel.km,
       cost: 0,
