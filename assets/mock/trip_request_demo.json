@@ -1,0 +1,12 @@
+{
+  "startDate": "2026-11-14",
+  "endDate": "2026-11-15",
+  "travellerCount": 2,
+  "budget": 7000,
+  "originId": "bangkok",
+  "intercityMode": "bus",
+  "localTransportMode": "publicTransport",
+  "preferenceTags": ["beach", "cafe"],
+  "pace": "chill",
+  "note": "อยากได้ร้านกาแฟวิวทะเล"
+}

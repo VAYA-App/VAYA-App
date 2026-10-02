@@ -1,0 +1,108 @@
+{
+  "_comment": "ข้อมูลตัวอย่างจาก #12 พิกัดและราคาเป็นค่าโดยประมาณ #21 จะตรวจสอบและเติมให้ครบ",
+  "places": [
+    {
+      "id": "bangkok-attraction-grand-palace",
+      "category": "attraction",
+      "name": "พระบรมมหาราชวัง",
+      "area": "เกาะรัตนโกสินทร์",
+      "location": { "lat": 13.75, "lng": 100.4913 },
+      "tags": ["templeHistory", "artCulture"],
+      "priceLevel": 2,
+      "rating": 4.6,
+      "openingHours": { "mon": ["08:30", "15:30"], "tue": ["08:30", "15:30"], "wed": ["08:30", "15:30"], "thu": ["08:30", "15:30"], "fri": ["08:30", "15:30"], "sat": ["08:30", "15:30"], "sun": ["08:30", "15:30"] },
+      "dwellMinutes": 120,
+      "entranceFee": 500,
+      "shortDescription": "พระราชวังและวัดพระแก้ว สถาปัตยกรรมไทยที่งดงามที่สุดแห่งหนึ่ง"
+    },
+    {
+      "id": "bangkok-attraction-wat-pho",
+      "category": "attraction",
+      "name": "วัดพระเชตุพนฯ (วัดโพธิ์)",
+      "area": "เกาะรัตนโกสินทร์",
+      "location": { "lat": 13.7465, "lng": 100.493 },
+      "tags": ["templeHistory", "wellness"],
+      "priceLevel": 1,
+      "rating": 4.7,
+      "openingHours": { "mon": ["08:00", "18:30"], "tue": ["08:00", "18:30"], "wed": ["08:00", "18:30"], "thu": ["08:00", "18:30"], "fri": ["08:00", "18:30"], "sat": ["08:00", "18:30"], "sun": ["08:00", "18:30"] },
+      "dwellMinutes": 90,
+      "entranceFee": 300,
+      "shortDescription": "พระพุทธไสยาสน์องค์ใหญ่และต้นตำรับนวดแผนไทย"
+    },
+    {
+      "id": "bangkok-attraction-wat-arun",
+      "category": "attraction",
+      "name": "วัดอรุณราชวราราม",
+      "area": "ริมแม่น้ำเจ้าพระยา",
+      "location": { "lat": 13.7437, "lng": 100.4889 },
+      "tags": ["templeHistory", "viewpoint"],
+      "priceLevel": 1,
+      "rating": 4.7,
+      "openingHours": { "mon": ["08:00", "18:00"], "tue": ["08:00", "18:00"], "wed": ["08:00", "18:00"], "thu": ["08:00", "18:00"], "fri": ["08:00", "18:00"], "sat": ["08:00", "18:00"], "sun": ["08:00", "18:00"] },
+      "dwellMinutes": 60,
+      "entranceFee": 200,
+      "shortDescription": "พระปรางค์ริมแม่น้ำเจ้าพระยา สวยที่สุดช่วงเย็น"
+    },
+    {
+      "id": "bangkok-attraction-chatuchak",
+      "category": "attraction",
+      "name": "ตลาดนัดจตุจักร",
+      "area": "จตุจักร",
+      "location": { "lat": 13.7999, "lng": 100.55 },
+      "tags": ["shopping", "localFood"],
+      "priceLevel": 1,
+      "rating": 4.4,
+      "openingHours": { "sat": ["09:00", "18:00"], "sun": ["09:00", "18:00"] },
+      "dwellMinutes": 180,
+      "shortDescription": "ตลาดนัดสุดสัปดาห์ขนาดใหญ่ ร้านค้ากว่าหมื่นร้าน"
+    },
+    {
+      "id": "bangkok-restaurant-thipsamai",
+      "category": "restaurant",
+      "name": "ผัดไทยทิพย์สมัย ประตูผี",
+      "area": "พระนคร",
+      "location": { "lat": 13.7527, "lng": 100.5047 },
+      "tags": ["localFood"],
+      "priceLevel": 2,
+      "rating": 4.2,
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านผัดไทยเก่าแก่ ห่อไข่ เส้นเหนียวนุ่ม"
+    },
+    {
+      "id": "bangkok-restaurant-pier21-asok",
+      "category": "restaurant",
+      "name": "Pier 21 Food Terminal (Terminal 21 อโศก)",
+      "area": "สุขุมวิท",
+      "location": { "lat": 13.7376, "lng": 100.5604 },
+      "tags": ["localFood", "family"],
+      "priceLevel": 1,
+      "rating": 4.3,
+      "openingHours": { "mon": ["10:00", "22:00"], "tue": ["10:00", "22:00"], "wed": ["10:00", "22:00"], "thu": ["10:00", "22:00"], "fri": ["10:00", "22:00"], "sat": ["10:00", "22:00"], "sun": ["10:00", "22:00"] },
+      "dwellMinutes": 60,
+      "shortDescription": "ศูนย์อาหารราคาประหยัด มีอาหารไทยหลากหลาย"
+    },
+    {
+      "id": "bangkok-accommodation-lub-d-siam",
+      "category": "accommodation",
+      "name": "Lub d Bangkok Siam",
+      "area": "สยาม",
+      "location": { "lat": 13.7466, "lng": 100.531 },
+      "tags": ["nightlife"],
+      "priceLevel": 1,
+      "rating": 4.4,
+      "shortDescription": "โฮสเทลใกล้ BTS สนามกีฬาแห่งชาติ เดินทางสะดวก"
+    },
+    {
+      "id": "bangkok-accommodation-mandarin-oriental",
+      "category": "accommodation",
+      "name": "Mandarin Oriental, Bangkok",
+      "area": "ริมแม่น้ำเจ้าพระยา",
+      "location": { "lat": 13.7237, "lng": 100.5143 },
+      "tags": ["wellness"],
+      "priceLevel": 4,
+      "rating": 4.7,
+      "shortDescription": "โรงแรมหรูริมแม่น้ำเจ้าพระยา",
+      "breakfastIncluded": true
+    }
+  ]
+}
