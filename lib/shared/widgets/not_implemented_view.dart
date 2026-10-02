@@ -3,46 +3,57 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
 
-/// Temporary body for screens that are not built yet.
+/// Friendly body for screens that are not built yet.
 ///
-/// Shows which GitHub issue owns the screen and offers shortcuts so the
-/// whole flow stays navigable during development. Delete it from a screen
-/// as soon as that screen's issue lands.
+/// Names the GitHub issue that owns the screen (when there is one) and
+/// offers shortcuts so the whole flow stays navigable during development.
 class NotImplementedView extends StatelessWidget {
   const NotImplementedView({
     super.key,
     required this.screenName,
-    required this.issue,
-    required this.owner,
+    this.issue,
+    this.owner,
+    this.icon = Icons.hourglass_empty_rounded,
     this.shortcuts = const [],
   });
 
   final String screenName;
-  final int issue;
-  final String owner;
+
+  /// GitHub issue that builds this screen; `null` for features outside the
+  /// current scope.
+  final int? issue;
+  final String? owner;
+  final IconData icon;
   final List<({String label, String location})> shortcuts;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final sizeClass = context.windowSizeClass;
+    final colors = theme.colorScheme;
 
     return Center(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          maxWidth: WindowSizeClass.maxContentWidth,
-        ),
+        constraints: const BoxConstraints(maxWidth: 480),
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(sizeClass.pageMargin),
+          padding: EdgeInsets.all(context.windowSizeClass.pageMargin),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                Icons.construction_outlined,
-                size: 48,
-                color: theme.colorScheme.primary,
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.secondaryContainer,
+                  shape: BoxShape.circle,
+                ),
+                child: SizedBox.square(
+                  dimension: 88,
+                  child: Icon(
+                    icon,
+                    size: 40,
+                    color: colors.onSecondaryContainer,
+                  ),
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               Text(
                 screenName,
                 style: theme.textTheme.titleLarge,
@@ -50,25 +61,31 @@ class NotImplementedView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'หน้านี้ยังไม่ได้ทำ · ดู issue #$issue (@$owner)',
+                switch ((issue, owner)) {
+                  (null, _) => 'เร็ว ๆ นี้',
+                  (final i?, null) => 'เร็ว ๆ นี้ · ดู issue #$i',
+                  (final i?, final o?) => 'กำลังพัฒนา · issue #$i (@$o)',
+                },
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                  color: colors.onSurfaceVariant,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 24),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                alignment: WrapAlignment.center,
-                children: [
-                  for (final s in shortcuts)
-                    FilledButton.tonal(
-                      onPressed: () => context.go(s.location),
-                      child: Text(s.label),
-                    ),
-                ],
-              ),
+              if (shortcuts.isNotEmpty) ...[
+                const SizedBox(height: 24),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    for (final s in shortcuts)
+                      OutlinedButton(
+                        onPressed: () => context.go(s.location),
+                        child: Text(s.label),
+                      ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),

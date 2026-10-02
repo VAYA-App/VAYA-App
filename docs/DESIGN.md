@@ -1,8 +1,10 @@
 # กติกาการออกแบบ: Material 3 เท่านั้น
 
+> **แนวภาพ:** ใช้งานออกแบบจาก Stitch (ธีม "Siam Wanderlust") ในแบบมินิมอล ได้แก่ พื้นครีมอุ่น การ์ดสีขาวขอบบาง สีหลักเขียวมรกต สีเน้นส้มพระอาทิตย์ตก ฟอนต์ Prompt และพื้นที่ว่างเยอะ ทั้งหมดทำผ่าน theme ของ Material 3 ไม่สร้าง component ใหม่
+
 > แหล่งอ้างอิงเดียวที่ใช้คือ **https://m3.material.io/** ทุกหน้าจอต้องใช้ component, token และ layout ของ Material 3 ทั้งบน Android และ iOS **ห้ามใช้ Cupertino widget** และห้ามสร้าง component เองถ้า M3 มีให้ใช้อยู่แล้ว
 >
-> **Import:** ใช้ `import 'package:material_ui/material_ui.dart';` เท่านั้น ห้ามใช้ `package:flutter/material.dart` และ `package:flutter/cupertino.dart` เพราะตั้งแต่ Flutter 3.44 Material แยกออกมาเป็นแพ็กเกจ [`material_ui`](https://pub.dev/packages/material_ui) แล้ว และแพ็กเกจที่เราใช้ (`go_router`, `dynamic_color`) ก็ใช้ตัวนี้ ถ้าปนกันจะได้ `ThemeData`/`ColorScheme` คนละ type ส่วน widget พื้นฐานที่ไม่ใช่ Material ให้ import `package:flutter/widgets.dart`
+> **Import:** ใช้ `import 'package:material_ui/material_ui.dart';` เท่านั้น ห้ามใช้ `package:flutter/material.dart` และ `package:flutter/cupertino.dart` เพราะตั้งแต่ Flutter 3.44 Material แยกออกมาเป็นแพ็กเกจ [`material_ui`](https://pub.dev/packages/material_ui) แล้ว และแพ็กเกจที่เราใช้ (เช่น `go_router`) ก็ใช้ตัวนี้ ถ้าปนกันจะได้ `ThemeData`/`ColorScheme` คนละ type ส่วน widget พื้นฐานที่ไม่ใช่ Material ให้ import `package:flutter/widgets.dart`
 >
 > ถ้าแพ็กเกจภายนอกตัวไหนยังใช้ `flutter/material.dart` อยู่ ให้ครอบเฉพาะ widget นั้นด้วย `MaterialUiCompatibilityBridge` แล้วแจ้งทีม
 >
@@ -17,7 +19,17 @@
 
 - ใช้สีจาก `Theme.of(context).colorScheme` เท่านั้น เช่น `primary`, `onPrimary`, `primaryContainer`, `surfaceContainerHigh`, `error` และ `outlineVariant`
 - **ห้ามใช้ `Colors.xxx` หรือ `Color(0x...)` ในหน้าจอ** สีแบรนด์มีที่เดียวคือ seed color ใน `lib/app/theme/app_theme.dart`
-- **Dynamic color:** Android 12 ขึ้นไปใช้สีจาก wallpaper ผ่าน `dynamic_color` ส่วน Android รุ่นเก่าและ iOS ใช้สีจาก seed
+- **สีแบรนด์คงที่ (ไม่ใช้ dynamic color):** ถ้าใช้สีจาก wallpaper จะแทนที่สีมรกตของแบรนด์
+
+| Role | ใช้ทำอะไร | Light |
+|---|---|---|
+| `primary` | ปุ่มหลัก, เลขลำดับบนไทม์ไลน์/หมุด, ไอคอนเด่น | `#006948` มรกต |
+| `secondaryContainer` / `onSecondaryContainer` | สถานะที่เลือก (ชิป, segmented, navigation), การ์ดเด่น | `#D5F0E3` / `#005137` |
+| `tertiary` / `tertiaryContainer` | สีเน้นส้ม: ยอดต่อคน, ป้ายร้านอาหาร, เกร็ดความรู้, ปุ่ม AI | `#A73A00` / `#FFDBCE` |
+| `surface` | พื้นหลังทั้งแอป | `#FFF8F5` ครีม |
+| `surfaceContainerLowest` | การ์ด, ช่องกรอก, แถบด้านล่าง | `#FFFFFF` |
+| `surfaceContainerLow` | กล่องรอง เช่น AI note | `#FCF2EB` |
+| `outlineVariant` | ขอบบาง | `#BCCAC0` |
 - **Light + Dark:** ทุกหน้าต้องดูในทั้งสองโหมดก่อนเปิด PR ถ้ามีข้อความวางบนพื้นสี ต้องใช้คู่ `on*` เช่น `onPrimaryContainer` บน `primaryContainer`
 - สีสถานะ:
   - **Over Budget:** `errorContainer` / `onErrorContainer`
@@ -27,7 +39,7 @@
 
 - ใช้ `Theme.of(context).textTheme` เท่านั้น ตาม [M3 type scale](https://m3.material.io/styles/typography/type-scale-tokens): `displaySmall`, `headlineMedium`, `titleLarge`, `titleMedium`, `bodyLarge`, `bodyMedium`, `labelLarge` และอื่น ๆ
 - **ห้ามกำหนด `fontSize` เอง** ถ้าต้องการเปลี่ยนน้ำหนักตัวอักษร ให้ใช้ `.copyWith(fontWeight: ...)` เท่านั้น
-- ฟอนต์ภาษาไทยคือ **Noto Sans Thai** ซึ่ง bundle ไว้ใน `assets/fonts/` แล้ว (ตั้งเป็น fallback ของฟอนต์ระบบ)
+- ฟอนต์คือ **Prompt** (มีทั้งไทยและอังกฤษ) bundle ไว้ใน `assets/fonts/` · หัวข้อเป็น SemiBold, เนื้อหาเป็น Light และตั้ง line height สูง เพื่อไม่ให้วรรณยุกต์ชนกัน
 - ตัวเลขเงินให้ใช้ `NumberFormat` ของ `intl` จัดรูปแบบเป็น "฿12,000"
 
 ## 3. Layout และขนาดจอ (Window size classes)
@@ -44,7 +56,17 @@
 - ฟอร์มและรายการบนจอใหญ่ต้องจำกัดความกว้างไม่เกิน 840dp (`ConstrainedBox`) ไม่ให้ยืดเต็มจอ
 - ทดสอบทั้งแนวตั้งและแนวนอน รวมทั้งเครื่องพับได้ (medium)
 
-## 4. Component ที่ใช้ในโปรเจกต์ (ใช้ตามนี้ก่อนคิดสร้างเอง)
+## 4. รูปทรงที่ตั้งใน theme แล้ว (ไม่ต้องกำหนดเองในหน้าจอ)
+
+| Component | รูปทรง |
+|---|---|
+| `Card` | มุมโค้ง 20dp, ไม่มีเงา, ขอบบาง `outlineVariant` |
+| `FilledButton` / `OutlinedButton` | สูง 52dp, มุมโค้ง 16dp |
+| Chip | ทรงแคปซูล ถ้าเลือกแล้วพื้นเป็น `secondaryContainer` |
+| `TextField` | พื้นขาว มุมโค้ง 12dp และขอบเป็น primary เมื่อโฟกัส |
+| `NavigationBar` | พื้นขาว ปุ่มตรงกลางเป็น "สร้างทริป" (วงกลม primary) |
+
+## 5. Component ที่ใช้ในโปรเจกต์ (ใช้ตามนี้ก่อนคิดสร้างเอง)
 
 | สิ่งที่ต้องการ | M3 component (Flutter) |
 |---|---|
@@ -66,7 +88,7 @@
 | Badge / ตัวเลข | `Badge` |
 | ไอคอน | `Icons.*` ใช้ชุดเดียวกันทั้งแอป (แนะนำแบบ outlined สำหรับสถานะปกติ) |
 
-## 5. Accessibility (ต้องผ่านก่อน merge)
+## 6. Accessibility (ต้องผ่านก่อน merge)
 
 - พื้นที่กดไม่น้อยกว่า **48×48dp**
 - ตัวอักษรขยายถึง **200%** แล้วต้องไม่ล้นหรือถูกตัด (ทดสอบด้วย Settings → Font size หรือ `MediaQuery.textScalerOf`)
@@ -74,13 +96,13 @@
 - ห้ามสื่อความหมายด้วยสีอย่างเดียว เช่น สถานะ Over Budget ต้องมีไอคอนและข้อความด้วย
 - หมุดบนแผนที่ต้องมี label ลำดับเลขให้ screen reader อ่านได้
 
-## 6. ภาษาและข้อความ
+## 7. ภาษาและข้อความ
 
 - ข้อความในแอปเป็น**ภาษาไทยทั้งหมด** และใช้คำตาม [CONTEXT.md](../CONTEXT.md) เช่น "แผนการเดินทาง" ไม่ใช้ "Itinerary"
 - ราคาทุกจุดต้องมีป้าย "ราคาโดยประมาณ"
 - ทุกหน้าต้องมี **empty state** และ **error state** ที่บอกว่าเกิดอะไรขึ้นและผู้ใช้ทำอะไรต่อได้
 
-## 7. Checklist ก่อนเปิด PR ที่มี UI
+## 8. Checklist ก่อนเปิด PR ที่มี UI
 
 - [ ] import `package:material_ui/material_ui.dart` เท่านั้น (`grep -rn "flutter/material.dart\|flutter/cupertino.dart" lib` ต้องไม่เจอ)
 - [ ] ใช้สีและตัวอักษรจาก theme ทั้งหมด (`grep -n "Colors\.\|fontSize" <ไฟล์ที่แก้>` ต้องไม่เจอ)

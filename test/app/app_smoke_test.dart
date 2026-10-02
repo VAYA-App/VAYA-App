@@ -25,12 +25,31 @@ void main() {
 
     expect(find.byType(NavigationRail), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
+
+    await tester.tap(find.byTooltip('สร้างทริป'));
+    await tester.pumpAndSettle();
+    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+  });
+
+  testWidgets('bottom bar opens every tab', (tester) async {
+    await pumpApp(tester, const Size(400, 800));
+
+    for (final tab in ['สำรวจ', 'AI ช่วยคิด', 'โปรไฟล์', 'ทริปของฉัน']) {
+      await tester.tap(
+        find.descendant(
+          of: find.byType(NavigationBar),
+          matching: find.text(tab),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull, reason: tab);
+    }
   });
 
   testWidgets('new trip action opens the trip request screen', (tester) async {
     await pumpApp(tester, const Size(400, 800));
 
-    await tester.tap(find.byType(FloatingActionButton));
+    await tester.tap(find.text('สร้างทริป'));
     await tester.pumpAndSettle();
 
     expect(find.text('วางแผนทริปใหม่'), findsWidgets);
