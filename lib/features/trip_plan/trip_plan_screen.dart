@@ -4,8 +4,10 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
+import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
 import 'trip_plan_view_provider.dart';
+import 'widgets/stop_timeline.dart';
 
 /// A Trip Plan shown day by day (#39).
 class TripPlanScreen extends ConsumerWidget {
@@ -52,6 +54,14 @@ class _TripPlanBodyState extends State<_TripPlanBody>
     super.dispose();
   }
 
+  /// The Night Stay that ends day [dayIndex], if any (none on the last day).
+  NightStay? _nightStayAfter(int dayIndex) {
+    for (final stay in widget.view.plan.nightStays) {
+      if (stay.night == dayIndex + 1) return stay;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final view = widget.view;
@@ -81,17 +91,18 @@ class _TripPlanBodyState extends State<_TripPlanBody>
         child: TabBarView(
           controller: _tabs,
           children: [
-            for (final day in plan.days)
+            for (final (i, day) in plan.days.indexed)
               ListView(
                 padding: EdgeInsets.all(margin),
                 children: [
                   _TripSummary(view: view),
-                  const SizedBox(height: 16),
-                  for (final stop in day.stops)
-                    ListTile(
-                      title: Text(view.catalog.place(stop.placeId).name),
-                      subtitle: Text(stop.start.toJson()),
-                    ),
+                  const SizedBox(height: 24),
+                  StopTimeline(
+                    day: day,
+                    catalog: view.catalog,
+                    transport: view.request.localTransportMode,
+                    nightStay: _nightStayAfter(i),
+                  ),
                 ],
               ),
           ],
