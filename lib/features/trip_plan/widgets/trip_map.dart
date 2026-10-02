@@ -49,6 +49,20 @@ class _TripMapState extends ConsumerState<TripMap> {
     maxZoom: 15,
   );
 
+  /// Keeps the camera on what the timeline shows: the whole day after a
+  /// day change, the Stop the user picked after a selection.
+  @override
+  void didUpdateWidget(TripMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.day != widget.day) {
+      _controller.fitCamera(_fitAll);
+    } else if (widget.selectedIndex case final i?
+        when i != oldWidget.selectedIndex) {
+      final zoom = _controller.camera.zoom;
+      _controller.move(_at(widget.day.stops[i].placeId), zoom < 14 ? 14 : zoom);
+    }
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -112,6 +126,19 @@ class _TripMapState extends ConsumerState<TripMap> {
                 ),
               ),
           ],
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+            child: FloatingActionButton.small(
+              // Several maps can live in one TabBarView.
+              heroTag: null,
+              tooltip: 'ดูทุกจุดของวันนี้',
+              onPressed: () => _controller.fitCamera(_fitAll),
+              child: const Icon(Icons.fit_screen_outlined),
+            ),
+          ),
         ),
         SimpleAttributionWidget(
           source: Text(

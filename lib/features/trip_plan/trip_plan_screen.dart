@@ -199,7 +199,8 @@ class _TripPlanBodyState extends State<_TripPlanBody>
 
     return Scaffold(
       appBar: AppBar(
-        leading: context.canPop()
+        // Opened directly (e.g. from a link): offer a way home.
+        leading: !(ModalRoute.of(context)?.isFirst ?? false)
             ? null
             : IconButton(
                 icon: const Icon(Icons.arrow_back),
