@@ -38,11 +38,10 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
       return;
     }
     final request = _form.submit();
-    context.go(
-      request.destinationId == null
-          ? AppRoutes.suggestions
-          : AppRoutes.generating,
-    );
+    context.go(switch (request.destinationId) {
+      null => AppRoutes.suggestions,
+      final id => '${AppRoutes.generating}?destination=$id',
+    });
   }
 
   void _back() {
@@ -53,7 +52,6 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final form = ref.watch(tripRequestFormProvider);
-    final steps = TripRequestStep.values;
 
     return PopScope(
       canPop: form.isFirstStep,
@@ -68,14 +66,6 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
             onPressed: () => context.go(AppRoutes.home),
           ),
           title: const Text('วางแผนทริปใหม่'),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(4),
-            child: LinearProgressIndicator(
-              value: (form.step.index + 1) / steps.length,
-              semanticsLabel:
-                  'ขั้นที่ ${form.step.index + 1} จาก ${steps.length}',
-            ),
-          ),
         ),
         body: SafeArea(
           child: Row(
@@ -163,6 +153,94 @@ class _StepList extends StatelessWidget {
   }
 }
 
+/// Four-segment progress bar with the question for the current step.
+class _ProgressHeader extends StatelessWidget {
+  const _ProgressHeader({required this.step});
+
+  final TripRequestStep step;
+
+  static const _questions = {
+    TripRequestStep.datesAndTravellers: (
+      'ไปวันไหน กี่คน?',
+      'เลือกช่วงวันเดินทางและจำนวนผู้ร่วมทริป',
+    ),
+    TripRequestStep.budgetAndPlaces: (
+      'งบเท่าไร ไปที่ไหนดี?',
+      'บอกงบรวม แล้วให้ AI ช่วยเลือกจังหวัดก็ได้',
+    ),
+    TripRequestStep.transport: (
+      'เดินทางแบบไหน?',
+      'ใช้ประมาณค่าเดินทางและเวลาในแผน',
+    ),
+    TripRequestStep.preferences: (
+      'ชอบเที่ยวแบบไหน?',
+      'AI จะเลือกสถานที่ให้ตรงกับสไตล์ของคุณ',
+    ),
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final steps = TripRequestStep.values;
+    final (question, hint) = _questions[step]!;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Semantics(
+          label: 'ความคืบหน้า ขั้นที่ ${step.index + 1} จาก ${steps.length}',
+          child: Row(
+            children: [
+              for (final s in steps) ...[
+                if (s.index > 0) const SizedBox(width: 6),
+                Expanded(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 250),
+                    height: 6,
+                    decoration: BoxDecoration(
+                      color: s.index <= step.index
+                          ? colors.primary
+                          : colors.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(3),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          children: [
+            Text(
+              'ขั้นที่ ${step.index + 1} จาก ${steps.length}',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colors.primary,
+              ),
+            ),
+            Text(
+              ' · ${step.label}',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(question, style: theme.textTheme.headlineSmall),
+        const SizedBox(height: 4),
+        Text(
+          hint,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colors.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _StepPage extends StatelessWidget {
   const _StepPage({required this.step});
 
@@ -170,7 +248,6 @@ class _StepPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final margin = context.windowSizeClass.pageMargin;
 
     return Align(
@@ -182,14 +259,7 @@ class _StepPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                'ขั้นที่ ${step.index + 1} จาก ${TripRequestStep.values.length}',
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.primary,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(step.label, style: theme.textTheme.headlineSmall),
+              _ProgressHeader(step: step),
               const SizedBox(height: 24),
               switch (step) {
                 TripRequestStep.datesAndTravellers => const DatesStep(),
@@ -258,15 +328,28 @@ class _BottomBar extends StatelessWidget {
               ],
               Row(
                 children: [
-                  if (!isFirstStep)
-                    TextButton(
+                  if (!isFirstStep) ...[
+                    IconButton.outlined(
                       onPressed: onBack,
-                      child: const Text('ย้อนกลับ'),
+                      icon: const Icon(Icons.arrow_back),
+                      tooltip: 'ย้อนกลับ',
+                      style: IconButton.styleFrom(
+                        minimumSize: const Size.square(52),
+                      ),
                     ),
-                  const Spacer(),
-                  FilledButton(
-                    onPressed: onContinue,
-                    child: Text(isLastStep ? 'ดูผลลัพธ์' : 'ถัดไป'),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: FilledButton.icon(
+                      onPressed: onContinue,
+                      icon: Icon(
+                        isLastStep ? Icons.auto_awesome : Icons.arrow_forward,
+                      ),
+                      iconAlignment: isLastStep
+                          ? IconAlignment.start
+                          : IconAlignment.end,
+                      label: Text(isLastStep ? 'ให้ AI วางแผนให้' : 'ถัดไป'),
+                    ),
                   ),
                 ],
               ),
