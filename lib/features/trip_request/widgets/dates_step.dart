@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../shared/formatters.dart';
 import '../trip_request_form_notifier.dart';
-import 'step_section.dart';
+import 'form_section.dart';
 
 /// Step ①: travel dates and Traveller Count.
 class DatesStep extends ConsumerWidget {
@@ -30,62 +30,92 @@ class DatesStep extends ConsumerWidget {
     }
   }
 
+  static String _durationLabel(int days) =>
+      days == 1 ? 'ไปเช้าเย็นกลับ' : '$days วัน ${days - 1} คืน';
+
+  static String _groupLabel(int count) => switch (count) {
+    1 => 'เที่ยวคนเดียว',
+    2 => 'คู่รัก / เพื่อน',
+    <= 4 => 'กลุ่มเล็ก',
+    _ => 'กลุ่มใหญ่',
+  };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final form = ref.watch(tripRequestFormProvider);
     final notifier = ref.read(tripRequestFormProvider.notifier);
     final start = form.startDate, end = form.endDate;
     final count = form.travellerCount;
+    final muted = theme.textTheme.bodyMedium?.copyWith(
+      color: colors.onSurfaceVariant,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        StepSection(
-          title: 'วันเดินทาง',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              OutlinedButton.icon(
-                onPressed: () => _pickDates(context, ref),
-                icon: const Icon(Icons.date_range_outlined),
-                label: Text(
-                  start != null && end != null
-                      ? '${formatThaiShortDate(start)} – ${formatThaiShortDate(end)}'
-                      : 'เลือกวันไป–กลับ',
-                ),
-              ),
-              if (start != null && end != null) ...[
-                const SizedBox(height: 8),
-                Text(
-                  _durationLabel(end.difference(start).inDays + 1),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
+        FormSection(
+          icon: Icons.calendar_month_outlined,
+          title: 'ช่วงเวลาเดินทาง',
+          child: start != null && end != null
+              ? InkWell(
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => _pickDates(context, ref),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${formatThaiShortDate(start)} – ${formatThaiShortDate(end)}',
+                              style: theme.textTheme.titleLarge,
+                            ),
+                            Text(
+                              _durationLabel(end.difference(start).inDays + 1),
+                              style: muted,
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton.filledTonal(
+                        onPressed: () => _pickDates(context, ref),
+                        icon: const Icon(Icons.edit_calendar_outlined),
+                        tooltip: 'เปลี่ยนวันเดินทาง',
+                      ),
+                    ],
                   ),
+                )
+              : OutlinedButton.icon(
+                  onPressed: () => _pickDates(context, ref),
+                  icon: const Icon(Icons.date_range_outlined),
+                  label: const Text('เลือกวันไป–กลับ'),
                 ),
-              ],
-            ],
-          ),
         ),
-        StepSection(
-          title: 'จำนวนผู้เดินทาง',
+        FormSection(
+          icon: Icons.group_outlined,
+          title: 'ผู้เดินทาง',
           child: Row(
             children: [
-              IconButton.filledTonal(
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$count คน', style: theme.textTheme.titleLarge),
+                    Text(_groupLabel(count), style: muted),
+                  ],
+                ),
+              ),
+              IconButton.outlined(
                 onPressed: count > 1
                     ? () => notifier.setTravellerCount(count - 1)
                     : null,
                 icon: const Icon(Icons.remove),
                 tooltip: 'ลดจำนวนผู้เดินทาง',
               ),
-              Expanded(
-                child: Text(
-                  '$count คน',
-                  style: theme.textTheme.titleLarge,
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              IconButton.filledTonal(
+              const SizedBox(width: 8),
+              IconButton.filled(
                 onPressed: count < TripRequestFormState.maxTravellers
                     ? () => notifier.setTravellerCount(count + 1)
                     : null,
@@ -98,7 +128,4 @@ class DatesStep extends ConsumerWidget {
       ],
     );
   }
-
-  static String _durationLabel(int days) =>
-      days == 1 ? 'ไปเช้าเย็นกลับ (1 วัน)' : '$days วัน ${days - 1} คืน';
 }
