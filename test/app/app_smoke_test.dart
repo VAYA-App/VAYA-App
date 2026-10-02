@@ -34,7 +34,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('วางแผนทริปใหม่'), findsWidgets);
-    expect(find.textContaining('#18'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
   });
 
   test('window size classes follow the M3 breakpoints', () {
