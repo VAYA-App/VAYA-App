@@ -55,17 +55,34 @@ class RouteOrderer {
     ClockTime.hm(19, 30),
   );
 
+  /// Assumed when a Place has no opening hours (with a warning).
+  static const assumedHours = OpeningPeriod(
+    ClockTime.hm(9, 0),
+    ClockTime.hm(17, 0),
+  );
+
   /// [start] is where the day begins: the previous night's accommodation,
-  /// or the arrival point on the first day. Costs are left at 0 for the
+  /// or the arrival point on the first day. [dayEnd] is when the travellers
+  /// must leave (the last day's departure). Costs are left at 0 for the
   /// cost calculator (#34).
+  ///
+  /// Problems such as a Place being closed only add Thai warnings to the
+  /// Stop; the order never changes because of them.
   DayPlan orderDay({
     required DateTime date,
     required List<SlotPick> picks,
     required GeoPoint start,
     required ClockTime dayStart,
     required PlaceCatalog catalog,
+    ClockTime? dayEnd,
   }) {
-    final day = _DayBuilder(start: start, time: dayStart, catalog: catalog);
+    final day = _DayBuilder(
+      date: date,
+      start: start,
+      time: dayStart,
+      dayEnd: dayEnd,
+      catalog: catalog,
+    );
     SlotPick? lunch, dinner;
     final sights = <SlotPick>[], evening = <SlotPick>[];
     for (final pick in picks) {
@@ -104,12 +121,16 @@ class RouteOrderer {
 /// Walks through a day, keeping the clock and the current position.
 class _DayBuilder {
   _DayBuilder({
+    required this.date,
     required GeoPoint start,
     required ClockTime time,
+    required this.dayEnd,
     required this.catalog,
   }) : _here = start,
        _now = time;
 
+  final DateTime date;
+  final ClockTime? dayEnd;
   final PlaceCatalog catalog;
   final stops = <Stop>[];
   GeoPoint _here;
@@ -147,9 +168,29 @@ class _DayBuilder {
       travelFromPrevKm: travel.km,
       cost: 0,
       note: pick.note,
+      warnings: _warningsFor(place, start, _durationOf(pick)),
     );
     stops.add(stop);
     _here = place.location;
     _now = stop.end;
+  }
+
+  List<String> _warningsFor(Place place, ClockTime start, int minutes) {
+    final end = start.addMinutes(minutes);
+    final hours = place.hasKnownOpeningHours
+        ? place.hoursOn(date)
+        : RouteOrderer.assumedHours;
+    return [
+      if (!place.hasKnownOpeningHours)
+        'ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน'
+      else if (hours == null)
+        'สถานที่ปิดในวันนี้'
+      else if (start.isBefore(hours.open))
+        'ไปถึงก่อนเวลาเปิด (${hours.open})'
+      else if (end.isAfter(hours.close))
+        'อาจปิดก่อนเที่ยวเสร็จ (ปิด ${hours.close})',
+      if (dayEnd case final leave? when end.isAfter(leave))
+        'เลยเวลาที่ควรออกเดินทางกลับ ($leave)',
+    ];
   }
 }
