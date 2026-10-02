@@ -7,11 +7,8 @@
 1. **1 issue = 1 branch = 1 PR** ทุกงานต้องมี issue ก่อน (ดูได้จาก [Project board](https://github.com/users/Kritternai/projects/4))
 2. **ห้าม push ตรงเข้า `main`** ทุกอย่างต้องผ่าน PR
 3. **Merge ด้วย "Squash and merge" เท่านั้น** แล้วกด **Delete branch** (ห้ามใช้ "Create a merge commit" หรือ "Rebase and merge")
-4. **ผู้รีวิว:** @Kritternai หรือ @tp-job คนใดคนหนึ่ง approve 1 คนก็ merge ได้
-   - PR ของ @Kritternai → ให้ @tp-job รีวิว
-   - PR ของ @tp-job → ให้ @Kritternai รีวิว
-   - PR ของคนอื่น → ขอทั้งสองคน แล้วใครว่างก่อนก็รีวิว
-5. ถ้า PR แก้ `lib/domain/` หรือ `lib/app/theme/` ต้องให้ **@Kritternai** รีวิว และแจ้งในกลุ่มก่อน
+4. **ไม่บังคับรีวิว:** เจ้าของ PR merge เองได้เมื่อ `flutter analyze` และ `flutter test` ผ่าน และทำครบ checklist ใน PR template แล้ว ถ้าอยากให้เพื่อนช่วยดูก็ขอได้ (`--reviewer <ชื่อ>`) แต่ไม่ต้องรอ
+5. ถ้า PR แก้ `lib/domain/` หรือ `lib/app/theme/` ต้อง**แจ้งในกลุ่มก่อน merge** เพราะกระทบงานของทุกคน
 
 ## ชื่อ branch
 
@@ -71,7 +68,7 @@ git push -u origin feat/18-trip-request-form
 gh pr create --base main \
   --title "feat(trip-request): add multi-step trip request form (#18)" \
   --body "Closes #18" \
-  --reviewer tp-job --assignee @me
+  --assignee @me
 
 # ถ้า rebase หลัง push ไปแล้ว ให้ใช้คำสั่งนี้แทน git push ธรรมดา
 git push --force-with-lease
@@ -95,7 +92,7 @@ git branch -D feat/18-trip-request-form
 |---|---|
 | **Todo** | ยังไม่เริ่ม |
 | **In Progress** | แตก branch แล้ว |
-| **In Review** | เปิด PR แล้ว รอรีวิว |
+| **In Review** | เปิด PR แล้ว ยังไม่ merge |
 | **Done** | merge แล้ว (issue ปิดอัตโนมัติจาก `Closes #`) |
 
 ## ถ้าต้อง revert
