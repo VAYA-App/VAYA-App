@@ -34,5 +34,9 @@ abstract final class AppTheme {
     fontFamilyFallback: const [thaiFontFamily],
     visualDensity: VisualDensity.standard,
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    // Outlined text fields everywhere (docs/DESIGN.md §4).
+    inputDecorationTheme: const InputDecorationThemeData(
+      border: OutlineInputBorder(),
+    ),
   );
 }
