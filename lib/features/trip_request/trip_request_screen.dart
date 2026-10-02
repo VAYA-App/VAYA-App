@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
 import 'trip_request_form_notifier.dart';
+import 'widgets/dates_step.dart';
 
 /// Multi-step Trip Request form (#18). State lives in
 /// [tripRequestFormProvider] (#17).
@@ -121,7 +122,7 @@ class _StepPage extends StatelessWidget {
               Text(step.label, style: theme.textTheme.headlineSmall),
               const SizedBox(height: 24),
               switch (step) {
-                TripRequestStep.datesAndTravellers => const _PendingStep(),
+                TripRequestStep.datesAndTravellers => const DatesStep(),
                 TripRequestStep.budgetAndPlaces => const _PendingStep(),
                 TripRequestStep.transport => const _PendingStep(),
                 TripRequestStep.preferences => const _PendingStep(),
