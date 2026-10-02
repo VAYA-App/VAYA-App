@@ -7,6 +7,7 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
 import 'trip_plan_view_provider.dart';
+import 'widgets/stop_detail_sheet.dart';
 import 'widgets/stop_timeline.dart';
 
 /// A Trip Plan shown day by day (#39).
@@ -102,6 +103,13 @@ class _TripPlanBodyState extends State<_TripPlanBody>
                     catalog: view.catalog,
                     transport: view.request.localTransportMode,
                     nightStay: _nightStayAfter(i),
+                    onSelect: (stopIndex) => showStopDetailSheet(
+                      context,
+                      number: stopIndex + 1,
+                      stop: day.stops[stopIndex],
+                      place: view.catalog.place(day.stops[stopIndex].placeId),
+                      date: day.date,
+                    ),
                   ),
                 ],
               ),
