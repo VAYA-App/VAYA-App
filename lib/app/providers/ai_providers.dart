@@ -1,8 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../ai/gemini_service.dart';
+import '../../ai/mock_gemini_service.dart';
 
-/// Replace the body with the Firebase AI Logic implementation in #26.
+/// Mock for now: every call fails so callers use their fallbacks.
+/// The Firebase AI Logic implementation is deferred (#26).
 final geminiServiceProvider = Provider<GeminiService>(
-  (ref) => throw UnimplementedError('GeminiService: see #26'),
+  (ref) => const MockGeminiService(),
 );
