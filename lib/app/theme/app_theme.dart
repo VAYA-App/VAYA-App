@@ -90,10 +90,6 @@ abstract final class AppTheme {
         surfaceTintColor: Colors.transparent,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: text.titleLarge?.copyWith(
-          color: c.onSurface,
-          fontWeight: FontWeight.w600,
-        ),
       ),
       cardTheme: CardThemeData(
         color: c.surfaceContainerLowest,
@@ -183,7 +179,8 @@ abstract final class AppTheme {
   }
 
   /// Stitch type rhythm: semi-bold headlines, light body text and open line
-  /// heights so Thai tone marks never collide.
+  /// heights so Thai tone marks never collide. Only weights and heights are
+  /// set here; Flutter adds the font sizes for the locale's script later.
   static TextTheme _textTheme(TextTheme t) {
     const semiBold = FontWeight.w600, medium = FontWeight.w500;
     return t.copyWith(

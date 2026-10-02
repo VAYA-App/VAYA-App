@@ -12,14 +12,17 @@ class NotImplementedView extends StatelessWidget {
   const NotImplementedView({
     super.key,
     required this.screenName,
-    required this.issue,
-    required this.owner,
+    this.issue,
+    this.owner,
     this.shortcuts = const [],
   });
 
   final String screenName;
-  final int issue;
-  final String owner;
+
+  /// GitHub issue that builds this screen; `null` for features outside the
+  /// current scope.
+  final int? issue;
+  final String? owner;
   final List<({String label, String location})> shortcuts;
 
   @override
@@ -50,7 +53,12 @@ class NotImplementedView extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'หน้านี้ยังไม่ได้ทำ · ดู issue #$issue (@$owner)',
+                switch ((issue, owner)) {
+                  (null, _) => 'เร็ว ๆ นี้',
+                  (final i?, null) => 'เร็ว ๆ นี้ · ดู issue #$i',
+                  (final i?, final o?) =>
+                    'หน้านี้ยังไม่ได้ทำ · ดู issue #$i (@$o)',
+                },
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

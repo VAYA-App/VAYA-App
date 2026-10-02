@@ -1,7 +1,5 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'package:go_router/go_router.dart';
-
 import '../../app/router.dart';
 import '../../shared/widgets/not_implemented_view.dart';
 
@@ -13,11 +11,6 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('ทริปของฉัน')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go(AppRoutes.newTrip),
-        icon: const Icon(Icons.add),
-        label: const Text('วางแผนทริปใหม่'),
-      ),
       body: const NotImplementedView(
         screenName: 'ทริปของฉัน',
         issue: 42,
