@@ -76,6 +76,11 @@ abstract final class AppTheme {
     );
     final text = _textTheme(base.textTheme);
     final soft = BorderSide(color: c.outlineVariant.withValues(alpha: 0.6));
+    // Cards, fields and bars sit above the background: white in light mode,
+    // a lighter tone in dark mode (where the lowest container is darkest).
+    final raised = c.brightness == Brightness.light
+        ? c.surfaceContainerLowest
+        : c.surfaceContainerHigh;
     OutlineInputBorder field(Color color, [double width = 1]) =>
         OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -92,7 +97,7 @@ abstract final class AppTheme {
         centerTitle: false,
       ),
       cardTheme: CardThemeData(
-        color: c.surfaceContainerLowest,
+        color: raised,
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -116,7 +121,7 @@ abstract final class AppTheme {
             borderRadius: BorderRadius.circular(16),
           ),
           side: BorderSide(color: c.outlineVariant),
-          backgroundColor: c.surfaceContainerLowest,
+          backgroundColor: raised,
           textStyle: text.labelLarge?.copyWith(fontWeight: FontWeight.w600),
         ),
       ),
@@ -131,27 +136,27 @@ abstract final class AppTheme {
       chipTheme: ChipThemeData(
         shape: const StadiumBorder(),
         side: soft,
-        backgroundColor: c.surfaceContainerLowest,
+        backgroundColor: raised,
         selectedColor: c.secondaryContainer,
         labelStyle: text.labelLarge?.copyWith(color: c.onSurface),
       ),
       inputDecorationTheme: InputDecorationThemeData(
         filled: true,
-        fillColor: c.surfaceContainerLowest,
+        fillColor: raised,
         border: field(c.outlineVariant),
         enabledBorder: field(c.outlineVariant),
         focusedBorder: field(c.primary, 2),
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
-          backgroundColor: c.surfaceContainerLowest,
+          backgroundColor: raised,
           selectedBackgroundColor: c.secondaryContainer,
           selectedForegroundColor: c.onSecondaryContainer,
           side: BorderSide(color: c.outlineVariant),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: c.surfaceContainerLowest,
+        backgroundColor: raised,
         indicatorColor: c.secondaryContainer,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -167,7 +172,7 @@ abstract final class AppTheme {
         elevation: 2,
       ),
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: c.surfaceContainerLowest,
+        backgroundColor: raised,
         surfaceTintColor: Colors.transparent,
         showDragHandle: true,
       ),
