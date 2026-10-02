@@ -84,12 +84,6 @@ class OptionCard extends StatelessWidget {
                       Icon(icon, color: iconColor),
                       const SizedBox(width: 12),
                       Expanded(child: text),
-                      if (selected)
-                        Icon(
-                          Icons.check_circle,
-                          size: 20,
-                          color: colors.primary,
-                        ),
                     ],
                   ),
           ),

@@ -3,28 +3,43 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/domain.dart';
 import '../trip_request_form_notifier.dart';
-import 'step_section.dart';
+import 'form_section.dart';
+import 'option_card.dart';
 
 /// Step ③: Intercity Transport (hidden for same-province trips) and Local
 /// Transport Mode.
 class TransportStep extends ConsumerWidget {
   const TransportStep({super.key});
 
-  static const _intercityIcons = {
-    IntercityMode.bus: Icons.directions_bus_outlined,
-    IntercityMode.train: Icons.train_outlined,
-    IntercityMode.car: Icons.directions_car_outlined,
+  static const _intercity = {
+    IntercityMode.bus: (Icons.directions_bus_outlined, 'สะดวก ราคาประหยัด'),
+    IntercityMode.train: (Icons.train_outlined, 'ชมวิวระหว่างทาง'),
+    IntercityMode.car: (Icons.directions_car_outlined, 'แวะได้ตามใจ'),
   };
 
-  static const _localIcons = {
-    LocalTransportMode.rentalCar: Icons.car_rental_outlined,
-    LocalTransportMode.rentalMotorbike: Icons.two_wheeler_outlined,
-    LocalTransportMode.taxi: Icons.local_taxi_outlined,
-    LocalTransportMode.publicTransport: Icons.directions_transit_outlined,
+  static const _local = {
+    LocalTransportMode.rentalCar: (
+      Icons.car_rental_outlined,
+      'ขับเองได้ทุกที่',
+    ),
+    LocalTransportMode.rentalMotorbike: (
+      Icons.two_wheeler_outlined,
+      'คล่องตัว ประหยัด',
+    ),
+    LocalTransportMode.taxi: (
+      Icons.local_taxi_outlined,
+      'เรียกง่าย ไม่ต้องขับ',
+    ),
+    LocalTransportMode.publicTransport: (
+      Icons.directions_transit_outlined,
+      'ถูกที่สุด',
+    ),
   };
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final form = ref.watch(tripRequestFormProvider);
     final notifier = ref.read(tripRequestFormProvider.notifier);
 
@@ -32,50 +47,50 @@ class TransportStep extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (form.needsIntercity)
-          StepSection(
+          FormSection(
+            icon: Icons.route_outlined,
             title: 'เดินทางไป–กลับ',
             subtitle: 'ระหว่างจุดเริ่มต้นกับจังหวัดที่ไป',
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+            child: OptionGrid(
               children: [
-                for (final mode in IntercityMode.values)
-                  ChoiceChip(
-                    showCheckmark: false,
-                    avatar: Icon(_intercityIcons[mode]),
-                    label: Text(mode.label),
+                for (final MapEntry(key: mode, value: (icon, caption))
+                    in _intercity.entries)
+                  OptionCard(
+                    icon: icon,
+                    label: mode.label,
+                    caption: caption,
                     selected: form.intercityMode == mode,
-                    onSelected: (_) => notifier.setIntercityMode(mode),
+                    onTap: () => notifier.setIntercityMode(mode),
                   ),
               ],
             ),
           )
         else
-          const Padding(
-            padding: EdgeInsets.only(bottom: 32),
-            child: Card.outlined(
-              margin: EdgeInsets.zero,
+          Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Card(
+              color: colors.secondaryContainer,
               child: ListTile(
-                leading: Icon(Icons.info_outline),
-                title: Text('เที่ยวในจังหวัดเดียวกับจุดเริ่มต้น'),
-                subtitle: Text('ไม่มีค่าเดินทางข้ามเมือง'),
+                leading: Icon(Icons.info_outline, color: colors.primary),
+                title: const Text('เที่ยวในจังหวัดเดียวกับจุดเริ่มต้น'),
+                subtitle: const Text('ไม่มีค่าเดินทางข้ามเมือง'),
               ),
             ),
           ),
-        StepSection(
+        FormSection(
+          icon: Icons.near_me_outlined,
           title: 'เดินทางในพื้นที่',
           subtitle: 'ใช้ไปมาระหว่างที่เที่ยวในจังหวัด',
-          child: Wrap(
-            spacing: 8,
-            runSpacing: 8,
+          child: OptionGrid(
             children: [
-              for (final mode in LocalTransportMode.values)
-                ChoiceChip(
-                  showCheckmark: false,
-                  avatar: Icon(_localIcons[mode]),
-                  label: Text(mode.label),
+              for (final MapEntry(key: mode, value: (icon, caption))
+                  in _local.entries)
+                OptionCard(
+                  icon: icon,
+                  label: mode.label,
+                  caption: caption,
                   selected: form.localTransportMode == mode,
-                  onSelected: (_) => notifier.setLocalTransportMode(mode),
+                  onTap: () => notifier.setLocalTransportMode(mode),
                 ),
             ],
           ),
