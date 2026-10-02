@@ -1,0 +1,47 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:vaya_app/app/app.dart';
+import 'package:vaya_app/app/layout/window_size_class.dart';
+
+void main() {
+  Future<void> pumpApp(WidgetTester tester, Size size) async {
+    tester.view.physicalSize = size;
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(const ProviderScope(child: VayaApp()));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('compact window shows a bottom navigation bar', (tester) async {
+    await pumpApp(tester, const Size(400, 800));
+
+    expect(find.byType(NavigationBar), findsOneWidget);
+    expect(find.byType(NavigationRail), findsNothing);
+  });
+
+  testWidgets('expanded window shows a navigation rail', (tester) async {
+    await pumpApp(tester, const Size(1000, 800));
+
+    expect(find.byType(NavigationRail), findsOneWidget);
+    expect(find.byType(NavigationBar), findsNothing);
+  });
+
+  testWidgets('new trip action opens the trip request screen', (tester) async {
+    await pumpApp(tester, const Size(400, 800));
+
+    await tester.tap(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('วางแผนทริปใหม่'), findsWidgets);
+    expect(find.textContaining('#18'), findsOneWidget);
+  });
+
+  test('window size classes follow the M3 breakpoints', () {
+    expect(WindowSizeClass.fromWidth(599), WindowSizeClass.compact);
+    expect(WindowSizeClass.fromWidth(600), WindowSizeClass.medium);
+    expect(WindowSizeClass.fromWidth(840), WindowSizeClass.expanded);
+    expect(WindowSizeClass.fromWidth(1200), WindowSizeClass.large);
+    expect(WindowSizeClass.fromWidth(1600), WindowSizeClass.extraLarge);
+  });
+}
