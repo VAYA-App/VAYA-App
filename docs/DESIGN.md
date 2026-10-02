@@ -2,6 +2,10 @@
 
 > แหล่งอ้างอิงเดียวที่ใช้คือ **https://m3.material.io/** ทุกหน้าจอต้องใช้ component, token และ layout ของ Material 3 ทั้งบน Android และ iOS **ห้ามใช้ Cupertino widget** และห้ามสร้าง component เองถ้า M3 มีให้ใช้อยู่แล้ว
 >
+> **Import:** ใช้ `import 'package:material_ui/material_ui.dart';` เท่านั้น ห้ามใช้ `package:flutter/material.dart` และ `package:flutter/cupertino.dart` เพราะตั้งแต่ Flutter 3.44 Material แยกออกมาเป็นแพ็กเกจ [`material_ui`](https://pub.dev/packages/material_ui) แล้ว และแพ็กเกจที่เราใช้ (`go_router`, `dynamic_color`) ก็ใช้ตัวนี้ ถ้าปนกันจะได้ `ThemeData`/`ColorScheme` คนละ type ส่วน widget พื้นฐานที่ไม่ใช่ Material ให้ import `package:flutter/widgets.dart`
+>
+> ถ้าแพ็กเกจภายนอกตัวไหนยังใช้ `flutter/material.dart` อยู่ ให้ครอบเฉพาะ widget นั้นด้วย `MaterialUiCompatibilityBridge` แล้วแจ้งทีม
+>
 > โค้ดที่ตั้งค่าไว้แล้ว:
 > - theme: `lib/app/theme/`
 > - window size class: `lib/app/layout/window_size_class.dart`
@@ -78,6 +82,7 @@
 
 ## 7. Checklist ก่อนเปิด PR ที่มี UI
 
+- [ ] import `package:material_ui/material_ui.dart` เท่านั้น (`grep -rn "flutter/material.dart\|flutter/cupertino.dart" lib` ต้องไม่เจอ)
 - [ ] ใช้สีและตัวอักษรจาก theme ทั้งหมด (`grep -n "Colors\.\|fontSize" <ไฟล์ที่แก้>` ต้องไม่เจอ)
 - [ ] ตรวจครบทั้ง Light และ Dark
 - [ ] ตรวจครบทั้ง Compact (มือถือ) และ Expanded (แท็บเล็ตแนวนอน / หน้าต่างกว้าง)
