@@ -7,6 +7,7 @@ import 'package:vaya_app/app/providers/mock_providers.dart';
 import 'package:vaya_app/app/providers/planner_providers.dart';
 import 'package:vaya_app/app/router.dart';
 import 'package:vaya_app/domain/domain.dart';
+import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
 import 'package:vaya_app/planner/mock_planner_service.dart';
 import 'package:vaya_app/planner/planner_service.dart';
 
@@ -60,7 +61,9 @@ void main() {
     return container;
   }
 
-  testWidgets('shows progress and opens the plan when done', (tester) async {
+  testWidgets('shows progress and opens the plan as a draft when done', (
+    tester,
+  ) async {
     final container = await pumpGenerating(tester);
 
     expect(find.text('กำลังจัดทริปที่ใช่ให้คุณ'), findsOneWidget);
@@ -77,7 +80,9 @@ void main() {
         .currentConfiguration
         .uri
         .path;
-    expect(location, AppRoutes.tripPlan('mock'));
+    expect(location, AppRoutes.tripPlan('draft-1'));
+    final draft = container.read(draftTripsProvider)['draft-1'];
+    expect(draft?.plan.destinationId, 'chonburi');
   });
 
   testWidgets('offers a retry when planning fails', (tester) async {
