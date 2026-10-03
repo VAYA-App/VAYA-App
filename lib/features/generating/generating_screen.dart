@@ -12,10 +12,11 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../planner/planner_service.dart';
 import '../../shared/formatters.dart';
+import '../trip_plan/trip_plan_view_provider.dart';
 import '../trip_request/trip_request_form_notifier.dart';
 
 /// Shows the planner's progress while a Trip Plan is built (#31, #65),
-/// then opens the plan.
+/// then opens the plan as an unsaved draft.
 class GeneratingScreen extends ConsumerStatefulWidget {
   const GeneratingScreen({super.key, this.destinationId});
 
@@ -90,7 +91,10 @@ class _GeneratingScreenState extends ConsumerState<GeneratingScreen> {
   void _onProgress(PlanningProgress progress) {
     setState(() => _stage = progress.stage);
     if (progress.stage == PlanningStage.done) {
-      context.go(AppRoutes.tripPlan('mock'));
+      final tripId = ref
+          .read(draftTripsProvider.notifier)
+          .add(progress.plan!, _request!);
+      context.go(AppRoutes.tripPlan(tripId));
     }
   }
 
