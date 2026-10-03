@@ -12,6 +12,7 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../planner/planner_service.dart';
 import '../../shared/formatters.dart';
+import '../../shared/widgets/mascot_view.dart';
 import '../trip_plan/trip_plan_view_provider.dart';
 import '../trip_request/trip_request_form_notifier.dart';
 
@@ -31,6 +32,9 @@ class GeneratingScreen extends ConsumerStatefulWidget {
 class _GeneratingScreenState extends ConsumerState<GeneratingScreen> {
   static const _fallbackDestination = 'chonburi';
 
+  /// How long the mascot cheers before the plan opens.
+  static const _celebration = Duration(milliseconds: 900);
+
   static const _steps = {
     PlanningStage.selectingPlaces: 'เลือกสถานที่ที่เข้ากับสไตล์',
     PlanningStage.validating: 'ตรวจสอบว่าทุกที่มีอยู่จริง',
@@ -39,6 +43,7 @@ class _GeneratingScreenState extends ConsumerState<GeneratingScreen> {
   };
 
   StreamSubscription<PlanningProgress>? _subscription;
+  Timer? _openPlan;
   TripRequest? _request;
   PlanningStage? _stage;
   Object? _error;
@@ -55,6 +60,7 @@ class _GeneratingScreenState extends ConsumerState<GeneratingScreen> {
   @override
   void dispose() {
     _subscription?.cancel();
+    _openPlan?.cancel();
     super.dispose();
   }
 
@@ -94,7 +100,12 @@ class _GeneratingScreenState extends ConsumerState<GeneratingScreen> {
       final tripId = ref
           .read(draftTripsProvider.notifier)
           .add(progress.plan!, _request!);
-      context.go(AppRoutes.tripPlan(tripId));
+      void open() => context.go(AppRoutes.tripPlan(tripId));
+      if (MediaQuery.disableAnimationsOf(context)) {
+        open();
+      } else {
+        _openPlan = Timer(_celebration, () => mounted ? open() : null);
+      }
     }
   }
 
@@ -128,7 +139,11 @@ class _GeneratingScreenState extends ConsumerState<GeneratingScreen> {
                   : [
                       _ProgressRing(stage: _stage, total: _steps.length),
                       const SizedBox(height: 24),
-                      _Headline(request: _request, province: province),
+                      _Headline(
+                        request: _request,
+                        province: province,
+                        done: _stage == PlanningStage.done,
+                      ),
                       const SizedBox(height: 24),
                       _StepList(steps: _steps, current: _stage),
                       if (province != null) ...[
@@ -193,39 +208,41 @@ class _ProgressRing extends StatelessWidget {
         TweenAnimationBuilder<double>(
           tween: Tween(end: target),
           duration: const Duration(milliseconds: 500),
-          builder: (context, value, _) => SizedBox.square(
-            dimension: 168,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                CircularProgressIndicator(
-                  value: value,
-                  strokeWidth: 10,
-                  strokeCap: StrokeCap.round,
-                  backgroundColor: colors.surfaceContainerHighest,
-                  semanticsLabel: 'ความคืบหน้าการสร้างแผน',
-                  semanticsValue: '${(value * 100).round()}%',
+          builder: (context, value, mascot) => Column(
+            children: [
+              SizedBox.square(
+                dimension: 168,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    CircularProgressIndicator(
+                      value: value,
+                      strokeWidth: 10,
+                      strokeCap: StrokeCap.round,
+                      backgroundColor: colors.surfaceContainerHighest,
+                      semanticsLabel: 'ความคืบหน้าการสร้างแผน',
+                      semanticsValue: '${(value * 100).round()}%',
+                    ),
+                    Center(child: mascot),
+                  ],
                 ),
-                Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.travel_explore,
-                        size: 32,
-                        color: colors.primary,
-                      ),
-                      Text(
-                        '${(value * 100).round()}%',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          color: colors.primary,
-                        ),
-                      ),
-                    ],
+              ),
+              const SizedBox(height: 8),
+              ExcludeSemantics(
+                child: Text(
+                  '${(value * 100).round()}%',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: colors.primary,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          child: MascotView(
+            pose: stage == PlanningStage.done
+                ? MascotPose.celebrate
+                : MascotPose.map,
+            size: 120,
           ),
         ),
       ],
@@ -234,10 +251,15 @@ class _ProgressRing extends StatelessWidget {
 }
 
 class _Headline extends StatelessWidget {
-  const _Headline({required this.request, required this.province});
+  const _Headline({
+    required this.request,
+    required this.province,
+    required this.done,
+  });
 
   final TripRequest? request;
   final Province? province;
+  final bool done;
 
   @override
   Widget build(BuildContext context) {
@@ -248,7 +270,7 @@ class _Headline extends StatelessWidget {
     return Column(
       children: [
         Text(
-          'กำลังจัดทริปที่ใช่ให้คุณ',
+          done ? 'เสร็จแล้ว! ไปดูแผนกันเลย' : 'กำลังจัดทริปที่ใช่ให้คุณ',
           style: theme.textTheme.headlineSmall,
           textAlign: TextAlign.center,
         ),
@@ -406,13 +428,25 @@ class _ErrorBody extends StatelessWidget {
     final colors = theme.colorScheme;
     return Column(
       children: [
-        const SizedBox(height: 48),
-        Icon(Icons.cloud_off_outlined, size: 56, color: colors.error),
+        const SizedBox(height: 32),
+        const MascotView(pose: MascotPose.map, size: 140),
         const SizedBox(height: 16),
-        Text('สร้างแผนไม่สำเร็จ', style: theme.textTheme.headlineSmall),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.cloud_off_outlined, color: colors.error),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(
+                'สร้างแผนไม่สำเร็จ',
+                style: theme.textTheme.headlineSmall,
+              ),
+            ),
+          ],
+        ),
         const SizedBox(height: 8),
         Text(
-          'อาจเป็นเพราะการเชื่อมต่อหรือ AI ไม่ตอบ ลองใหม่อีกครั้ง',
+          'ช้างน้อยหลงทางนิดหน่อย อาจเป็นเพราะการเชื่อมต่อหรือ AI ไม่ตอบ ลองใหม่อีกครั้ง',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: colors.onSurfaceVariant,
           ),
