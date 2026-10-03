@@ -16,8 +16,10 @@ enum MascotPose {
 /// The elephant mascot, floating gently and cross-fading between poses.
 ///
 /// Purely decorative: screen readers skip it and it stands still when the
-/// user turns animations off. It never grows past [size] or the space it is
-/// given, so large text keeps its room.
+/// user turns animations off. It floats for under five seconds after it
+/// appears or changes pose, then rests (WCAG 2.2.2), which also lets
+/// `pumpAndSettle` finish in tests. It never grows past [size] or the space
+/// it is given, so large text keeps its room.
 class MascotView extends StatefulWidget {
   const MascotView({super.key, required this.pose, this.size = 160});
 
@@ -32,22 +34,35 @@ class MascotView extends StatefulWidget {
 
 class _MascotViewState extends State<MascotView>
     with SingleTickerProviderStateMixin {
+  /// One rise or one fall; [_floatTimes] of them make up the idle motion.
   late final _float = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 2400),
+    duration: const Duration(milliseconds: 1200),
   );
+  static const _floatTimes = 4;
 
   bool get _still => MediaQuery.disableAnimationsOf(context);
+
+  void _startFloating() {
+    if (_still) {
+      _float
+        ..stop()
+        ..value = 0;
+    } else {
+      _float.repeat(reverse: true, count: _floatTimes);
+    }
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_still) {
-      _float.value = 0;
-      _float.stop();
-    } else if (!_float.isAnimating) {
-      _float.repeat(reverse: true);
-    }
+    if (_still || !_float.isAnimating && _float.value == 0) _startFloating();
+  }
+
+  @override
+  void didUpdateWidget(MascotView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.pose != widget.pose) _startFloating();
   }
 
   @override

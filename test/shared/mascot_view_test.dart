@@ -25,11 +25,23 @@ void main() {
     expect(shownAsset(tester), 'assets/mascot/wave.webp');
   });
 
-  testWidgets('floats when animations are on', (tester) async {
+  testWidgets('floats for under five seconds, then rests', (tester) async {
     await tester.pumpWidget(host(const MascotView(pose: MascotPose.wave)));
     await tester.pump(const Duration(milliseconds: 500));
-
     expect(tester.hasRunningAnimations, isTrue);
+
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.hasRunningAnimations, isFalse);
+  });
+
+  testWidgets('floats again after changing pose', (tester) async {
+    await tester.pumpWidget(host(const MascotView(pose: MascotPose.wave)));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(host(const MascotView(pose: MascotPose.map)));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(tester.hasRunningAnimations, isTrue);
+    await tester.pumpAndSettle();
   });
 
   testWidgets('switches pose', (tester) async {
