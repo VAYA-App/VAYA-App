@@ -1,0 +1,21 @@
+{
+  "_comment": "Handwritten in the shape Gemini returns (#27); replace with a recorded response once Gemini is connected (#26).",
+  "days": [
+    {
+      "slots": [
+        { "slot": "morning", "placeId": "chonburi-attraction-sanctuary-of-truth", "note": "ปราสาทไม้ริมทะเล เหมาะกับสายถ่ายรูป" },
+        { "slot": "lunch", "placeId": "chonburi-restaurant-lan-pho-naklua", "note": "อาหารทะเลสดใกล้ปราสาท" },
+        { "slot": "afternoon", "placeId": "chonburi-attraction-pattaya-viewpoint", "note": "ชมวิวอ่าวพัทยาทั้งอ่าว" },
+        { "slot": "dinner", "placeId": "chonburi-restaurant-pier21-pattaya", "note": "ศูนย์อาหารราคาประหยัด" }
+      ]
+    },
+    {
+      "slots": [
+        { "slot": "morning", "placeId": "chonburi-attraction-jomtien-beach", "note": "หาดเงียบ เหมาะกับการเที่ยวชิล" },
+        { "slot": "lunch", "placeId": "chonburi-restaurant-nong-mon-market", "note": "ตลาดของฝากขึ้นชื่อ" },
+        { "slot": "afternoon", "placeId": "chonburi-attraction-bang-saen-beach", "note": "แวะทะเลก่อนกลับกรุงเทพฯ" }
+      ]
+    }
+  ],
+  "accommodationTier": 3
+}
