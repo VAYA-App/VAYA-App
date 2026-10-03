@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
+import '../../shared/widgets/mascot_view.dart';
 import 'trip_request_form_notifier.dart';
 import 'widgets/budget_step.dart';
 import 'widgets/dates_step.dart';
@@ -121,7 +122,8 @@ class _StepList extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: SizedBox(
           width: 280,
-          child: Padding(
+          // Scrolls when large text makes the steps taller than the window.
+          child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -153,7 +155,8 @@ class _StepList extends StatelessWidget {
   }
 }
 
-/// Four-segment progress bar with the question for the current step.
+/// Four-segment progress bar with the question for the current step, and
+/// the mascot acting it out (#81).
 class _ProgressHeader extends StatelessWidget {
   const _ProgressHeader({required this.step});
 
@@ -178,12 +181,23 @@ class _ProgressHeader extends StatelessWidget {
     ),
   };
 
+  static const _poses = {
+    TripRequestStep.datesAndTravellers: MascotPose.calendar,
+    TripRequestStep.budgetAndPlaces: MascotPose.budget,
+    TripRequestStep.transport: MascotPose.map,
+    TripRequestStep.preferences: MascotPose.wave,
+  };
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final steps = TripRequestStep.values;
     final (question, hint) = _questions[step]!;
+    // Large text on a phone needs the whole width for the question.
+    final showMascot =
+        context.windowSizeClass != WindowSizeClass.compact ||
+        MediaQuery.textScalerOf(context).scale(1) < 1.5;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -228,13 +242,28 @@ class _ProgressHeader extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(question, style: theme.textTheme.headlineSmall),
-        const SizedBox(height: 4),
-        Text(
-          hint,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: colors.onSurfaceVariant,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(question, style: theme.textTheme.headlineSmall),
+                  const SizedBox(height: 4),
+                  Text(
+                    hint,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (showMascot) ...[
+              const SizedBox(width: 12),
+              MascotView(pose: _poses[step]!, size: 88),
+            ],
+          ],
         ),
       ],
     );
