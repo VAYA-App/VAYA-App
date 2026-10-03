@@ -3,13 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/layout/window_size_class.dart';
+import 'package:vaya_app/app/providers/data_providers.dart';
+import 'package:vaya_app/features/explore/trip_ideas.dart';
 
 void main() {
   Future<void> pumpApp(WidgetTester tester, Size size) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(const ProviderScope(child: VayaApp()));
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    // Asset loading needs real async; load what the tabs read first.
+    await tester.runAsync(() async {
+      await container.read(placeCatalogProvider.future);
+      await container.read(tripIdeasProvider.future);
+    });
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const VayaApp()),
+    );
     await tester.pumpAndSettle();
   }
 

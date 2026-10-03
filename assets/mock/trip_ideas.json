@@ -1,0 +1,71 @@
+{
+  "_comment": "ไอเดียทริปตัวอย่างสำหรับหน้าสำรวจและหน้าแรก (#84) ราคาเป็นค่าโดยประมาณต่อคน ใช้เฉพาะ Place ที่มีอยู่ใน assets/data/places/",
+  "ideas": [
+    {
+      "id": "bangsaen-chill",
+      "provinceId": "chonburi",
+      "title": "ทะเลชิล ๆ บางแสน",
+      "summary": "เดินเล่นริมหาด ขึ้นเขาสามมุขดูวิว แล้วปิดท้ายด้วยซีฟู้ดตลาดหนองมน",
+      "art": "sea",
+      "days": 2,
+      "budgetPerPerson": 2500,
+      "tags": ["beach", "seafood", "nature"],
+      "placeIds": ["chonburi-attraction-bang-saen-beach", "chonburi-attraction-khao-sam-muk", "chonburi-restaurant-nong-mon-market"]
+    },
+    {
+      "id": "rattanakosin-temples",
+      "provinceId": "bangkok",
+      "title": "ไหว้พระเกาะรัตนโกสินทร์",
+      "summary": "วัดพระแก้ว วัดโพธิ์ ข้ามเรือไปวัดอรุณ แล้วปิดท้ายด้วยผัดไทยประตูผี",
+      "art": "temple",
+      "days": 1,
+      "budgetPerPerson": 1500,
+      "tags": ["templeHistory", "artCulture", "localFood"],
+      "placeIds": ["bangkok-attraction-grand-palace", "bangkok-attraction-wat-pho", "bangkok-attraction-wat-arun", "bangkok-restaurant-thipsamai"]
+    },
+    {
+      "id": "pattaya-sunset",
+      "provinceId": "chonburi",
+      "title": "พัทยาวิวพระอาทิตย์ตก",
+      "summary": "ชมเมืองจากเขาพระตำหนัก ดูงานไม้ที่ปราสาทสัจธรรม แล้วกินซีฟู้ดที่นาเกลือ",
+      "art": "sunset",
+      "days": 2,
+      "budgetPerPerson": 3500,
+      "tags": ["viewpoint", "artCulture", "seafood"],
+      "placeIds": ["chonburi-attraction-pattaya-viewpoint", "chonburi-attraction-sanctuary-of-truth", "chonburi-restaurant-lan-pho-naklua"]
+    },
+    {
+      "id": "weekend-market",
+      "provinceId": "bangkok",
+      "title": "เดินตลาดนัดจตุจักร",
+      "summary": "ช้อปของแฮนด์เมด ชิมของกินเล่น แล้วพักเท้าที่ศูนย์อาหารราคาประหยัด",
+      "art": "city",
+      "days": 1,
+      "budgetPerPerson": 1000,
+      "tags": ["shopping", "localFood"],
+      "placeIds": ["bangkok-attraction-chatuchak", "bangkok-restaurant-pier21-asok"]
+    },
+    {
+      "id": "jomtien-family",
+      "provinceId": "chonburi",
+      "title": "หาดจอมเทียนกับครอบครัว",
+      "summary": "หาดยาว เล่นน้ำได้ทั้งวัน และมีศูนย์อาหารราคาไม่แรงอยู่ใกล้ ๆ",
+      "art": "sea",
+      "days": 2,
+      "budgetPerPerson": 3000,
+      "tags": ["beach", "family"],
+      "placeIds": ["chonburi-attraction-jomtien-beach", "chonburi-restaurant-pier21-pattaya"]
+    },
+    {
+      "id": "riverside-evening",
+      "provinceId": "bangkok",
+      "title": "ริมเจ้าพระยายามเย็น",
+      "summary": "นั่งเรือข้ามฟากไปชมวัดอรุณตอนพระอาทิตย์ตก บรรยากาศดีที่สุดของวัน",
+      "art": "sunset",
+      "days": 1,
+      "budgetPerPerson": 1200,
+      "tags": ["viewpoint", "templeHistory"],
+      "placeIds": ["bangkok-attraction-wat-arun"]
+    }
+  ]
+}
