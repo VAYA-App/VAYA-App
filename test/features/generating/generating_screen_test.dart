@@ -6,6 +6,7 @@ import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/providers/mock_providers.dart';
 import 'package:vaya_app/app/providers/planner_providers.dart';
 import 'package:vaya_app/app/router.dart';
+import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
 import 'package:vaya_app/planner/mock_planner_service.dart';
@@ -34,6 +35,9 @@ void main() {
     );
     final container = ProviderContainer(
       overrides: [
+        authRepositoryProvider.overrideWithValue(
+          MockAuthRepository(initialUser: MockAuthRepository.demoUser),
+        ),
         plannerServiceProvider.overrideWithValue(
           planner ??
               MockPlannerService(

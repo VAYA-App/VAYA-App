@@ -3,13 +3,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/layout/window_size_class.dart';
+import 'package:vaya_app/app/providers/data_providers.dart';
+import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 
 void main() {
   Future<void> pumpApp(WidgetTester tester, Size size) async {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    await tester.pumpWidget(const ProviderScope(child: VayaApp()));
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(
+            MockAuthRepository(initialUser: MockAuthRepository.demoUser),
+          ),
+        ],
+        child: const VayaApp(),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
