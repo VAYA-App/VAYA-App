@@ -89,7 +89,7 @@ void main() {
         expect(find.byType(Card), findsOneWidget);
 
         final buttonFinder = find.widgetWithText(
-          FilledButton,
+          OutlinedButton,
           'เข้าสู่ระบบด้วย Google',
         );
         expect(buttonFinder, findsOneWidget);
@@ -127,8 +127,8 @@ void main() {
 
       // Progress indicator should be visible and button disabled
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'เข้าสู่ระบบด้วย Google'),
+      final button = tester.widget<OutlinedButton>(
+        find.widgetWithText(OutlinedButton, 'เข้าสู่ระบบด้วย Google'),
       );
       expect(button.onPressed, isNull);
 
