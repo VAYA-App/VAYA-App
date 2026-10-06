@@ -56,68 +56,90 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: margin, vertical: 24),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.secondaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Icon(
-                        Icons.flight_takeoff,
-                        size: 40,
-                        color: colors.primary,
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 36,
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      DecoratedBox(
+                        decoration: BoxDecoration(
+                          color: colors.secondaryContainer,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Icon(
+                            Icons.flight,
+                            size: 40,
+                            color: colors.primary,
+                          ),
+                        ),
                       ),
-                    ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'VAYA',
+                        style: theme.textTheme.displaySmall?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'วางแผนเที่ยวด้วย AI',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'บอกเวลา งบ และสไตล์',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          color: colors.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 36),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed: _isLoading ? null : _signIn,
+                          icon: _isLoading
+                              ? SizedBox.square(
+                                  dimension: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: colors.primary,
+                                  ),
+                                )
+                              : Container(
+                                  width: 24,
+                                  height: 24,
+                                  decoration: BoxDecoration(
+                                    color: colors.surfaceContainerLowest,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'G',
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      color: colors.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                          label: const Text('เข้าสู่ระบบด้วย Google'),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'VAYA',
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'วางแผนเที่ยวด้วย AI',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'บอกเวลา งบ และสไตล์',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: colors.onSurfaceVariant,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 40),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: _isLoading ? null : _signIn,
-                      icon: _isLoading
-                          ? SizedBox.square(
-                              dimension: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: colors.primary,
-                              ),
-                            )
-                          : const Icon(Icons.g_mobiledata, size: 28),
-                      label: const Text('เข้าสู่ระบบด้วย Google'),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

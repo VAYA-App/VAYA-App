@@ -84,8 +84,9 @@ void main() {
         expect(find.text('VAYA'), findsOneWidget);
         expect(find.text('วางแผนเที่ยวด้วย AI'), findsOneWidget);
         expect(find.text('บอกเวลา งบ และสไตล์'), findsOneWidget);
-        expect(find.byIcon(Icons.flight_takeoff), findsOneWidget);
-        expect(find.byIcon(Icons.g_mobiledata), findsOneWidget);
+        expect(find.byIcon(Icons.flight), findsOneWidget);
+        expect(find.text('G'), findsOneWidget);
+        expect(find.byType(Card), findsOneWidget);
 
         final buttonFinder = find.widgetWithText(
           FilledButton,
