@@ -108,7 +108,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 36),
                       SizedBox(
                         width: double.infinity,
-                        child: FilledButton.icon(
+                        child: OutlinedButton.icon(
                           onPressed: _isLoading ? null : _signIn,
                           icon: _isLoading
                               ? SizedBox.square(
@@ -119,10 +119,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ),
                                 )
                               : Container(
-                                  width: 24,
-                                  height: 24,
+                                  width: 26,
+                                  height: 26,
                                   decoration: BoxDecoration(
-                                    color: colors.surfaceContainerLowest,
+                                    color: colors.secondaryContainer,
                                     shape: BoxShape.circle,
                                   ),
                                   alignment: Alignment.center,
