@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:vaya_app/domain/domain.dart';
+import 'package:vaya_app/planner/pricing_table.dart';
 
 /// Shared fixtures for planner tests.
 
@@ -50,4 +51,31 @@ TripRequest demoRequest({
   preferenceTags: tags,
   pace: pace,
   note: note,
+);
+
+/// PROJECT-PLAN §9, kept apart so tests do not move with pricing.json.
+const section9Pricing = PricingTable(
+  roomPerNight: {1: 700, 2: 1500, 3: 3000, 4: 6000},
+  mealPerPerson: {1: 80, 2: 200, 3: 450, 4: 1000},
+  breakfastPerPerson: 100,
+  localTransport: {
+    LocalTransportMode.rentalCar: LocalTransportRate(
+      perDay: 1000,
+      perKm: 2.5,
+      capacity: 4,
+    ),
+    LocalTransportMode.rentalMotorbike: LocalTransportRate(
+      perDay: 250,
+      perKm: 1,
+      capacity: 2,
+    ),
+    LocalTransportMode.taxi: LocalTransportRate(
+      perTrip: 40,
+      perKm: 12,
+      capacity: 4,
+    ),
+    LocalTransportMode.publicTransport: LocalTransportRate(perTrip: 30),
+  },
+  selfDrivePerKm: 2.5,
+  bufferRate: 0.1,
 );

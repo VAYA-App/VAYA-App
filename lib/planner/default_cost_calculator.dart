@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import '../domain/domain.dart';
 import 'candidate_builder.dart';
 import 'cost_calculator.dart';
 import 'geo.dart';
 import 'pricing_table.dart';
+import 'slot_template.dart';
 
 /// Prices a Trip Plan from [pricing] (PROJECT-PLAN §9). Every category is
 /// rounded to whole baht before the buffer is added, so the categories and
@@ -95,7 +98,63 @@ class DefaultCostCalculator implements CostCalculator {
   int minimumTripCost({
     required TripRequest request,
     required Province province,
-  }) => throw UnimplementedError('minimumTripCost: see #35');
+  }) {
+    final options = request.staysInOrigin(province.id)
+        ? null
+        : province.intercity[request.originId];
+    if (options == null || options.isEmpty) return _minimumFor(request);
+    return [
+      for (final MapEntry(key: mode, value: option) in options.entries)
+        _minimumFor(request, mode: mode, option: option),
+    ].reduce(math.min);
+  }
+
+  /// The cheapest trip that travels by [mode]: Price Level 1 rooms and
+  /// meals, free attractions, an Accommodation that includes breakfast, no
+  /// distance between Stops and the cheapest Local Transport Mode. It never
+  /// exceeds what [applyCosts] gives a plan the pipeline builds, so a
+  /// province above the Budget here cannot fit it.
+  int _minimumFor(
+    TripRequest request, {
+    IntercityMode? mode,
+    IntercityOption? option,
+  }) {
+    final travellers = request.travellerCount;
+    // The same day structure the pipeline fills.
+    final days = SlotTemplate.forTrip(
+      request,
+      intercityMinutes: option?.durationMin,
+    );
+    final nights = days.length - 1;
+    var meals = 0;
+    var legs = 0;
+    for (final (i, day) in days.indexed) {
+      if (day.slots.isEmpty) continue;
+      meals += day.slots.where((slot) => slot.isMeal).length;
+      legs += day.slots.length;
+      if (i < nights || days.length == 1) legs++;
+    }
+
+    final intercity = option == null || mode == null
+        ? 0
+        : _fare(option, mode, travellers);
+    final accommodation = pricing.roomFor(1) * (travellers / 2).ceil() * nights;
+    final food =
+        pricing.mealFor(1) * travellers * meals +
+        pricing.breakfastPerPerson * travellers;
+    final localTransport = [
+      for (final local in LocalTransportMode.values)
+        _localCost(
+          local,
+          days: days.length,
+          legs: legs,
+          travellers: travellers,
+        ),
+    ].reduce(math.min);
+
+    final subtotal = intercity + accommodation + food + localTransport;
+    return subtotal + (subtotal * pricing.bufferRate).round();
+  }
 
   /// A meal or an entrance fee for all travellers. A missing entrance fee
   /// counts as free because the data cannot tell the two apart yet.
@@ -151,10 +210,25 @@ class DefaultCostCalculator implements CostCalculator {
       }
     }
 
-    final rate = pricing.rateFor(request.localTransportMode);
-    final perUnit =
-        rate.perDay * dayCount + rate.perTrip * legs + rate.perKm * km;
-    return (perUnit * rate.unitsFor(request.travellerCount)).round();
+    return _localCost(
+      request.localTransportMode,
+      days: dayCount,
+      legs: legs,
+      km: km,
+      travellers: request.travellerCount,
+    );
+  }
+
+  int _localCost(
+    LocalTransportMode mode, {
+    required int days,
+    required int legs,
+    required int travellers,
+    double km = 0,
+  }) {
+    final rate = pricing.rateFor(mode);
+    final perUnit = rate.perDay * days + rate.perTrip * legs + rate.perKm * km;
+    return (perUnit * rate.unitsFor(travellers)).round();
   }
 
   /// Where the travellers return to after the day before [night]: that
@@ -172,8 +246,6 @@ class DefaultCostCalculator implements CostCalculator {
     return province.center;
   }
 
-  /// Both directions. Tickets are per person; a car pays fuel and the toll
-  /// once per direction whatever the number of travellers.
   int _intercityCost(
     TripRequest request,
     Province province,
@@ -182,12 +254,21 @@ class DefaultCostCalculator implements CostCalculator {
     final options = province.intercity[request.originId];
     if (options == null || options.isEmpty) return 0;
     // Same fallback as the pipeline when the route lacks the chosen mode.
-    final option = options[mode] ?? options.values.first;
+    return _fare(
+      options[mode] ?? options.values.first,
+      mode,
+      request.travellerCount,
+    );
+  }
+
+  /// Both directions. Tickets are per person; a car pays fuel and the toll
+  /// once per direction whatever the number of travellers.
+  int _fare(IntercityOption option, IntercityMode mode, int travellers) {
     if (mode == IntercityMode.car) {
       final fuel = (option.distanceKm ?? 0) * pricing.selfDrivePerKm;
       return ((fuel + option.toll) * 2).round();
     }
-    return option.farePerPerson * request.travellerCount * 2;
+    return option.farePerPerson * travellers * 2;
   }
 }
 
