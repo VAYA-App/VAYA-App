@@ -41,16 +41,12 @@ class ProfileScreen extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                 },
-                const SizedBox(height: 24),
-                const _SectionTitle('การแสดงผล'),
+                const SizedBox(height: 20),
+                const _SectionTitle('การแสดงผลและธีม'),
                 const SizedBox(height: 8),
                 const _ThemeModeCard(),
-                const SizedBox(height: 24),
-                const _SectionTitle('เกี่ยวกับแอป'),
-                const SizedBox(height: 8),
-                const _AboutCard(),
                 if (user.value != null) ...[
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
                   const _SignOutButton(),
                 ],
               ],
@@ -94,6 +90,12 @@ class _ThemeModeCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
+    final String modeLabel = switch (mode) {
+      ThemeMode.system => 'ตามระบบ',
+      ThemeMode.light => 'โหมดสว่าง',
+      ThemeMode.dark => 'โหมดมืด',
+    };
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
@@ -104,7 +106,7 @@ class _ThemeModeCard extends ConsumerWidget {
               leading: DecoratedBox(
                 decoration: BoxDecoration(
                   color: colors.secondaryContainer,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: SizedBox.square(
                   dimension: 40,
@@ -113,6 +115,25 @@ class _ThemeModeCard extends ConsumerWidget {
               ),
               title: const Text('ธีม'),
               subtitle: const Text('เลือกโหมดสว่างหรือมืดของแอป'),
+              trailing: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerHigh,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  child: Text(
+                    modeLabel,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 8),
             Padding(
@@ -170,14 +191,14 @@ class _UserCard extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.25),
-                  width: 2,
+                  color: colors.primary.withValues(alpha: 0.3),
+                  width: 2.5,
                 ),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(2),
                 child: CircleAvatar(
-                  radius: 32,
+                  radius: 34,
                   backgroundColor: colors.secondaryContainer,
                   foregroundColor: colors.onSecondaryContainer,
                   foregroundImage: photo == null ? null : NetworkImage(photo),
@@ -211,28 +232,24 @@ class _UserCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 8),
                   DecoratedBox(
                     decoration: BoxDecoration(
                       color: colors.secondaryContainer,
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(16),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 3,
+                        horizontal: 10,
+                        vertical: 4,
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(
-                            Icons.verified_user_outlined,
-                            size: 13,
-                            color: colors.onSecondaryContainer,
-                          ),
+                          Icon(Icons.verified, size: 14, color: colors.primary),
                           const SizedBox(width: 4),
                           Text(
-                            'บัญชี VAYA',
+                            'สมาชิก VAYA',
                             style: theme.textTheme.labelSmall?.copyWith(
                               color: colors.onSecondaryContainer,
                               fontWeight: FontWeight.bold,
@@ -252,78 +269,18 @@ class _UserCard extends StatelessWidget {
   }
 }
 
-/// ข้อมูลเกี่ยวกับแอปพลิเคชัน
-class _AboutCard extends StatelessWidget {
-  const _AboutCard();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Card(
-      child: Column(
-        children: [
-          ListTile(
-            leading: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: SizedBox.square(
-                dimension: 40,
-                child: Icon(Icons.info_outline, color: colors.onSurfaceVariant),
-              ),
-            ),
-            title: const Text('เกี่ยวกับ VAYA'),
-            subtitle: const Text('AI Trip Planner สำหรับเที่ยวไทย'),
-            trailing: Text(
-              'v1.0.0',
-              style: theme.textTheme.labelMedium?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-            ),
-          ),
-          Divider(
-            height: 1,
-            indent: 16,
-            endIndent: 16,
-            color: colors.outlineVariant.withValues(alpha: 0.5),
-          ),
-          ListTile(
-            leading: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: SizedBox.square(
-                dimension: 40,
-                child: Icon(
-                  Icons.translate_outlined,
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-            ),
-            title: const Text('ภาษา'),
-            subtitle: const Text('ไทย'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Empty state: nobody is signed in.
-class _SignedOutCard extends StatelessWidget {
+class _SignedOutCard extends ConsumerWidget {
   const _SignedOutCard();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
         child: Column(
           children: [
             DecoratedBox(
@@ -361,6 +318,14 @@ class _SignedOutCard extends StatelessWidget {
               onPressed: () => context.go(AppRoutes.login),
               icon: const Icon(Icons.login),
               label: const Text('ไปหน้าเข้าสู่ระบบ'),
+            ),
+            const SizedBox(height: 10),
+            FilledButton.tonalIcon(
+              onPressed: () async {
+                await ref.read(authRepositoryProvider).signInWithGoogle();
+              },
+              icon: const Icon(Icons.account_circle_outlined),
+              label: const Text('เข้าสู่ระบบด้วย Google (ทดลองใช้งาน)'),
             ),
           ],
         ),
@@ -437,7 +402,7 @@ class _SignOutButton extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        icon: Icon(Icons.logout, color: colors.error),
+        icon: Icon(Icons.logout, color: colors.error, size: 28),
         title: const Text('ออกจากระบบ?'),
         content: const Text(
           'คุณต้องเข้าสู่ระบบด้วย Google อีกครั้งเพื่อดูทริปที่บันทึกไว้',
@@ -478,7 +443,7 @@ class _SignOutButton extends ConsumerWidget {
     return OutlinedButton.icon(
       style: OutlinedButton.styleFrom(
         foregroundColor: colors.error,
-        side: BorderSide(color: colors.outlineVariant),
+        side: BorderSide(color: colors.error.withValues(alpha: 0.4)),
       ),
       onPressed: () => _confirmAndSignOut(context, ref),
       icon: const Icon(Icons.logout),
