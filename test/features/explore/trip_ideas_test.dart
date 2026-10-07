@@ -66,7 +66,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     await tester.tap(tile);
-    await tester.pumpAndSettle();
+    // Let the route push complete without waiting 5s for the mascot animation
+    // to finish (which would let the 4s SnackBar expire).
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
 
     // `push` keeps the shell's location, so look for the screen itself.
     expect(find.byType(TripRequestScreen), findsOneWidget);
