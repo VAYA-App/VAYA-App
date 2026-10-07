@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFF8F5">
+<title>VAYA M5-M6 Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0..1,0&display=swap">
+<style>
+/* Light theme only. Tokens mirror lib/app/theme/app_theme.dart (emerald "Siam Wanderlust":
+   warm cream surface, white raised cards, emerald primary, sunset-orange tertiary).
+   Roles the app does not set (primary-container, error) are approximations. */
+:root {
+  --primary: #006948; --on-primary: #FFFFFF;
+  --primary-container: #8CF7C7; --on-primary-container: #002114;
+  --secondary-container: #D5F0E3; --on-secondary-container: #005137;
+  --tertiary: #A73A00; --on-tertiary: #FFFFFF; --tertiary-container: #FFDBCE; --on-tertiary-container: #370E00;
+  --error: #BA1A1A; --on-error: #FFFFFF; --error-container: #FFDAD6; --on-error-container: #93000A;
+  --surface: #FFF8F5; --on-surface: #1F1B17; --on-surface-variant: #3D4A42;
+  --sc-lowest: #FFFFFF; --sc-low: #FCF2EB; --sc: #F6ECE6; --sc-high: #F0E6E0; --sc-highest: #EAE1DA;
+  --outline: #6D7A72; --outline-variant: #BCCAC0;
+  --inverse-surface: #342F2B; --inverse-on-surface: #F9EFE8; --inverse-primary: #6CDBAC;
+  --scrim: rgba(0,0,0,.32); --stage: #E7DFD8;
+  --c1: #006948; --c2: #A73A00; --c3: #00639B; --c4: #8E3A8C; --c5: #6D7A72; --c6: #8A6A00;
+  --r-card: 20px; --r-btn: 16px; --r-field: 12px; --r-chip: 8px; --r-sheet: 28px;
+  --ease: cubic-bezier(.2, 0, 0, 1);
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body { margin: 0; background: var(--stage); color: var(--on-surface); font-family: "Prompt", system-ui, sans-serif; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+.ms { font-family: "Material Symbols Outlined"; font-weight: 400; font-style: normal; font-size: 24px; line-height: 1; letter-spacing: normal;
+  text-transform: none; display: inline-block; white-space: nowrap; direction: ltr; font-feature-settings: "liga"; flex: none; user-select: none; }
+.ms.fill { font-variation-settings: "FILL" 1; }
+
+/* M3 type scale */
+.display-s { font-size: 2.25rem; line-height: 2.75rem; font-weight: 600; }
+.headline-s { font-size: 1.5rem; line-height: 2rem; font-weight: 600; }
+.title-l { font-size: 1.375rem; line-height: 1.75rem; font-weight: 600; }
+.title-m { font-size: 1rem; line-height: 1.5rem; font-weight: 500; }
+.title-s { font-size: .875rem; line-height: 1.25rem; font-weight: 500; }
+.body-l { font-size: 1rem; line-height: 1.5rem; }
+.body-m { font-size: .875rem; line-height: 1.25rem; }
+.body-s { font-size: .75rem; line-height: 1rem; }
+.label-l { font-size: .875rem; line-height: 1.25rem; font-weight: 500; }
+.label-m { font-size: .75rem; line-height: 1rem; font-weight: 500; }
+.muted { color: var(--on-surface-variant); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ================= phone + safe areas =================
+   On a real phone (<600px) the browser/OS supplies the status bar, camera cut-out and
+   system buttons; we only honour env(safe-area-inset-*). On a larger screen we draw the
+   phone and reserve the same insets so the layout shows where content must NOT go. */
+.device { width: 100%; }
+.app { --inset-top: env(safe-area-inset-top, 0px); --inset-bottom: env(safe-area-inset-bottom, 0px);
+  position: relative; height: 100dvh; max-width: 480px; margin: 0 auto; overflow: hidden; background: var(--surface);
+  display: flex; flex-direction: column; }
+.sysbar, .navbar, .guide { display: none; }
+@media (min-width: 600px) {
+  body { display: grid; place-items: center; min-height: 100dvh; padding: 24px; }
+  .device { width: 410px; padding: 10px; background: #1b1714; border-radius: 56px; box-shadow: 0 16px 48px rgba(0,0,0,.28); }
+  .app { height: min(844px, calc(100dvh - 68px)); border-radius: 46px; }
+  .app[data-cam="punch"]  { --inset-top: 44px; }
+  .app[data-cam="notch"]  { --inset-top: 56px; }
+  .app[data-cam="none"]   { --inset-top: 28px; }
+  .app[data-nav="gesture"] { --inset-bottom: 26px; }
+  .app[data-nav="buttons"] { --inset-bottom: 48px; }
+  .app[data-cam="notch"][data-nav="gesture"] { --inset-bottom: 34px; }
+  .sysbar { display: flex; position: absolute; z-index: 30; top: 0; left: 0; right: 0; height: var(--inset-top);
+    align-items: center; justify-content: space-between; padding: 6px 28px 0; color: var(--on-surface); pointer-events: none; }
+  .sysbar .time { font-weight: 600; font-size: .875rem; }
+  .sysbar .icons { display: flex; gap: 4px; }
+  .sysbar .icons .ms { font-size: 16px; }
+  .cam { position: absolute; left: 50%; transform: translateX(-50%); background: #0b0908; z-index: 31; pointer-events: none; }
+  .app[data-cam="punch"] .cam { top: 12px; width: 14px; height: 14px; border-radius: 50%; }
+  .app[data-cam="notch"] .cam { top: 0; width: 124px; height: 32px; border-radius: 0 0 20px 20px; }
+  .app[data-cam="none"] .cam { display: none; }
+  .navbar { display: flex; position: absolute; z-index: 30; left: 0; right: 0; bottom: 0; height: var(--inset-bottom);
+    align-items: center; justify-content: center; pointer-events: none; }
+  .navbar .pill { width: 120px; height: 4px; border-radius: 4px; background: rgba(31,27,23,.55); margin-top: 8px; }
+  .app[data-nav="buttons"] .pill { display: none; }
+  .navbar .btns { display: none; width: 100%; justify-content: space-around; padding: 0 56px; color: var(--on-surface); }
+  .app[data-nav="buttons"] .btns { display: flex; }
+  .navbar .btns .ms { font-size: 22px; }
+  .guide { display: none; position: absolute; z-index: 29; left: 0; right: 0; pointer-events: none; align-items: center; justify-content: center;
+    background: repeating-linear-gradient(45deg, rgba(186,26,26,.22) 0 6px, rgba(186,26,26,.1) 6px 12px); color: #93000A;
+    font-size: .6875rem; font-weight: 600; border-block: 1px dashed rgba(186,26,26,.7); }
+  .app.guides .guide { display: flex; }
+  .guide.top { top: 0; height: var(--inset-top); }
+  .guide.bottom { bottom: 0; height: var(--inset-bottom); }
+}
+
+/* ================= top app bar ================= */
+.topbar { flex: none; display: flex; align-items: center; gap: 4px; padding: var(--inset-top) 4px 0 4px;
+  min-height: calc(var(--inset-top) + 64px); background: var(--surface); transition: background .2s var(--ease); z-index: 2; }
+.topbar.scrolled { background: var(--sc); }
+.topbar h1 { flex: 1; min-width: 0; margin: 0; padding-left: 4px; color: var(--primary); }
+.icon-btn { position: relative; width: 48px; height: 48px; border-radius: 999px; border: 0; background: transparent; display: grid;
+  place-items: center; color: var(--on-surface-variant); flex: none; }
+.icon-btn::before, .btn::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: currentColor; opacity: 0; transition: opacity .15s; pointer-events: none; }
+.icon-btn:hover::before, .btn:hover::before { opacity: .08; }
+.icon-btn:active::before, .btn:active::before { opacity: .12; }
+
+.main { position: relative; flex: 1; min-height: 0; }
+.scroll { position: absolute; inset: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; scrollbar-width: none; }
+.scroll::-webkit-scrollbar { display: none; }
+.page { padding: 4px 16px 24px; display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); overflow-wrap: anywhere; }
+
+/* ================= buttons (radius 16 like the app's FilledButtonTheme) ================= */
+.btn { position: relative; min-height: 52px; padding: 0 20px; border-radius: var(--r-btn); border: 0; text-decoration: none; overflow: hidden;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; font-weight: 500; }
+.btn .ms { font-size: 20px; }
+.btn.filled { background: var(--primary); color: var(--on-primary); }
+.btn.tert { background: var(--tertiary); color: var(--on-tertiary); }
+.btn.tonal { background: var(--secondary-container); color: var(--on-secondary-container); }
+.btn.outlined { background: transparent; color: var(--primary); border: 1px solid var(--outline); }
+.btn.text { background: transparent; color: var(--primary); padding: 0 12px; min-height: 48px; }
+.btn.block { width: 100%; }
+.btn.small { min-height: 48px; }
+
+/* ================= chips / status ================= */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { min-height: 32px; padding: 0 12px 0 8px; border-radius: var(--r-chip); border: 1px solid var(--outline-variant); display: inline-flex;
+  align-items: center; gap: 6px; color: var(--on-surface-variant); background: var(--sc-lowest); }
+.chip .ms { font-size: 18px; color: var(--primary); }
+.status { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px 0 8px; border-radius: var(--r-chip); }
+.status .ms { font-size: 18px; }
+.status.ok { background: var(--secondary-container); color: var(--on-secondary-container); }
+.status.over { background: var(--error-container); color: var(--on-error-container); }
+.daychips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.daychips::-webkit-scrollbar { display: none; }
+.daychip { flex: none; min-height: 40px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--outline-variant); background: var(--sc-lowest); }
+.daychip[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); border-color: var(--primary); }
+
+/* ================= cards ================= */
+.card { background: var(--sc-lowest); border: 1px solid color-mix(in srgb, var(--outline-variant) 60%, transparent); border-radius: var(--r-card); padding: 20px; }
+.card.tint { background: var(--secondary-container); border-color: transparent; }
+.hero { margin-top: 16px; padding: 16px; border-radius: 16px; background: var(--sc-low); }
+.hero .big { color: var(--primary); }
+.hero.over .big { color: var(--error); }
+.split { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+.split .per { color: var(--tertiary); }
+.progress { position: relative; height: 6px; border-radius: 999px; background: var(--sc-highest); overflow: hidden; margin-top: 16px; }
+.progress > i { position: absolute; inset: 0 auto 0 0; background: var(--primary); border-radius: 999px; transition: width .4s var(--ease); }
+.progress.over > i { background: var(--error); }
+.progress-cap { display: flex; justify-content: space-between; gap: 12px; margin-top: 6px; }
+.note { margin: 16px 0 0; display: flex; gap: 8px; align-items: flex-start; }
+.note .ms { font-size: 18px; margin-top: 1px; }
+
+/* ================= over-budget banner (#38 + mascot #83) ================= */
+.banner { border-radius: var(--r-card); padding: 16px; background: var(--error-container); color: var(--on-error-container);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; }
+.banner .txt { min-width: 0; }
+.banner h2 { margin: 0; display: flex; gap: 6px; align-items: flex-start; }
+.banner h2 .ms { font-size: 22px; flex: none; margin-top: 1px; }
+.banner p { margin: 6px 0 0; }
+.banner .mascot { width: 76px; height: 76px; object-fit: contain; }
+.banner .act { grid-column: 1 / -1; justify-self: start; margin: 4px 0 -4px -12px; color: var(--on-error-container); }
+html.big .banner .mascot { display: none; }   /* MASCOT.md: hide the mascot when large text needs the room */
+
+.banner.soft { background: var(--tertiary-container); color: var(--on-tertiary-container); }
+.banner.soft .act { color: var(--on-tertiary-container); }
+.sumlines { margin: 10px 0 0; display: grid; gap: 2px; color: var(--on-surface-variant); }
+.sumlines > div { display: flex; justify-content: space-between; gap: 12px; }
+.sumlines dt, .sumlines dd { margin: 0; }
+.sumlines .sum { color: var(--on-surface); font-weight: 500; border-top: 1px solid var(--outline-variant); padding-top: 4px; margin-top: 2px; }
+.flag { display: inline-block; vertical-align: middle; margin-left: 4px; padding: 1px 8px; border-radius: 999px; font-size: .6875rem; line-height: 1.125rem; font-weight: 500; }
+.flag.est, .tag.est { background: var(--tertiary-container); color: var(--on-tertiary-container); border-color: transparent; }
+.flag.real { background: var(--secondary-container); color: var(--on-secondary-container); }
+.flag.warn { background: var(--error-container); color: var(--on-error-container); }
+.unk { color: var(--tertiary); font-weight: 500; }
+.rescue { margin-top: 12px; background: var(--tertiary-container); color: var(--on-tertiary-container); border-color: transparent; }
+.rescue h3 { margin: 0 0 6px; display: flex; gap: 8px; align-items: center; }
+.rescue p { margin: 6px 0 0; }
+.rescue .muted { color: inherit; opacity: .8; }
+.rescue .acts { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.rescue .btn { background: var(--sc-lowest); color: var(--tertiary); }
+.rescue .tag { border-color: currentColor; background: transparent; }
+.rules { margin-top: 16px; }
+.rules summary { cursor: pointer; min-height: 40px; display: flex; align-items: center; color: var(--on-surface); }
+.rules ol { margin: 4px 0 0; padding-left: 20px; display: grid; gap: 4px; }
+
+/* ================= advice (#37) ================= */
+.section-h { margin: 4px 4px 0; }
+.advice-list { display: grid; gap: 12px; margin: 12px 0 0; padding: 0; list-style: none; }
+.advice { padding: 16px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; }
+.advice .lead { width: 2.5rem; height: 2.5rem; border-radius: 999px; display: grid; place-items: center; background: var(--tertiary-container); color: var(--on-tertiary-container); }
+.advice h3 { margin: 0; }
+.advice .save { color: var(--tertiary); font-weight: 600; }
+.advice .after { grid-column: 2; margin: 0; }
+.advice .after strong { color: var(--on-surface); font-weight: 500; }
+.advice .acts { grid-column: 2; margin: 8px 0 0; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tag { display: inline-flex; align-items: center; gap: 4px; min-height: 32px; padding: 0 12px 0 8px; border-radius: var(--r-chip); border: 1px solid var(--outline-variant); }
+.tag .ms { font-size: 18px; }
+
+.li { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 16px; padding: 8px 0; min-height: 56px; align-items: center; }
+.li .lead { width: 2.5rem; height: 2.5rem; border-radius: 999px; display: grid; place-items: center; background: var(--primary-container); color: var(--on-primary-container); }
+.day-h { display: flex; align-items: center; gap: 8px; margin: 0 0 4px; }
+.day-h i { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+
+/* ================= persistent cost row + bottom actions ================= */
+.costbar { flex: none; display: none; align-items: center; gap: 12px; padding: 8px 16px; background: var(--sc); border-top: 1px solid var(--outline-variant); }
+.costbar.show { display: flex; }
+.costbar .grow { flex: 1; min-width: 0; }
+.costbar .amt { color: var(--primary); }
+.costbar.over .amt { color: var(--error); }
+.actions { flex: none; display: flex; gap: 12px; padding: 12px 16px calc(12px + var(--inset-bottom)); background: var(--surface);
+  border-top: 1px solid color-mix(in srgb, var(--outline-variant) 50%, transparent); }
+.actions .btn { flex: 1; min-width: 0; padding: 0 12px; }
+
+/* large text: stack the actions and drop the duplicate total row so the content keeps its room */
+html.big .actions { flex-direction: column; gap: 8px; }
+html.big .costbar.show { display: none; }
+
+/* ================= modal bottom sheet ================= */
+.scrim { position: absolute; inset: 0; z-index: 8; background: var(--scrim); opacity: 0; visibility: hidden; transition: opacity .25s var(--ease), visibility 0s .25s; }
+.scrim.open { opacity: 1; visibility: visible; transition: opacity .25s var(--ease); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 9; max-height: 90%; display: flex; flex-direction: column; background: var(--sc-low);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0; transform: translateY(105%); visibility: hidden; transition: transform .3s var(--ease), visibility 0s .3s; }
+.sheet.open { transform: translateY(0); visibility: visible; transition: transform .3s var(--ease); }
+.sheet .grab { flex: none; padding: 16px 0 8px; touch-action: none; cursor: grab; }
+.sheet .grab i { display: block; width: 32px; height: 4px; border-radius: 999px; background: var(--on-surface-variant); opacity: .4; margin: 0 auto; }
+.sheet .body { overflow-y: auto; padding: 0 16px calc(24px + var(--inset-bottom)); overflow-wrap: anywhere; }
+.sheet-head { display: flex; align-items: center; gap: 8px; }
+.sheet-head h2 { flex: 1; margin: 0; }
+.stack { display: flex; gap: 2px; height: 8px; margin: 16px 0 8px; }
+.stack i { display: block; min-width: 4px; border-radius: 2px; }
+.row-li { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 16px; align-items: center; min-height: 64px; padding: 8px 0; }
+.row-li .lead { width: 2.5rem; height: 2.5rem; border-radius: 999px; display: grid; place-items: center; background: var(--sc-lowest); }
+.row-li .lead .ms { font-size: 22px; }
+.row-li .trail { text-align: right; }
+.divider { height: 1px; background: var(--outline-variant); margin: 8px 0; }
+.assume { margin-top: 16px; padding: 12px 16px; border-radius: var(--r-field); background: var(--sc); display: flex; gap: 12px; }
+.assume .ms { font-size: 20px; }
+
+/* lab (settings) form */
+.field { position: relative; display: block; margin-top: 20px; }
+.field > span { position: absolute; top: -10px; left: 12px; padding: 0 4px; background: var(--sc-low); z-index: 1; color: var(--on-surface-variant); }
+.field select, .field input[type=number] { width: 100%; min-height: 56px; padding: 0 16px; border-radius: var(--r-field); border: 1px solid var(--outline); background: transparent; }
+.field select:focus, .field input:focus { outline: 2px solid var(--primary); outline-offset: -1px; border-color: transparent; }
+.stepper { display: flex; align-items: center; border: 1px solid var(--outline); border-radius: var(--r-field); min-height: 56px; padding: 0 4px; }
+.stepper output { flex: 1; text-align: center; }
+.seg { display: flex; border: 1px solid var(--outline); border-radius: 999px; overflow: hidden; margin-top: 8px; }
+.seg button { flex: 1; min-height: 40px; padding: 0 8px; background: transparent; border: 0; border-left: 1px solid var(--outline); display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--secondary-container); color: var(--on-secondary-container); }
+.seg button[aria-pressed="true"]::before { content: "✓"; }
+.switch-row { display: flex; align-items: center; gap: 16px; min-height: 56px; }
+.switch-row span { flex: 1; }
+.switch { appearance: none; -webkit-appearance: none; position: relative; flex: none; width: 52px; height: 32px; border-radius: 999px; border: 2px solid var(--outline); background: var(--sc-highest); transition: background .2s var(--ease); margin: 0; }
+.switch::after { content: ""; position: absolute; top: 50%; left: 6px; width: 16px; height: 16px; border-radius: 50%; background: var(--outline); transform: translateY(-50%); transition: all .2s var(--ease); }
+.switch:checked { background: var(--primary); border-color: var(--primary); }
+.switch:checked::after { left: 22px; width: 24px; height: 24px; background: var(--on-primary); }
+
+.snack { position: absolute; left: 16px; right: 16px; bottom: 16px; z-index: 6; min-height: 48px; display: flex; align-items: center; gap: 8px; padding: 6px 8px 6px 16px;
+  border-radius: 8px; background: var(--inverse-surface); color: var(--inverse-on-surface); transform: translateY(160%); visibility: hidden; transition: transform .25s var(--ease), visibility 0s .25s; }
+.snack.show { transform: translateY(0); visibility: visible; transition: transform .25s var(--ease); }
+.snack span { flex: 1; }
+.snack .btn { color: var(--inverse-primary); min-height: 40px; }
+</style>
+</head>
+<body>
+
+<div class="device">
+<div class="app" id="app" data-cam="punch" data-nav="gesture">
+  <!-- drawn phone chrome (only on screens ≥600px) -->
+  <div class="sysbar" aria-hidden="true"><span class="time">9:41</span>
+    <span class="icons"><span class="ms fill">signal_cellular_alt</span><span class="ms fill">wifi</span><span class="ms fill">battery_full</span></span></div>
+  <div class="cam" aria-hidden="true"></div>
+  <div class="guide top" aria-hidden="true"></div>
+  <div class="guide bottom" aria-hidden="true"></div>
+
+  <header class="topbar" id="topbar">
+    <button class="icon-btn" type="button" aria-label="กลับ"><span class="ms" aria-hidden="true">arrow_back</span></button>
+    <h1 class="title-l" id="app-title">ชลบุรี</h1>
+    <button class="icon-btn" type="button" id="open-settings" aria-label="ตัวเลือกทดลอง" aria-haspopup="dialog"><span class="ms" aria-hidden="true">tune</span></button>
+    <button class="icon-btn" type="button" aria-label="แชร์แผน"><span class="ms" aria-hidden="true">share</span></button>
+  </header>
+
+  <div class="main">
+    <div class="scroll" id="scroll"><main class="page" id="page"></main></div>
+    <div class="snack" id="snack" role="status" aria-live="polite"><span id="snack-text"></span><button class="btn text" type="button" id="snack-undo">เลิกทำ</button></div>
+  </div>
+
+  <div class="costbar" id="costbar">
+    <div class="grow"><div class="label-m muted" id="costbar-label">ค่าใช้จ่ายรวม</div><div class="title-l amt num" id="costbar-amt"></div></div>
+    <button class="btn tonal small" type="button" id="costbar-open">รายละเอียด</button>
+  </div>
+  <div class="actions">
+    <button class="btn outlined" type="button"><span class="ms" aria-hidden="true">bookmark_border</span>บันทึกทริป</button>
+    <button class="btn tert" type="button"><span class="ms" aria-hidden="true">auto_awesome</span>ให้ AI ปรับแผน</button>
+  </div>
+
+  <div class="navbar" aria-hidden="true"><span class="pill"></span>
+    <span class="btns"><span class="ms">arrow_left</span><span class="ms">circle</span><span class="ms">square</span></span></div>
+
+  <div class="scrim" id="scrim"></div>
+  <section class="sheet" id="sheet-cost" role="dialog" aria-modal="true" aria-labelledby="cost-title" tabindex="-1"></section>
+  <section class="sheet" id="sheet-set" role="dialog" aria-modal="true" aria-labelledby="set-title" tabindex="-1"></section>
+</div>
+</div>
+
+<script>
+"use strict";
+const PRICE = {
+  room: {1: 700, 2: 1500, 3: 3000, 4: 6000}, meal: {1: 80, 2: 200, 3: 450, 4: 1000},
+  breakfast: 100, breakfastIncludedFrom: 3,                    // prototype assumption
+  local: { rentalCar: {day: 1000, km: 2.5, cap: 4}, rentalMotorbike: {day: 250, km: 1, cap: 2},
+           taxi: {base: 40, km: 12, cap: 4}, publicTransport: {trip: 30} },
+  intercity: {bus: {fare: 131}, train: {fare: 31}, car: {km: 150, rate: 2.5, toll: 120}},
+  buffer: 0.10,
+  min: {stopsPerDay: 4}                                          // assumption used by the minimum trip cost
+};
+const LOCAL_LABEL = {rentalCar: "เช่ารถยนต์", rentalMotorbike: "เช่ามอเตอร์ไซค์", taxi: "Grab/แท็กซี่", publicTransport: "รถสาธารณะ"};
+const IC_LABEL = {bus: "รถทัวร์/รถตู้", train: "รถไฟ", car: "ขับรถเอง"};
+const DATES = ["ส. 14 พ.ย.", "อา. 15 พ.ย.", "จ. 16 พ.ย."];
+const A = (name, km, fee = 0) => ({name, cat: "attr", km, fee});
+const R = (name, km, level) => ({name, cat: "rest", km, level});
+/* Real rows from สถานที่กรุงเทพ_พร้อมนำเข้า.xlsx (sheet places): n=name c=category l=priceLevel f=entranceFee
+   (foreigner adult price, as in the file) ft=entranceFeeThai. */
+const BKK = {"grand-palace":{"n":"วัดพระศรีรัตนศาสดาราม","c":"attr","lat":13.7515,"lng":100.4927,"l":2,"f":500,"ft":0},"thong-heng-lee":{"n":"Thong Heng Lee Restaurant","c":"rest","lat":13.7526785,"lng":100.4893907,"l":1,"f":0,"ft":0},"wat-pho":{"n":"วัดพระเชตุพนวิมลมังคลาราม","c":"attr","lat":13.74642,"lng":100.49277,"l":1,"f":300,"ft":0},"wat-arun":{"n":"วัดอรุณราชวรารามราชวรมหาวิหาร","c":"attr","lat":13.74387,"lng":100.48844,"l":1,"f":200,"ft":0},"baan-tha-tien":{"n":"Baan ThaTien","c":"rest","lat":13.7446855,"lng":100.4922468,"l":2,"f":0,"ft":0},"the-gate-grand-palace":{"n":"The Gate Grand Palace","c":"rest","lat":13.7521738,"lng":100.4891456,"l":2,"f":0,"ft":0},"rongros":{"n":"RONGROS","c":"rest","lat":13.7442546,"lng":100.4917087,"l":3,"f":0,"ft":0},"mahanakhon-skywalk":{"n":"SkyWalk King Power Mahanakhon","c":"attr","lat":13.72401,"lng":100.52848,"l":3,"f":880,"ft":880},"mahanakhon-eatery":{"n":"Mahanakhon Eatery","c":"rest","lat":13.7239054,"lng":100.5286479,"l":2,"f":0,"ft":0},"iconsiam":{"n":"ไอคอนสยาม","c":"attr","lat":13.72623,"lng":100.51045,"l":2,"f":0,"ft":0}};
+const BKK_CENTER = {lat: 13.7563, lng: 100.5018};
+function hav(a, b) { const r = x => x * Math.PI / 180, dLa = r(b.lat - a.lat), dLn = r(b.lng - a.lng);
+  const h = Math.sin(dLa / 2) ** 2 + Math.cos(r(a.lat)) * Math.cos(r(b.lat)) * Math.sin(dLn / 2) ** 2;
+  return 2 * 6371 * Math.asin(Math.min(1, Math.sqrt(h))); }
+/* same rule as lib/planner/geo.dart: straight line x 1.3, one decimal */
+const bkkBack = ids => Math.round(hav(BKK[ids[ids.length - 1]], BKK_CENTER) * 1.3 * 10) / 10;
+function bkkDay(ids, from = BKK_CENTER) { let prev = from;
+  return ids.map(id => { const d = BKK[id], km = Math.round(hav(prev, d) * 1.3 * 10) / 10; prev = d;
+    return d.c === "attr" ? {name: d.n, cat: "attr", km, fee: d.f, feeThai: d.ft, src: "excel"}
+                          : {name: d.n, cat: "rest", km, level: d.l, src: "excel"}; }); }
+
+const SCENARIOS = {
+  demo1: { province: "ชลบุรี", tagsLabel: "ทะเล & คาเฟ่", n: 2, budget: 7000, tier: 3, local: "publicTransport", intercity: "bus", sameProvince: false, back: [1.4, null], days: [
+    [A("ปราสาทสัจธรรม", 8, 500), R("ลานโพธิ์ นาเกลือ", 2, 2), A("พัทยา วิวพอยท์", 10), R("Pier 21 พัทยา", 4, 1)],
+    [A("หาดจอมเทียน", 9), R("ตลาดหนองมน", 48, 1), A("หาดบางแสน", 4), A("เขาสามมุข", 3)]] },
+  demo3: { province: "ชลบุรี", tagsLabel: "ทะเล & ซีฟู้ด", n: 4, budget: 3000, tier: 3, local: "publicTransport", intercity: "bus", sameProvince: false, back: [1.4, null, null], days: [
+    [A("ปราสาทสัจธรรม", 8, 500), R("ร้านอาหารทะเลนาเกลือ", 2, 1), A("พัทยา วิวพอยท์", 10), R("Pier 21 พัทยา", 4, 1)],
+    [A("หาดจอมเทียน", 9), R("ตลาดหนองมน", 48, 1), A("หาดบางแสน", 4), R("ร้านข้าวแกงบางแสน", 3, 1)],
+    [A("เขาสามมุข", 3), R("ก๋วยเตี๋ยวศรีราชา", 18, 1)]] },
+  bkk1: { province: "กรุงเทพฯ", tagsLabel: "วัด & ประวัติศาสตร์", n: 1, budget: 1500, tier: 2, local: "publicTransport", intercity: "bus", sameProvince: true, fromFile: true,
+    back: [bkkBack(["baan-tha-tien"])],
+    days: [bkkDay(["grand-palace", "thong-heng-lee", "wat-pho", "wat-arun", "baan-tha-tien"])] },
+  bkk2: { province: "กรุงเทพฯ", tagsLabel: "วัด & ไลฟ์สไตล์", n: 2, budget: 5000, tier: 2, local: "publicTransport", intercity: "bus", sameProvince: true, fromFile: true, noHotelData: true,
+    back: [bkkBack(["rongros"]), bkkBack(["iconsiam"])],
+    days: [bkkDay(["grand-palace", "the-gate-grand-palace", "wat-pho", "rongros"]),
+           bkkDay(["mahanakhon-skywalk", "mahanakhon-eatery", "iconsiam"])] }
+};
+
+/* ---- calculator (mirror of the planned CostCalculator) ---- */
+const rooms = n => Math.ceil(n / 2);
+/* same thresholds as CandidateBuilder.priceCap (budget per person per day) */
+function priceCap(cfg) { const v = cfg.budget / cfg.n / cfg.days.length; return v < 700 ? 1 : v < 1500 ? 2 : v < 3000 ? 3 : 4; }
+/* Legs travelled in one trip: every Stop, plus the way back to the hotel on each night
+   and, on a one-day trip, the way back to the start. `approx` = distance mirrored from the way in. */
+function legsOf(cfg) {
+  const d = cfg.days.length, nights = Math.max(0, d - 1), legs = []; let returns = 0, approx = 0;
+  cfg.days.forEach((stops, i) => {
+    stops.forEach(s => legs.push(s.km));
+    if (i < nights || d === 1) { const known = cfg.back && cfg.back[i] != null;
+      legs.push(known ? cfg.back[i] : stops[0].km); returns++; if (!known) approx++; }
+  });
+  return {legs, returns, approx};
+}
+function localCost(mode, legs, dayCount, n) {
+  const p = PRICE.local[mode], km = legs.reduce((s, x) => s + x, 0);
+  if (mode === "publicTransport") return p.trip * n * legs.length;
+  if (mode === "taxi") return legs.reduce((s, x) => s + p.base + p.km * x, 0) * Math.ceil(n / p.cap);
+  return (p.day * dayCount + p.km * km) * Math.ceil(n / p.cap);      // rentals: every day of the trip
+}
+function estimate(cfg) {
+  const n = cfg.n, dayCount = cfg.days.length, stops = cfg.days.flat();
+  const nights = Math.max(0, dayCount - 1), hasHotel = nights > 0;
+  // no accommodation data: never 0 -- table price for the tier, flagged, breakfast assumed not included
+  const breakfastIn = hasHotel && !cfg.noHotelData && cfg.tier >= PRICE.breakfastIncludedFrom;
+  const accommodation = hasHotel ? PRICE.room[cfg.tier] * rooms(n) * nights : 0;
+  const meals = stops.filter(s => s.cat === "rest").reduce((s, x) => s + PRICE.meal[x.level] * n, 0);
+  // breakfast follows the real days of the trip; mornings covered by the hotel cost nothing
+  const paidBreakfasts = dayCount - (breakfastIn ? nights : 0);
+  const breakfast = PRICE.breakfast * n * paidBreakfasts;
+  const feeOf = x => cfg.feeBasis === "thai" && x.feeThai !== undefined ? x.feeThai : x.fee;
+  const attrs = stops.filter(s => s.cat === "attr");
+  const unknownFees = attrs.filter(x => feeOf(x) == null).length;        // unknown is not "free"
+  const entrance = attrs.reduce((s, x) => s + (feeOf(x) || 0) * n, 0);
+  const trip = legsOf(cfg);
+  const localTransport = localCost(cfg.local, trip.legs, dayCount, n);
+  let intercity = 0;
+  if (!cfg.sameProvince) { const ic = PRICE.intercity[cfg.intercity];
+    intercity = cfg.intercity === "car" ? ic.km * ic.rate * 2 + ic.toll * 2 : ic.fare * n * 2; }
+  const food = meals + breakfast, subtotal = intercity + accommodation + food + entrance + localTransport;
+  const buffer = subtotal * PRICE.buffer, total = subtotal + buffer, over = total - cfg.budget > 0.005;
+  return {intercity, accommodation, food, entrance, localTransport, buffer, subtotal, total, perPerson: total / n,
+    over, softOver: over && subtotal <= cfg.budget, overBy: Math.max(0, total - cfg.budget),
+    breakfastIn, breakfast, paidBreakfasts, nights, dayCount, unknownFees, returns: trip.returns, returnsApprox: trip.approx};
+}
+/* Mirror of CostCalculator.minimumTripCost (#35): the cheapest conceivable trip of d days. */
+function minTripCost(cfg, d = cfg.days.length, sameProvince = cfg.sameProvince) {
+  const n = cfg.n, ic = PRICE.intercity;
+  const inter = sameProvince ? 0 : Math.min(ic.bus.fare * n * 2, ic.train.fare * n * 2, ic.car.km * ic.car.rate * 2 + ic.car.toll * 2);
+  const trips = PRICE.min.stopsPerDay * d + (d > 1 ? d - 1 : 1);
+  return (inter + PRICE.room[1] * rooms(n) * Math.max(0, d - 1) + PRICE.meal[1] * n * (2 * d - 1) + PRICE.breakfast * n * d
+    + PRICE.local.publicTransport.trip * n * trips) * (1 + PRICE.buffer);
+}
+const dropDay = cfg => ({...cfg, days: cfg.days.slice(0, -1), back: cfg.back ? cfg.back.slice(0, -1) : cfg.back});
+function cheapestLocal(cfg) { let best = null;
+  for (const m of Object.keys(PRICE.local).filter(m => m !== cfg.local)) { const t = estimate({...cfg, local: m}).total; if (!best || t < best.t) best = {m, t}; }
+  return best; }
+function advise(cfg, base) {                       // every option priced by the same calculator, except the province lower bound
+  const out = [], price = c => estimate(c).total;
+  if (cfg.tier > 1 && cfg.days.length > 1) { const c = {...cfg, tier: cfg.tier - 1}, loses = !cfg.noHotelData && c.tier < PRICE.breakfastIncludedFrom && cfg.tier >= PRICE.breakfastIncludedFrom;
+    out.push({icon: "hotel", title: `ลดระดับที่พักเป็น ${"฿".repeat(c.tier)}`, text: loses ? "ห้องถูกลง แต่ต้องซื้ออาหารเช้าเองทุกวัน" : "เลือกที่พักระดับราคาต่ำลงหนึ่งขั้น", saving: base.total - price(c), apply: c}); }
+  const best = cheapestLocal(cfg);
+  if (best && base.total - best.t > 0.5)
+    out.push({icon: "commute", title: `เปลี่ยนเป็น${LOCAL_LABEL[best.m]}`, text: `ถูกกว่า${LOCAL_LABEL[cfg.local]}ในทริปนี้`, saving: base.total - best.t, apply: {...cfg, local: best.m}});
+  if (cfg.days.length > 1) { const c = dropDay(cfg);
+    out.push({icon: "event_busy", title: "ลดทริปลง 1 วัน", text: "ตัดวันสุดท้ายและที่พักคืนสุดท้ายออก", saving: base.total - price(c), apply: c, rough: true}); }
+  if (!cfg.sameProvince)
+    out.push({icon: "map", title: "เที่ยวในกรุงเทพฯ แทน (ต้นทาง)", text: "ไม่มีค่าเดินทางข้ามเมือง", saving: base.total - minTripCost(cfg, cfg.days.length, true), estimated: true});
+  return out.filter(a => a.saving > 0.5).sort((a, b) => (a.estimated ? 1 : 0) - (b.estimated ? 1 : 0) || b.saving - a.saving).slice(0, 3);
+}
+/* What is left when every applicable option is taken TOGETHER (priced as one plan, never by adding savings). */
+function rescue(cfg, e) {
+  let c = {...cfg};
+  if (c.tier > 1 && c.days.length > 1) c = {...c, tier: c.tier - 1};
+  const best = cheapestLocal(c); if (best && best.t < estimate(c).total) c = {...c, local: best.m};
+  if (c.days.length > 1) c = dropDay(c);
+  const all = estimate(c);
+  if (!all.over) return null;                                   // the options are enough: no rescue card
+  const d = cfg.days.length, need = minTripCost(cfg);
+  let fitDays = 0; for (let k = d - 1; k >= 1; k--) if (minTripCost(cfg, k) <= cfg.budget) { fitDays = k; break; }
+  return {stillOver: all.total - cfg.budget, need, needRounded: Math.ceil(need / 100) * 100, fitDays,
+    fitCost: fitDays ? minTripCost(cfg, fitDays) : 0, oneDay: minTripCost(cfg, 1)};
+}
+
+/* ---- state ---- */
+const $ = id => document.getElementById(id);
+const baht = v => "฿" + v.toLocaleString("en-US", {minimumFractionDigits: Math.abs(v - Math.round(v)) < .005 ? 0 : 2, maximumFractionDigits: 2});
+const clone = o => JSON.parse(JSON.stringify(o));
+let scenarioId = "demo3", cfg, feeBasis = "foreign", unknownDemo = false, applied = [], history = [], day = 0, mascotOn = true, openId = null, lastFocus = null, snackTimer = null, io = null;
+function load(id) {
+  scenarioId = id; cfg = clone(SCENARIOS[id]); cfg.feeBasis = feeBasis;
+  if (cfg.noHotelData) cfg.tier = priceCap(cfg);
+  if (unknownDemo) { const a = cfg.days.flat().find(s => s.cat === "attr" && !s.fee); if (a) { a.fee = null; if (a.feeThai !== undefined) a.feeThai = null; } }
+  applied = []; history = []; day = 0; render(); renderSettings();
+}
+
+function feeNote(s) {
+  if (s.cat !== "attr") return "";
+  if (s.fee == null) return ' · <span class="unk">ค่าเข้าชม: ไม่ทราบ</span>';
+  if (s.feeThai === undefined) return s.fee ? " · เข้าชม " + baht(s.fee) + "/คน" : " · เข้าชมฟรี";
+  if (s.fee === s.feeThai) return s.fee ? " · เข้าชม " + baht(s.fee) + "/คน" : " · เข้าชมฟรี";
+  return ` · ชาวต่างชาติ ${baht(s.fee)} · คนไทย ${s.feeThai ? baht(s.feeThai) : "ฟรี"}`;
+}
+function render() {
+  $("app-title").textContent = cfg.province;
+  const e = estimate(cfg), pct = Math.round(e.total / Math.max(1, cfg.budget) * 100);
+  const advice = e.over ? advise(cfg, e) : [];
+  const res = e.over ? rescue(cfg, e) : null;
+  const dayLabel = cfg.days.length === 1 ? "1 วัน" : `${cfg.days.length} วัน ${cfg.days.length - 1} คืน`;
+  const tripLabel = `${cfg.province} ${dayLabel} ${cfg.n} คน`;
+  if (day >= cfg.days.length) day = cfg.days.length - 1;
+
+  const banner = e.over ? `
+    <section class="banner ${e.softOver ? "soft" : ""}" role="alert" aria-labelledby="ob-title">
+      <div class="txt"><h2 class="title-m" id="ob-title"><span class="ms fill" aria-hidden="true">${e.softOver ? "info" : "warning"}</span>${e.softOver
+          ? `ค่าใช้จ่ายจริงอยู่ในงบ แต่รวมเงินสำรองแล้วเกิน ${baht(e.overBy)}` : `แผนนี้เกินงบ ${baht(e.overBy)}`}</h2>
+        <p class="body-m">${e.softOver ? `ค่าใช้จ่ายจริง ${baht(e.subtotal)} ไม่เกินงบ ส่วนที่เกินมาจากเงินสำรอง 10% (${baht(e.buffer)})` : "ยังแสดงแผนให้ครบ ดูวิธีลดค่าใช้จ่ายด้านล่างได้เลย"}</p></div>
+      ${mascotOn ? '<img class="mascot" src="data:image/webp;base64,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" alt="" aria-hidden="true">' : ""}
+      <a class="btn text act" href="#advice" id="goto-advice"><span class="label-l">ดูคำแนะนำ</span></a>
+    </section>` : "";
+
+  const summary = `
+    <section class="card" id="summary" aria-labelledby="sum-title">
+      <div class="label-m" style="color:var(--primary)">${cfg.tagsLabel}</div>
+      <h2 class="headline-s" id="sum-title" style="margin:2px 0 12px">${cfg.province} ${dayLabel}</h2>
+      <div class="chips">
+        <span class="chip label-m"><span class="ms" aria-hidden="true">group</span>${cfg.n} คน</span>
+        <span class="chip label-m"><span class="ms" aria-hidden="true">${cfg.sameProvince ? "home" : "directions_bus"}</span>${cfg.sameProvince ? "ในจังหวัดต้นทาง" : IC_LABEL[cfg.intercity]}</span>
+        <span class="chip label-m"><span class="ms" aria-hidden="true">commute</span>${LOCAL_LABEL[cfg.local]}</span>
+      </div>
+      <div class="hero ${e.over ? "over" : ""}">
+        <div class="status ${e.over ? "over" : "ok"} label-m"><span class="ms fill" aria-hidden="true">${e.over ? "warning" : "check_circle"}</span>${e.over ? "เกินงบ " + baht(e.overBy) : "อยู่ในงบ"}</div>
+        <div class="body-m muted" style="margin-top:12px">งบประมาณรวมทั้งทริป</div>
+        <div class="display-s big num">${baht(e.total)}</div>
+        <dl class="sumlines body-m">
+          <div><dt>ค่าใช้จ่ายจริง</dt><dd class="num">${baht(e.subtotal)}</dd></div>
+          <div><dt>เงินสำรอง 10%</dt><dd class="num">+ ${baht(e.buffer)}</dd></div>
+          <div class="sum"><dt>รวม (ใช้เทียบกับงบ)</dt><dd class="num">${baht(e.total)}</dd></div>
+        </dl>
+        <div class="progress ${e.over ? "over" : ""}" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.min(100, pct)}"
+             aria-label="ใช้ไป ${pct}% ของงบ ${baht(cfg.budget)}"><i style="width:${Math.min(100, pct)}%"></i></div>
+        <div class="progress-cap body-s muted"><span>ใช้ไป ${pct}%</span><span>งบ ${baht(cfg.budget)}</span></div>
+        <div class="split">
+          <div><div class="body-s muted">เฉลี่ยต่อคน (${cfg.n} ท่าน)</div><div class="title-l per num">${baht(e.perPerson)}</div></div>
+          <button class="btn tonal small" type="button" id="open-cost" aria-haspopup="dialog"><span class="ms" aria-hidden="true">receipt_long</span>แยกหมวด</button>
+        </div>
+      </div>
+      ${e.unknownFees ? `<p class="note body-s unk"><span class="ms" aria-hidden="true">help</span>ไม่ทราบค่าเข้าชม ${e.unknownFees} แห่ง ยอดรวมยังไม่รวมส่วนนี้</p>` : ""}
+      <p class="note body-s muted"><span class="ms" aria-hidden="true">info</span>ราคาโดยประมาณ คำนวณจากตารางราคากลาง ไม่ใช่ราคาที่จองจริง</p>
+    </section>`;
+
+  const rescueHtml = res ? `
+    <div class="card rescue" role="note" aria-labelledby="res-title">
+      <h3 class="title-m" id="res-title"><span class="ms fill" aria-hidden="true">savings</span>งบนี้ยังไม่พอสำหรับทริปนี้</h3>
+      <p class="body-m">${advice.length ? "ทำตามคำแนะนำทุกข้อพร้อมกันแล้ว" : "ไม่มีวิธีลดค่าใช้จ่ายที่ทำได้ และ"}ยังเกินงบอีก <strong>${baht(res.stillOver)}</strong></p>
+      <p class="body-m"><strong>ควรมีงบอย่างน้อย ${baht(res.needRounded)}</strong> สำหรับ ${tripLabel}
+        <span class="muted">(ขั้นต่ำ ${baht(res.need)}: ที่พัก ฿ อาหาร ฿ รถสาธารณะ${cfg.sameProvince ? "" : " และตั๋วข้ามเมืองที่ถูกที่สุด"})</span></p>
+      <p class="body-m">${res.fitDays
+        ? `หรือ <strong>แนะนำให้ลดเหลือ ${res.fitDays} วัน</strong> ซึ่งใช้ขั้นต่ำ ${baht(res.fitCost)} อยู่ในงบ ${baht(cfg.budget)}`
+        : `งบ ${baht(cfg.budget)} ยังไม่พอแม้เที่ยว 1 วัน (ขั้นต่ำ ${baht(res.oneDay)}) <strong>แนะนำให้ลดจำนวนคน${cfg.sameProvince ? "" : "หรือเที่ยวในจังหวัดต้นทาง"}</strong>`}</p>
+      <div class="acts"><button class="btn tonal small" type="button" id="res-budget">ลองตั้งงบ ${baht(res.needRounded)}</button>
+        <span class="tag est label-m"><span class="ms" aria-hidden="true">info</span>ประมาณการขั้นต่ำ</span></div>
+    </div>` : "";
+
+  const adviceHtml = e.over ? `
+    <section id="advice" aria-labelledby="adv-title">
+      <h2 class="title-m section-h" id="adv-title">ช่วยประหยัดได้อย่างไรบ้าง</h2>
+      ${advice.length ? `<ul class="advice-list">${advice.map((a, i) => { const left = e.total - a.saving - cfg.budget;
+        return `<li class="card advice">
+          <div class="lead"><span class="ms" aria-hidden="true">${a.icon}</span></div>
+          <div><h3 class="title-m" style="margin:0">${a.title}</h3><div class="body-m">ประหยัด${a.estimated ? "ได้สูงสุด " : " "}<span class="save num">~${baht(a.saving)}</span></div></div>
+          <p class="after body-m muted">${a.text}</p>
+          <p class="after body-m muted">${left > 0.5 ? `ทำข้อนี้ข้อเดียว <strong>ยังเกินงบอีก ${baht(left)}</strong>` : `ทำข้อนี้แล้ว <strong>อยู่ในงบ</strong> เหลือ ${baht(-left)}`}</p>
+          <div class="acts">${a.apply ? `<button class="btn tonal small" type="button" data-apply="${i}">ลองทำตามข้อนี้</button>` : ""}
+            ${a.estimated ? `<span class="tag est label-m"><span class="ms" aria-hidden="true">info</span>ประมาณการขั้นต่ำ ยังไม่ใช่แผนจริง</span>` : ""}
+            ${a.rough ? `<span class="tag est label-m"><span class="ms" aria-hidden="true">info</span>ประมาณ: ยังไม่ได้จัดเส้นทางใหม่</span>` : ""}</div></li>`; }).join("")}</ul>` : ""}
+      ${rescueHtml}
+    </section>` : "";
+  const done = !e.over && applied.length ? `<p class="body-m muted" style="margin:0 4px">ปรับแล้ว: ${applied.join(" → ")} — ตอนนี้อยู่ในงบ</p>` : "";
+
+  const list = `
+    <section aria-label="กิจกรรมรายวัน">
+      <div class="daychips" role="group" aria-label="เลือกวัน">${cfg.days.map((_, i) =>
+        `<button class="daychip label-l" type="button" data-day="${i}" aria-pressed="${i === day}">วันที่ ${i + 1} · ${DATES[i]}</button>`).join("")}</div>
+      <div class="card" style="margin-top:12px">
+        <h3 class="title-m day-h"><i aria-hidden="true"></i>กิจกรรมวันที่ ${day + 1} (${DATES[day]})</h3>
+        ${cfg.days[day].map((s, i) => `<div class="li"><div class="lead label-m">${i + 1}</div>
+          <div><div class="title-s">${s.name}</div><div class="body-s muted">${s.cat === "rest" ? "ร้านอาหาร " + "฿".repeat(s.level) : "สถานที่ท่องเที่ยว"}${feeNote(s)}</div></div></div>`).join("")}
+        <p class="body-s muted" style="margin:8px 0 0">${cfg.fromFile ? "ข้อมูลสถานที่จากไฟล์ Excel (สถานที่กรุงเทพ_พร้อมนำเข้า) · ระยะทางคำนวณเส้นตรง × 1.3" : "ข้อมูลตัวอย่างของ prototype"} · ไทม์ไลน์และแผนที่เต็มอยู่ในงาน M7</p>
+      </div>
+    </section>`;
+
+  $("page").innerHTML = banner + summary + adviceHtml + done + list;
+  $("open-cost").onclick = () => openSheet("sheet-cost");
+  const go = $("goto-advice"); if (go) go.onclick = ev => { ev.preventDefault(); $("advice").scrollIntoView({behavior: "smooth", block: "start"}); };
+  const rb = $("res-budget"); if (rb) rb.onclick = () => { history.push({cfg: clone(cfg), applied: [...applied]}); cfg.budget = res.needRounded; render(); renderSettings(); snack(`ตั้งงบเป็น ${baht(res.needRounded)} แล้ว`); };
+  document.querySelectorAll("[data-day]").forEach(b => b.onclick = () => { day = +b.dataset.day; render(); });
+  document.querySelectorAll("[data-apply]").forEach(b => b.onclick = () => {
+    const a = advice[+b.dataset.apply]; history.push({cfg: clone(cfg), applied: [...applied]});
+    applied.push(a.title); cfg = clone(a.apply); render(); renderSettings(); snack(`ทำตาม "${a.title}" แล้ว`); });
+  $("costbar-amt").textContent = baht(e.total);
+  $("costbar-label").textContent = e.over ? `เกินงบ ${baht(e.overBy)}` : "ค่าใช้จ่ายรวม · อยู่ในงบ";
+  $("costbar").classList.toggle("over", e.over);
+  observeSummary(); renderCost(e);
+}
+
+function renderCost(e) {
+  const EST = '<span class="flag est">ประมาณ</span>', REAL = '<span class="flag real">ราคาจริง</span>';
+  const backNote = e.returns ? ` · รวมขากลับ${e.dayCount === 1 ? "จุดเริ่มต้น" : "ที่พัก"} ${e.returns} เที่ยว${e.returnsApprox ? " (ประมาณระยะ " + e.returnsApprox + " เที่ยว)" : ""}` : "";
+  const rows = [
+    ["directions_bus", "เดินทางข้ามเมือง", cfg.sameProvince ? "อยู่ในจังหวัดต้นทาง" : `${IC_LABEL[cfg.intercity]} ไป-กลับ ${cfg.n} คน`, e.intercity, cfg.sameProvince ? "" : EST],
+    ["hotel", "ที่พัก", e.nights ? `${PRICE.room[cfg.tier].toLocaleString()} × ${rooms(cfg.n)} ห้อง × ${e.nights} คืน` : "ทริปวันเดียว ไม่มีค่าที่พัก", e.accommodation,
+      !e.nights ? "" : cfg.noHotelData ? '<span class="flag warn">ไม่มีข้อมูลที่พัก ใช้ราคาตาราง</span>' : EST],
+    ["restaurant", "อาหาร", `มื้อเช้าซื้อเอง ${e.paidBreakfasts} วัน ${baht(e.breakfast)}${e.breakfastIn ? ` · ที่พักรวมเช้า ${e.nights} เช้า` : ""}`, e.food, EST],
+    ["confirmation_number", "ค่าเข้าชม", `${cfg.n} คน · ${cfg.feeBasis === "thai" ? "ราคาคนไทย" : "ราคาชาวต่างชาติ"}`, e.entrance,
+      e.unknownFees ? `<span class="flag warn">ไม่ทราบ ${e.unknownFees} แห่ง</span>` : REAL],
+    ["local_taxi", "เดินทางในพื้นที่", LOCAL_LABEL[cfg.local] + backNote, e.localTransport, EST],
+    ["savings", "เงินสำรอง", "10% ของทุกหมวด", e.buffer, ""]];
+  $("sheet-cost").innerHTML = `
+    <div class="grab" data-grab><i></i></div>
+    <div class="body">
+      <div class="sheet-head"><h2 class="title-l" id="cost-title">ค่าใช้จ่ายแยกหมวด</h2><button class="icon-btn" type="button" data-close aria-label="ปิด"><span class="ms" aria-hidden="true">close</span></button></div>
+      <div class="body-m muted">ราคาโดยประมาณ · ${cfg.n} คน · ${cfg.days.length} วัน</div>
+      <div class="stack" aria-hidden="true">${rows.map((r, i) => r[3] > 0 ? `<i style="flex:${r[3]};background:var(--c${i + 1})"></i>` : "").join("")}</div>
+      <ul style="list-style:none;margin:0;padding:0">${rows.map((r, i) => `<li class="row-li">
+        <div class="lead" style="color:var(--c${i + 1})"><span class="ms" aria-hidden="true">${r[0]}</span></div>
+        <div><div class="title-m">${r[1]} ${r[4]}</div><div class="body-s muted">${r[2]}</div></div>
+        <div class="trail"><div class="title-m num">${baht(r[3])}</div><div class="body-s muted num">${e.total ? Math.round(r[3] / e.total * 100) : 0}%</div></div></li>`).join("")}</ul>
+      <div class="divider"></div>
+      <dl class="sumlines body-m" style="margin:4px 0 8px">
+        <div><dt>ค่าใช้จ่ายจริง (5 หมวด)</dt><dd class="num">${baht(e.subtotal)}</dd></div>
+        <div><dt>เงินสำรอง 10%</dt><dd class="num">+ ${baht(e.buffer)}</dd></div>
+      </dl>
+      <div class="row-li"><div class="lead" style="background:var(--primary-container);color:var(--on-primary-container)"><span class="ms" aria-hidden="true">functions</span></div>
+        <div><div class="title-m">รวมทั้งทริป</div><div class="body-s muted">ต่อคน ${baht(e.perPerson)}</div></div>
+        <div class="trail"><div class="title-l num" style="color:${e.over ? "var(--error)" : "var(--primary)"}">${baht(e.total)}</div><div class="body-s muted">งบ ${baht(cfg.budget)}</div></div></div>
+      <div class="assume body-s muted"><span class="ms" aria-hidden="true">info</span><span>"ประมาณ" = คำนวณจากตารางราคากลางตามระดับราคา ไม่ใช่ราคาจริงของแต่ละแห่ง · "ราคาจริง" = มาจากข้อมูลสถานที่</span></div>
+    </div>`;
+  bindSheet("sheet-cost");
+}
+
+function renderSettings() {
+  const app = $("app");
+  const seg = (name, items, cur) => `<div class="seg" role="group" aria-label="${name}">${items.map(([v, l]) =>
+    `<button type="button" data-${name}="${v}" aria-pressed="${String(v) === String(cur)}" class="label-l">${l}</button>`).join("")}</div>`;
+  $("sheet-set").innerHTML = `
+    <div class="grab" data-grab><i></i></div>
+    <div class="body">
+      <div class="sheet-head"><h2 class="title-l" id="set-title">ตัวเลือกทดลอง</h2><button class="icon-btn" type="button" data-close aria-label="ปิด"><span class="ms" aria-hidden="true">close</span></button></div>
+      <div class="body-m muted">ใช้ทดสอบ UI เท่านั้น ไม่ใช่ส่วนหนึ่งของแอป · ยังไม่ได้ commit</div>
+
+      <div class="title-s" style="margin-top:20px">กล้องหน้า / แถบสถานะ (เว้นด้านบน)</div>
+      ${seg("cam", [["punch", "รูเจาะ"], ["notch", "รอยบาก"], ["none", "ไม่มี"]], app.dataset.cam)}
+      <div class="title-s" style="margin-top:20px">ปุ่มนำทางของเครื่อง (เว้นด้านล่าง)</div>
+      ${seg("nav", [["gesture", "ปัดท่าทาง"], ["buttons", "3 ปุ่ม"]], app.dataset.nav)}
+      <div class="switch-row"><span class="body-l">แสดงเขตที่ต้องเว้น <span class="body-s muted" style="display:block">แถบแดง = ห้ามวางเนื้อหา · บน: แถบสถานะและกล้องหน้า · ล่าง: ปุ่ม/แถบนำทางของเครื่อง</span></span><input class="switch" id="f-guides" type="checkbox" role="switch" aria-label="แสดงเขตที่ต้องเว้น" ${app.classList.contains("guides") ? "checked" : ""}></div>
+
+      <label class="field"><span class="body-s">สถานการณ์</span>
+        <select id="f-scenario"><option value="demo1" ${scenarioId === "demo1" ? "selected" : ""}>Demo 1 · mock ใน repo (2 วัน 2 คน)</option>
+        <option value="demo3" ${scenarioId === "demo3" ? "selected" : ""}>Demo 3 · เกินงบ (3 วัน 4 คน งบ 3,000)</option>
+        <option value="bkk1" ${scenarioId === "bkk1" ? "selected" : ""}>Demo 2 · กรุงเทพฯ 1 วัน 1 คน งบ 1,500 (ข้อมูล Excel)</option>
+        <option value="bkk2" ${scenarioId === "bkk2" ? "selected" : ""}>กรุงเทพฯ 2 วัน 1 คืน 2 คน งบ 5,000 (ข้อมูล Excel)</option></select></label>
+      <div class="field"><span class="body-s">จำนวนคน</span>
+        <div class="stepper"><button class="icon-btn" type="button" id="n-dec" aria-label="ลดจำนวนคน"><span class="ms" aria-hidden="true">remove</span></button>
+          <output class="title-m num" aria-live="polite">${cfg.n} คน</output>
+          <button class="icon-btn" type="button" id="n-inc" aria-label="เพิ่มจำนวนคน"><span class="ms" aria-hidden="true">add</span></button></div></div>
+      <label class="field"><span class="body-s">งบรวม (บาท)</span><input id="f-budget" type="number" inputmode="numeric" min="500" step="100" value="${cfg.budget}"></label>
+      <label class="field"><span class="body-s">เดินทางในพื้นที่</span>
+        <select id="f-local">${Object.entries(LOCAL_LABEL).map(([v, l]) => `<option value="${v}" ${cfg.local === v ? "selected" : ""}>${l}</option>`).join("")}</select></label>
+      <div class="title-s" style="margin-top:20px">ราคาค่าเข้าชม <span class="body-s muted">(ไฟล์ Excel ใช้ราคาชาวต่างชาติ)</span></div>
+      ${seg("fee", [["foreign", "ชาวต่างชาติ"], ["thai", "คนไทย"]], cfg.feeBasis)}
+      <div class="title-s" style="margin-top:20px">ระดับที่พัก</div>
+      ${seg("tier", [[1, "฿"], [2, "฿฿"], [3, "฿฿฿"], [4, "฿฿฿฿"]], cfg.tier)}
+
+      <div class="switch-row"><span class="body-l">จำลอง: ไม่ทราบค่าเข้าชม 1 แห่ง</span><input class="switch" id="f-unk" type="checkbox" role="switch" aria-label="จำลองไม่ทราบค่าเข้าชม" ${unknownDemo ? "checked" : ""}></div>
+      <div class="switch-row"><span class="body-l">ตัวอักษร 200%</span><input class="switch" id="f-big" type="checkbox" role="switch" aria-label="ตัวอักษร 200%" ${document.documentElement.classList.contains("big") ? "checked" : ""}></div>
+      <div class="switch-row"><span class="body-l">มาสคอตบน banner (#83)</span><input class="switch" id="f-mascot" type="checkbox" role="switch" aria-label="มาสคอตบน banner" ${mascotOn ? "checked" : ""}></div>
+      <button class="btn outlined block" type="button" id="f-reset" style="margin-top:12px">รีเซ็ตสถานการณ์</button>
+      <details class="rules body-s muted"><summary class="title-s">กติกาคำนวณที่ใช้ (อนุมัติ 4 ต.ค. 2569)</summary><ol>
+        <li>เกินงบ = ยอดรวมที่บวกเงินสำรอง 10% แล้ว มากกว่างบ · แสดงแยก ค่าใช้จ่ายจริง / เงินสำรอง / รวม</li>
+        <li>มื้อเช้า 100 บาท/คน นับตามวันจริงของทริป · เช้าที่ที่พักรวมให้ = 0</li>
+        <li>ไม่มีข้อมูลที่พัก: ใช้ราคาตารางตามระดับจากงบ (priceCap) ติดธงประมาณ และถือว่าไม่รวมมื้อเช้า</li>
+        <li>ค่าเข้าชม: ราคาคนไทย/ต่างชาติยังรอตัดสิน · ไม่มีข้อมูล = "ไม่ทราบ" ไม่ใช่ฟรี</li>
+        <li>เดินทางในพื้นที่: นับขากลับที่พักทุกคืน · ทริปวันเดียวนับขากลับจุดเริ่มต้น · วันสุดท้ายของทริปค้างคืนไม่นับ · ไม่รู้ระยะให้ใช้เท่าขามา</li>
+        <li>รถเช่านับทุกวันของทริป · ขับรถเองข้ามเมืองแล้วเช่ารถในพื้นที่ นับแยก 2 ช่วง</li>
+        <li>คำแนะนำ: คิดราคาด้วยเครื่องคิดเลขเดียวกัน แสดงแยกข้อ ห้ามบวกยอดประหยัด</li>
+        <li>ลด 1 วัน = ตัดวันและคืนสุดท้ายของแผนจริง ไม่จัดเส้นทางใหม่ (ติดป้ายประมาณ)</li>
+        <li>ทำทุกข้อพร้อมกันแล้วยังเกิน: บอก "ควรมีงบอย่างน้อย" จากค่าใช้จ่ายขั้นต่ำ หรือแนะนำจำนวนวันที่งบพอ</li>
+      </ol></details>
+    </div>`;
+  const set = fn => () => { fn(); render(); renderSettings(); };
+  document.querySelectorAll("[data-cam]").forEach(b => b.onclick = () => { app.dataset.cam = b.dataset.cam; renderSettings(); });
+  document.querySelectorAll("[data-nav]").forEach(b => b.onclick = () => { app.dataset.nav = b.dataset.nav; renderSettings(); });
+  $("f-guides").onchange = ev => app.classList.toggle("guides", ev.target.checked);
+  $("f-scenario").onchange = ev => load(ev.target.value);
+  $("n-dec").onclick = set(() => { cfg.n = Math.max(1, cfg.n - 1); });
+  $("n-inc").onclick = set(() => { cfg.n = Math.min(8, cfg.n + 1); });
+  $("f-budget").oninput = ev => { cfg.budget = Math.max(0, +ev.target.value || 0); render(); };
+  $("f-local").onchange = ev => { cfg.local = ev.target.value; render(); };
+  document.querySelectorAll("[data-fee]").forEach(b => b.onclick = set(() => { feeBasis = b.dataset.fee; cfg.feeBasis = feeBasis; }));
+  document.querySelectorAll("[data-tier]").forEach(b => b.onclick = set(() => { cfg.tier = +b.dataset.tier; }));
+  $("f-big").onchange = ev => { document.documentElement.classList.toggle("big", ev.target.checked); document.documentElement.style.fontSize = ev.target.checked ? "32px" : ""; };
+  $("f-unk").onchange = ev => { unknownDemo = ev.target.checked; load(scenarioId); };
+  $("f-mascot").onchange = ev => { mascotOn = ev.target.checked; render(); };
+  $("f-reset").onclick = () => load(scenarioId);
+  bindSheet("sheet-set");
+}
+
+function openSheet(id) { lastFocus = document.activeElement; openId = id; $("scrim").classList.add("open"); $(id).classList.add("open"); $(id).focus({preventScroll: true}); }
+function closeSheet() {
+  if (!openId) return;
+  $("scrim").classList.remove("open"); $(openId).classList.remove("open"); $(openId).style.transform = ""; openId = null;
+  if (lastFocus) lastFocus.focus({preventScroll: true});
+}
+function bindSheet(id) {
+  const root = $(id);
+  root.querySelectorAll("[data-close]").forEach(b => b.onclick = closeSheet);
+  const g = root.querySelector("[data-grab]"); let y0 = null;       // drag the handle down to dismiss
+  g.onpointerdown = ev => { y0 = ev.clientY; g.setPointerCapture(ev.pointerId); root.style.transition = "none"; };
+  g.onpointermove = ev => { if (y0 !== null) root.style.transform = `translateY(${Math.max(0, ev.clientY - y0)}px)`; };
+  g.onpointerup = ev => { if (y0 === null) return; const dy = ev.clientY - y0; y0 = null; root.style.transition = ""; root.style.transform = ""; if (dy > 80) closeSheet(); };
+}
+$("scrim").onclick = closeSheet;
+document.addEventListener("keydown", ev => { if (ev.key === "Escape") closeSheet(); });
+$("open-settings").onclick = () => openSheet("sheet-set");
+$("costbar-open").onclick = () => openSheet("sheet-cost");
+function snack(text) { $("snack-text").textContent = text; $("snack").classList.add("show"); clearTimeout(snackTimer); snackTimer = setTimeout(() => $("snack").classList.remove("show"), 5000); }
+$("snack-undo").onclick = () => { const h = history.pop(); if (!h) return; cfg = h.cfg; applied = h.applied; $("snack").classList.remove("show"); render(); renderSettings(); };
+$("scroll").addEventListener("scroll", () => $("topbar").classList.toggle("scrolled", $("scroll").scrollTop > 4), {passive: true});
+function observeSummary() {
+  if (io) io.disconnect(); const el = $("summary"); if (!el) return;
+  io = new IntersectionObserver(([en]) => $("costbar").classList.toggle("show", !en.isIntersecting), {root: $("scroll"), threshold: 0.05});
+  io.observe(el);
+}
+load("demo3");
+</script>
+</body>
+</html>
