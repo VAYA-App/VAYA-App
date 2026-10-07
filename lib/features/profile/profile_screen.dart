@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
+import '../../app/providers/data_providers.dart';
 import '../../app/router.dart';
 import '../../app/theme/theme_mode_provider.dart';
 import '../../data/auth_repository.dart';
@@ -44,6 +45,10 @@ class ProfileScreen extends ConsumerWidget {
                 const _SectionTitle('การแสดงผล'),
                 const SizedBox(height: 8),
                 const _ThemeModeCard(),
+                if (user.value != null) ...[
+                  const SizedBox(height: 32),
+                  const _SignOutButton(),
+                ],
               ],
             ),
           ),
@@ -257,6 +262,55 @@ class _ErrorCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// ออกจากระบบหลังยืนยันใน AlertDialog แล้วกลับไปหน้าเข้าสู่ระบบ.
+class _SignOutButton extends ConsumerWidget {
+  const _SignOutButton();
+
+  Future<void> _confirmAndSignOut(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.logout),
+        title: const Text('ออกจากระบบ?'),
+        content: const Text(
+          'คุณต้องเข้าสู่ระบบด้วย Google อีกครั้งเพื่อดูทริปที่บันทึกไว้',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ยกเลิก'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ออกจากระบบ'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+      // go() replaces the whole stack, so back cannot return here.
+      if (context.mounted) context.go(AppRoutes.login);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ออกจากระบบไม่สำเร็จ ลองใหม่อีกครั้ง')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return OutlinedButton.icon(
+      onPressed: () => _confirmAndSignOut(context, ref),
+      icon: const Icon(Icons.logout),
+      label: const Text('ออกจากระบบ'),
     );
   }
 }
