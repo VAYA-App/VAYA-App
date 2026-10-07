@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
+import '../../app/theme/theme_mode_provider.dart';
 import '../../data/auth_repository.dart';
 import 'current_user_provider.dart';
 
@@ -39,9 +40,84 @@ class ProfileScreen extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                 },
+                const SizedBox(height: 24),
+                const _SectionTitle('การแสดงผล'),
+                const SizedBox(height: 8),
+                const _ThemeModeCard(),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: Text(
+        text,
+        style: theme.textTheme.titleSmall?.copyWith(
+          color: theme.colorScheme.primary,
+        ),
+      ),
+    );
+  }
+}
+
+/// ตามระบบ / สว่าง / มืด; the whole app follows immediately.
+class _ThemeModeCard extends ConsumerWidget {
+  const _ThemeModeCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final mode = ref.watch(themeModeProvider);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ListTile(
+              leading: Icon(Icons.contrast_outlined),
+              title: Text('ธีม'),
+              subtitle: Text('เลือกโหมดสว่างหรือมืดของแอป'),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: SegmentedButton<ThemeMode>(
+                segments: const [
+                  ButtonSegment(
+                    value: ThemeMode.system,
+                    icon: Icon(Icons.brightness_auto_outlined),
+                    label: Text('ตามระบบ'),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.light,
+                    icon: Icon(Icons.light_mode_outlined),
+                    label: Text('สว่าง'),
+                  ),
+                  ButtonSegment(
+                    value: ThemeMode.dark,
+                    icon: Icon(Icons.dark_mode_outlined),
+                    label: Text('มืด'),
+                  ),
+                ],
+                selected: {mode},
+                showSelectedIcon: false,
+                onSelectionChanged: (s) =>
+                    ref.read(themeModeProvider.notifier).select(s.single),
+              ),
+            ),
+          ],
         ),
       ),
     );
