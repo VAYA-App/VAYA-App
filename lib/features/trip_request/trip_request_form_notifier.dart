@@ -189,6 +189,16 @@ class TripRequestFormNotifier extends Notifier<TripRequestFormState> {
 
   void reset() => state = const TripRequestFormState();
 
+  /// Starts a fresh request already set to [destinationId] with [tags]
+  /// picked, e.g. when the user taps a trip idea (#84).
+  void startWith({
+    required String destinationId,
+    Iterable<PreferenceTag> tags = const [],
+  }) => state = TripRequestFormState(
+    destinationId: destinationId,
+    preferenceTags: {...tags},
+  );
+
   /// The request built from the current values. Throws [StateError] when
   /// any step is incomplete.
   TripRequest submit() {

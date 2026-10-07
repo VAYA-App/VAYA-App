@@ -7,6 +7,7 @@ import 'package:vaya_app/app/providers/mock_providers.dart';
 import 'package:vaya_app/app/providers/planner_providers.dart';
 import 'package:vaya_app/app/router.dart';
 import 'package:vaya_app/domain/domain.dart';
+import 'package:vaya_app/features/generating/generating_screen.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
 import 'package:vaya_app/planner/mock_planner_service.dart';
 import 'package:vaya_app/planner/planner_service.dart';
@@ -67,7 +68,13 @@ void main() {
     final container = await pumpGenerating(tester);
 
     expect(find.text('กำลังจัดทริปที่ใช่ให้คุณ'), findsOneWidget);
-    expect(find.textContaining('ชลบุรี'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(GeneratingScreen),
+        matching: find.textContaining('ชลบุรี'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('เกร็ดน่ารู้ระหว่างรอ'), findsOneWidget);
 
     for (var i = 0; i < 10; i++) {

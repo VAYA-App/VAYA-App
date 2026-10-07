@@ -1,9 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
 import '../../shared/widgets/theme_picker_sheet.dart';
+import '../explore/trip_ideas.dart';
+import '../explore/widgets/trip_idea_card.dart';
 
 /// ทริปของฉัน. Layout skeleton in the Stitch style; the saved trips list
 /// and its empty/delete states are built in #42.
@@ -39,7 +42,9 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 const _PlannerCard(),
-                const SizedBox(height: 40),
+                const SizedBox(height: 32),
+                const _Inspiration(),
+                const SizedBox(height: 32),
                 Text('ทริปที่บันทึกไว้', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 12),
                 const _EmptyTrips(),
@@ -148,6 +153,49 @@ class _PlannerCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// A peek at the trip ideas on Explore (#84).
+class _Inspiration extends ConsumerWidget {
+  const _Inspiration();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final ideas = ref.watch(tripIdeasProvider).value;
+    if (ideas == null || ideas.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text('แรงบันดาลใจ', style: theme.textTheme.titleLarge),
+            ),
+            TextButton(
+              onPressed: () => context.go(AppRoutes.explore),
+              child: const Text('ดูทั้งหมด'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 150 + MediaQuery.textScalerOf(context).scale(64),
+          child: CarouselView(
+            itemExtent: 240,
+            shrinkExtent: 160,
+            itemSnapping: true,
+            onTap: (i) => openTripIdea(context, ref, ideas[i]),
+            children: [
+              for (final idea in ideas)
+                TripIdeaCard(idea: idea, showSummary: false),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
