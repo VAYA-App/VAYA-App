@@ -4,9 +4,11 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
+import '../../shared/widgets/mascot_view.dart';
 import '../../shared/widgets/theme_picker_sheet.dart';
 import '../explore/trip_ideas.dart';
 import '../explore/widgets/trip_idea_card.dart';
+import 'greeting.dart';
 
 /// ทริปของฉัน. Layout skeleton in the Stitch style; the saved trips list
 /// and its empty/delete states are built in #42.
@@ -16,7 +18,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
     final margin = context.windowSizeClass.pageMargin;
 
     return Scaffold(
@@ -31,15 +32,8 @@ class HomeScreen extends StatelessWidget {
               padding: EdgeInsets.fromLTRB(margin, 16, margin, 32),
               children: [
                 const _Brand(),
-                const SizedBox(height: 32),
-                Text('สวัสดี', style: theme.textTheme.headlineMedium),
-                const SizedBox(height: 4),
-                Text(
-                  'พร้อมออกเดินทางครั้งต่อไปหรือยัง?',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colors.onSurfaceVariant,
-                  ),
-                ),
+                const SizedBox(height: 24),
+                const _Greeting(),
                 const SizedBox(height: 24),
                 const _PlannerCard(),
                 const SizedBox(height: 32),
@@ -77,25 +71,66 @@ class _Brand extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'AI TRIP PLANNER',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.primary,
-                letterSpacing: 1,
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'AI TRIP PLANNER',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colors.primary,
+                  letterSpacing: 1,
+                ),
               ),
-            ),
-            Text('VAYA', style: theme.textTheme.titleLarge),
-          ],
+              Text('VAYA', style: theme.textTheme.titleLarge),
+            ],
+          ),
         ),
-        const Spacer(),
         IconButton(
           icon: const Icon(Icons.palette_outlined),
           tooltip: 'เปลี่ยนธีม',
           onPressed: () => showThemePicker(context),
         ),
+      ],
+    );
+  }
+}
+
+/// Time-of-day greeting with the mascot waving hello (#80).
+class _Greeting extends ConsumerWidget {
+  const _Greeting();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final greeting = greetingFor(ref.watch(greetingClockProvider));
+    // Large text on a phone needs the whole width for the greeting.
+    final showMascot =
+        context.windowSizeClass != WindowSizeClass.compact ||
+        MediaQuery.textScalerOf(context).scale(1) < 1.5;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(greeting.title, style: theme.textTheme.headlineMedium),
+              const SizedBox(height: 4),
+              Text(
+                greeting.subtitle,
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (showMascot) ...[
+          const SizedBox(width: 12),
+          const MascotView(pose: MascotPose.wave, size: 112),
+        ],
       ],
     );
   }
@@ -120,11 +155,13 @@ class _PlannerCard extends StatelessWidget {
               children: [
                 Icon(Icons.auto_awesome, size: 18, color: colors.primary),
                 const SizedBox(width: 8),
-                Text(
-                  'AI SMART PLANNER',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    color: colors.primary,
-                    letterSpacing: 1,
+                Flexible(
+                  child: Text(
+                    'AI SMART PLANNER',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: colors.primary,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
               ],
@@ -227,6 +264,12 @@ class _EmptyTrips extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
+            FilledButton.tonalIcon(
+              onPressed: () => context.push(AppRoutes.newTrip),
+              icon: const Icon(Icons.add),
+              label: const Text('เริ่มวางแผนทริปแรก'),
+            ),
+            const SizedBox(height: 4),
             TextButton.icon(
               onPressed: () => context.push('/trips/mock'),
               icon: const Icon(Icons.map_outlined),
