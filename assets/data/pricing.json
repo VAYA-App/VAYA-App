@@ -1,0 +1,13 @@
+{
+  "roomPerNight": { "1": 700, "2": 1500, "3": 3000, "4": 6000 },
+  "mealPerPerson": { "1": 80, "2": 200, "3": 450, "4": 1000 },
+  "breakfastPerPerson": 100,
+  "localTransport": {
+    "rentalCar": { "perDay": 1000, "perKm": 2.5, "capacity": 4 },
+    "rentalMotorbike": { "perDay": 250, "perKm": 1, "capacity": 2 },
+    "taxi": { "perTrip": 40, "perKm": 12, "capacity": 4 },
+    "publicTransport": { "perTrip": 30 }
+  },
+  "selfDrivePerKm": 2.5,
+  "bufferRate": 0.1
+}

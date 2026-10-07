@@ -83,6 +83,26 @@ assets/mock/               # ข้อมูลจำลองให้ทำ UI
 
 ถ้าจะเพิ่มแท็ก ต้องแก้ `PreferenceTag` ใน `lib/domain/enums.dart` (ขอรีวิวจาก @Kritternai)
 
+## `pricing.json`
+
+ราคาตั้งต้นของ PROJECT-PLAN §9 โหลดผ่าน `loadPricingTable()` ใน `lib/data/asset_pricing_table.dart` แล้วใช้งานผ่าน `PricingTable` (`pricingTableProvider`) ค่าตั๋วและค่าทางด่วนข้ามเมืองเป็นราคาต่อเส้นทาง จึงอยู่ใน `provinces.json` ไม่อยู่ในไฟล์นี้
+
+```jsonc
+{
+  "roomPerNight":  { "1": 700, "2": 1500, "3": 3000, "4": 6000 }, // บาทต่อห้องต่อคืน ตาม Price Level ต้องครบ 1–4
+  "mealPerPerson": { "1": 80, "2": 200, "3": 450, "4": 1000 },    // บาทต่อคนต่อมื้อ ตาม Price Level ของร้าน
+  "breakfastPerPerson": 100,           // มื้อเช้าที่ที่พักไม่ได้รวมให้
+  "localTransport": {                  // ต้องครบทุก LocalTransportMode
+    "rentalCar":       { "perDay": 1000, "perKm": 2.5, "capacity": 4 }, // perDay = ต่อคันต่อวัน
+    "rentalMotorbike": { "perDay": 250, "perKm": 1, "capacity": 2 },
+    "taxi":            { "perTrip": 40, "perKm": 12, "capacity": 4 },   // perTrip = ต่อคันต่อเที่ยว
+    "publicTransport": { "perTrip": 30 }  // ไม่มี capacity = คิดต่อคน
+  },
+  "selfDrivePerKm": 2.5,               // ค่าน้ำมันเมื่อขับรถเองข้ามเมือง
+  "bufferRate": 0.1                    // เงินสำรอง 10%
+}
+```
+
 ## ข้อมูลจำลอง (`assets/mock/`)
 
 | ไฟล์ | ใช้ทำอะไร |
