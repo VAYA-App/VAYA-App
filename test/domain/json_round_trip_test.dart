@@ -47,7 +47,9 @@ void main() {
         .expand((d) => d.stops)
         .fold<int>(0, (sum, s) => sum + s.cost);
 
-    expect(stopCosts, cost.food + cost.entrance);
+    // Breakfast is food that belongs to no Stop; the exact split is checked
+    // in test/planner/cost_calculator_test.dart.
+    expect(stopCosts, lessThanOrEqualTo(cost.food + cost.entrance));
     expect(
       plan.nightStays.fold<int>(0, (sum, n) => sum + n.cost),
       cost.accommodation,
