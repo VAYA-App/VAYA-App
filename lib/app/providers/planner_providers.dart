@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../planner/cost_calculator.dart';
+import '../../planner/default_cost_calculator.dart';
 import '../../planner/default_planner_service.dart';
 import '../../planner/destination_suggester.dart';
 import '../../planner/mock_planner_service.dart';
@@ -11,9 +12,10 @@ import 'ai_providers.dart';
 import 'data_providers.dart';
 import 'mock_providers.dart';
 
-/// Replace the body with the real implementation in #34.
-final costCalculatorProvider = Provider<CostCalculator>(
-  (ref) => throw UnimplementedError('CostCalculator: see #34'),
+/// Asynchronous because the pricing table is a bundled asset.
+final costCalculatorProvider = FutureProvider<CostCalculator>(
+  (ref) async =>
+      DefaultCostCalculator(await ref.watch(pricingTableProvider.future)),
 );
 
 /// Replace the body with the real implementation in #37.
@@ -32,14 +34,18 @@ final plannerServiceProvider = Provider<PlannerService>(
       MockPlannerService(loadPlan: () => ref.read(mockTripPlanProvider.future)),
 );
 
-/// The real pipeline (#31). It still needs [costCalculatorProvider] (#34)
-/// and [overBudgetAdvisorProvider] (#37); once they land, point
-/// [plannerServiceProvider] here.
-final pipelinePlannerServiceProvider = Provider<PlannerService>(
-  (ref) => DefaultPlannerService(
+/// The real pipeline (#31). It still needs [overBudgetAdvisorProvider]
+/// (#37); once that lands, point [plannerServiceProvider] here. It is a
+/// future because [costCalculatorProvider] is.
+final pipelinePlannerServiceProvider = FutureProvider<PlannerService>((
+  ref,
+) async {
+  final selector = PlaceSelector(gemini: ref.watch(geminiServiceProvider));
+  final overBudgetAdvisor = ref.watch(overBudgetAdvisorProvider);
+  return DefaultPlannerService(
     loadCatalog: () => ref.read(placeCatalogProvider.future),
-    selector: PlaceSelector(gemini: ref.watch(geminiServiceProvider)),
-    costCalculator: ref.watch(costCalculatorProvider),
-    overBudgetAdvisor: ref.watch(overBudgetAdvisorProvider),
-  ),
-);
+    selector: selector,
+    costCalculator: await ref.watch(costCalculatorProvider.future),
+    overBudgetAdvisor: overBudgetAdvisor,
+  );
+});
