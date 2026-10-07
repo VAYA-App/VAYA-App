@@ -77,9 +77,12 @@ void main() {
     );
     expect(find.text('เกร็ดน่ารู้ระหว่างรอ'), findsOneWidget);
 
+    // Four stages, then the mascot cheers before the plan opens.
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 100));
     }
+    expect(find.text('เสร็จแล้ว! ไปดูแผนกันเลย'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
 
     final location = container
         .read(routerProvider)
@@ -90,6 +93,28 @@ void main() {
     expect(location, AppRoutes.tripPlan('draft-1'));
     final draft = container.read(draftTripsProvider)['draft-1'];
     expect(draft?.plan.destinationId, 'chonburi');
+  });
+
+  testWidgets('opens the plan at once when animations are off', (tester) async {
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+    final container = await pumpGenerating(tester);
+
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.pump();
+
+    expect(
+      container
+          .read(routerProvider)
+          .routerDelegate
+          .currentConfiguration
+          .uri
+          .path,
+      AppRoutes.tripPlan('draft-1'),
+    );
   });
 
   testWidgets('offers a retry when planning fails', (tester) async {
