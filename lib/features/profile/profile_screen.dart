@@ -45,6 +45,10 @@ class ProfileScreen extends ConsumerWidget {
                 const _SectionTitle('การแสดงผล'),
                 const SizedBox(height: 8),
                 const _ThemeModeCard(),
+                const SizedBox(height: 24),
+                const _SectionTitle('เกี่ยวกับแอป'),
+                const SizedBox(height: 8),
+                const _AboutCard(),
                 if (user.value != null) ...[
                   const SizedBox(height: 32),
                   const _SignOutButton(),
@@ -72,6 +76,8 @@ class _SectionTitle extends StatelessWidget {
         text,
         style: theme.textTheme.titleSmall?.copyWith(
           color: theme.colorScheme.primary,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -85,17 +91,30 @@ class _ThemeModeCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Card(
       child: Padding(
-        padding: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const ListTile(
-              leading: Icon(Icons.contrast_outlined),
-              title: Text('ธีม'),
-              subtitle: Text('เลือกโหมดสว่างหรือมืดของแอป'),
+            ListTile(
+              leading: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.secondaryContainer,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: SizedBox.square(
+                  dimension: 40,
+                  child: Icon(Icons.palette_outlined, color: colors.primary),
+                ),
+              ),
+              title: const Text('ธีม'),
+              subtitle: const Text('เลือกโหมดสว่างหรือมืดของแอป'),
             ),
+            const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SegmentedButton<ThemeMode>(
@@ -144,18 +163,31 @@ class _UserCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 32,
-              backgroundColor: colors.secondaryContainer,
-              foregroundColor: colors.onSecondaryContainer,
-              foregroundImage: photo == null ? null : NetworkImage(photo),
-              child: Text(
-                name.isEmpty ? '?' : name.characters.first,
-                style: theme.textTheme.headlineSmall?.copyWith(
-                  color: colors.onSecondaryContainer,
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.25),
+                  width: 2,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(2),
+                child: CircleAvatar(
+                  radius: 32,
+                  backgroundColor: colors.secondaryContainer,
+                  foregroundColor: colors.onSecondaryContainer,
+                  foregroundImage: photo == null ? null : NetworkImage(photo),
+                  child: Text(
+                    name.isEmpty ? '?' : name.characters.first,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: colors.onSecondaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -164,9 +196,14 @@ class _UserCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(name, style: theme.textTheme.titleLarge),
+                  Text(
+                    name,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   if (email != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       email,
                       style: theme.textTheme.bodyMedium?.copyWith(
@@ -174,11 +211,103 @@ class _UserCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                  const SizedBox(height: 6),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.secondaryContainer,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.verified_user_outlined,
+                            size: 13,
+                            color: colors.onSecondaryContainer,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            'บัญชี VAYA',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colors.onSecondaryContainer,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// ข้อมูลเกี่ยวกับแอปพลิเคชัน
+class _AboutCard extends StatelessWidget {
+  const _AboutCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Card(
+      child: Column(
+        children: [
+          ListTile(
+            leading: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SizedBox.square(
+                dimension: 40,
+                child: Icon(Icons.info_outline, color: colors.onSurfaceVariant),
+              ),
+            ),
+            title: const Text('เกี่ยวกับ VAYA'),
+            subtitle: const Text('AI Trip Planner สำหรับเที่ยวไทย'),
+            trailing: Text(
+              'v1.0.0',
+              style: theme.textTheme.labelMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
+            ),
+          ),
+          Divider(
+            height: 1,
+            indent: 16,
+            endIndent: 16,
+            color: colors.outlineVariant.withValues(alpha: 0.5),
+          ),
+          ListTile(
+            leading: DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerHigh,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SizedBox.square(
+                dimension: 40,
+                child: Icon(
+                  Icons.translate_outlined,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+            title: const Text('ภาษา'),
+            subtitle: const Text('ไทย'),
+          ),
+        ],
       ),
     );
   }
@@ -197,14 +326,29 @@ class _SignedOutCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           children: [
-            Icon(Icons.person_off_outlined, size: 40, color: colors.outline),
-            const SizedBox(height: 12),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.secondaryContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Icon(
+                  Icons.person_off_outlined,
+                  size: 40,
+                  color: colors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text(
               'ยังไม่ได้เข้าสู่ระบบ',
-              style: theme.textTheme.titleMedium,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               'เข้าสู่ระบบด้วย Google เพื่อดูโปรไฟล์และทริปที่บันทึกไว้',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -212,10 +356,11 @@ class _SignedOutCard extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            FilledButton(
+            const SizedBox(height: 20),
+            FilledButton.icon(
               onPressed: () => context.go(AppRoutes.login),
-              child: const Text('ไปหน้าเข้าสู่ระบบ'),
+              icon: const Icon(Icons.login),
+              label: const Text('ไปหน้าเข้าสู่ระบบ'),
             ),
           ],
         ),
@@ -239,14 +384,29 @@ class _ErrorCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           children: [
-            Icon(Icons.error_outline, size: 40, color: colors.error),
-            const SizedBox(height: 12),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                color: colors.errorContainer,
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Icon(
+                  Icons.error_outline,
+                  size: 40,
+                  color: colors.onErrorContainer,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
             Text(
               'โหลดข้อมูลผู้ใช้ไม่สำเร็จ',
-              style: theme.textTheme.titleMedium,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Text(
               'ตรวจสอบการเชื่อมต่อแล้วลองใหม่อีกครั้ง',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -254,10 +414,11 @@ class _ErrorCard extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            FilledButton.tonal(
+            const SizedBox(height: 20),
+            FilledButton.tonalIcon(
               onPressed: onRetry,
-              child: const Text('ลองใหม่'),
+              icon: const Icon(Icons.refresh),
+              label: const Text('ลองใหม่'),
             ),
           ],
         ),
@@ -271,10 +432,12 @@ class _SignOutButton extends ConsumerWidget {
   const _SignOutButton();
 
   Future<void> _confirmAndSignOut(BuildContext context, WidgetRef ref) async {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        icon: const Icon(Icons.logout),
+        icon: Icon(Icons.logout, color: colors.error),
         title: const Text('ออกจากระบบ?'),
         content: const Text(
           'คุณต้องเข้าสู่ระบบด้วย Google อีกครั้งเพื่อดูทริปที่บันทึกไว้',
@@ -285,6 +448,10 @@ class _SignOutButton extends ConsumerWidget {
             child: const Text('ยกเลิก'),
           ),
           FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
+            ),
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text('ออกจากระบบ'),
           ),
@@ -307,7 +474,12 @@ class _SignOutButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
     return OutlinedButton.icon(
+      style: OutlinedButton.styleFrom(
+        foregroundColor: colors.error,
+        side: BorderSide(color: colors.outlineVariant),
+      ),
       onPressed: () => _confirmAndSignOut(context, ref),
       icon: const Icon(Icons.logout),
       label: const Text('ออกจากระบบ'),
