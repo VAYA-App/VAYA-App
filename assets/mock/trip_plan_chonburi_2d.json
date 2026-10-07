@@ -28,12 +28,12 @@
   "cost": {
     "intercity": 524,
     "accommodation": 3000,
-    "food": 720,
+    "food": 920,
     "entrance": 1000,
-    "localTransport": 480,
-    "buffer": 572,
-    "total": 6296,
-    "perPerson": 3148,
+    "localTransport": 540,
+    "buffer": 598,
+    "total": 6582,
+    "perPerson": 3291,
     "budget": 7000
   },
   "overBudgetAdvice": []
