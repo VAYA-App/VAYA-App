@@ -64,7 +64,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     // Decorative Header Banner
                     Container(
-                      height: 88,
+                      height: 100,
                       width: double.infinity,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
@@ -80,36 +80,48 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         alignment: Alignment.center,
                         children: [
                           Positioned(
-                            right: -10,
-                            top: -10,
+                            right: -15,
+                            top: -15,
                             child: Icon(
                               Icons.travel_explore,
-                              size: 72,
-                              color: colors.primary.withValues(alpha: 0.15),
+                              size: 80,
+                              color: colors.primary.withValues(alpha: 0.12),
                             ),
                           ),
                           Positioned(
-                            left: 24,
-                            bottom: 12,
+                            left: -15,
+                            bottom: -15,
+                            child: Icon(
+                              Icons.explore,
+                              size: 80,
+                              color: colors.primary.withValues(alpha: 0.12),
+                            ),
+                          ),
+                          Center(
                             child: DecoratedBox(
                               decoration: BoxDecoration(
                                 color: colors.surface,
                                 shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: colors.surfaceContainerHighest
+                                      .withValues(alpha: 0.5),
+                                  width: 1.5,
+                                ),
                                 boxShadow: [
                                   BoxShadow(
                                     color: colors.shadow.withValues(
                                       alpha: 0.08,
                                     ),
-                                    blurRadius: 8,
+                                    blurRadius: 10,
                                     offset: const Offset(0, 3),
                                   ),
                                 ],
                               ),
                               child: Padding(
-                                padding: const EdgeInsets.all(12),
+                                padding: const EdgeInsets.all(14),
                                 child: Icon(
                                   Icons.flight,
-                                  size: 32,
+                                  size: 34,
                                   color: colors.primary,
                                 ),
                               ),
@@ -121,18 +133,41 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     // Content Body
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 28,
+                        horizontal: 28,
+                        vertical: 32,
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: colors.secondaryContainer.withValues(
+                                alpha: 0.7,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              child: Text(
+                                'AI TRIP PLANNER',
+                                style: theme.textTheme.labelSmall?.copyWith(
+                                  color: colors.primary,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           Text(
                             'VAYA',
                             style: theme.textTheme.displaySmall?.copyWith(
                               color: colors.primary,
                               fontWeight: FontWeight.w700,
-                              letterSpacing: 2,
+                              letterSpacing: 1.5,
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -140,6 +175,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             'วางแผนเที่ยวด้วย AI',
                             style: theme.textTheme.bodyLarge?.copyWith(
                               color: colors.onSurfaceVariant,
+                              fontWeight: FontWeight.w600,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -183,6 +219,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                               label: const Text('เข้าสู่ระบบด้วย Google'),
                             ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'เข้าสู่ระบบเพื่อบันทึกและจัดการแผนการเดินทาง',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
                         ],
                       ),
