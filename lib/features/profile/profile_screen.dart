@@ -9,7 +9,8 @@ import '../../app/theme/theme_mode_provider.dart';
 import '../../data/auth_repository.dart';
 import 'current_user_provider.dart';
 
-/// โปรไฟล์: ข้อมูลผู้ใช้ ธีม และออกจากระบบ (#16).
+/// โปรไฟล์: ข้อมูลผู้ใช้ ธีม และออกจากระบบ (#16)
+/// ออกแบบในสไตล์ Bento Grid / การ์ดโมเดิร์น Material 3 (Siam Wanderlust)
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -31,8 +32,8 @@ class ProfileScreen extends ConsumerWidget {
               padding: EdgeInsets.fromLTRB(margin, 12, margin, 32),
               children: [
                 switch (user) {
-                  AsyncData(value: final u?) => _UserCard(user: u),
-                  AsyncData() => const _SignedOutCard(),
+                  AsyncData(value: final u?) => _UserBentoCard(user: u),
+                  AsyncData() => const _SignedOutBentoCard(),
                   AsyncError() => _ErrorCard(
                     onRetry: () => ref.invalidate(currentUserProvider),
                   ),
@@ -41,16 +42,11 @@ class ProfileScreen extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                 },
-                const SizedBox(height: 24),
-                const _SectionTitle(
-                  'การแสดงผลและธีม',
-                  icon: Icons.palette_outlined,
-                ),
-                const SizedBox(height: 8),
-                const _ThemeModeCard(),
+                const SizedBox(height: 16),
+                const _ThemeBentoCard(),
                 if (user.value != null) ...[
-                  const SizedBox(height: 28),
-                  const _SignOutButton(),
+                  const SizedBox(height: 16),
+                  const _SignOutBentoCard(),
                 ],
               ],
             ),
@@ -61,41 +57,130 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text, {this.icon});
+/// Bento Card 1: ข้อมูลผู้ใช้และสถานะนักเดินทาง
+class _UserBentoCard extends StatelessWidget {
+  const _UserBentoCard({required this.user});
 
-  final String text;
-  final IconData? icon;
+  final AppUser user;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Row(
-        children: [
-          if (icon != null) ...[
-            Icon(icon, size: 16, color: colors.primary),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            text,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: colors.primary,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 0.5,
+    final photo = user.photoUrl;
+    final name = user.displayName.trim();
+    final email = user.email;
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Row(
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: colors.primary.withValues(alpha: 0.25),
+                  width: 3,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(3),
+                child: CircleAvatar(
+                  radius: 34,
+                  backgroundColor: colors.secondaryContainer,
+                  foregroundColor: colors.onSecondaryContainer,
+                  foregroundImage: photo == null ? null : NetworkImage(photo),
+                  child: Text(
+                    name.isEmpty ? '?' : name.characters.first,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: colors.onSecondaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          name,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Icon(
+                        Icons.verified_rounded,
+                        size: 18,
+                        color: colors.primary,
+                      ),
+                    ],
+                  ),
+                  if (email != null) ...[
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.mail_outline_rounded,
+                          size: 14,
+                          color: colors.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Expanded(
+                          child: Text(
+                            email,
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: colors.onSurfaceVariant,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 8),
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.secondaryContainer,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      child: Text(
+                        'สมาชิก VAYA',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colors.onSecondaryContainer,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// ตามระบบ / สว่าง / มืด; the whole app follows immediately.
-class _ThemeModeCard extends ConsumerWidget {
-  const _ThemeModeCard();
+/// Bento Card 2: แผงควบคุมและเลือกธีมการแสดงผล
+class _ThemeBentoCard extends ConsumerWidget {
+  const _ThemeBentoCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -110,8 +195,9 @@ class _ThemeModeCard extends ConsumerWidget {
     };
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -155,7 +241,7 @@ class _ThemeModeCard extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SegmentedButton<ThemeMode>(
@@ -189,109 +275,79 @@ class _ThemeModeCard extends ConsumerWidget {
   }
 }
 
-class _UserCard extends StatelessWidget {
-  const _UserCard({required this.user});
+/// Bento Card 3: การ์ดออกจากระบบ
+class _SignOutBentoCard extends ConsumerWidget {
+  const _SignOutBentoCard();
 
-  final AppUser user;
-
-  @override
-  Widget build(BuildContext context) {
+  Future<void> _confirmAndSignOut(BuildContext context, WidgetRef ref) async {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final photo = user.photoUrl;
-    final name = user.displayName.trim();
-    final email = user.email;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: Icon(Icons.logout_rounded, color: colors.error, size: 28),
+        title: const Text('ออกจากระบบ?'),
+        content: const Text(
+          'คุณต้องเข้าสู่ระบบด้วย Google อีกครั้งเพื่อดูทริปที่บันทึกไว้',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ยกเลิก'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ออกจากระบบ'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await ref.read(authRepositoryProvider).signOut();
+      // go() replaces the whole stack, so back cannot return here.
+      if (context.mounted) context.go(AppRoutes.login);
+    } catch (_) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ออกจากระบบไม่สำเร็จ ลองใหม่อีกครั้ง')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = Theme.of(context).colorScheme;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Row(
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.3),
-                  width: 2.5,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(2),
-                child: CircleAvatar(
-                  radius: 34,
-                  backgroundColor: colors.secondaryContainer,
-                  foregroundColor: colors.onSecondaryContainer,
-                  foregroundImage: photo == null ? null : NetworkImage(photo),
-                  child: Text(
-                    name.isEmpty ? '?' : name.characters.first,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      color: colors.onSecondaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+        padding: const EdgeInsets.all(16),
+        child: SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: colors.error,
+              side: BorderSide(color: colors.error.withValues(alpha: 0.35)),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    name,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  if (email != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      email,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colors.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 8),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.secondaryContainer,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.verified, size: 14, color: colors.primary),
-                          const SizedBox(width: 4),
-                          Text(
-                            'สมาชิก VAYA',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colors.onSecondaryContainer,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            onPressed: () => _confirmAndSignOut(context, ref),
+            icon: const Icon(Icons.logout_rounded),
+            label: const Text('ออกจากระบบ'),
+          ),
         ),
       ),
     );
   }
 }
 
-/// Empty state: nobody is signed in.
-class _SignedOutCard extends ConsumerWidget {
-  const _SignedOutCard();
+/// Empty state Bento Card: ยังไม่ได้เข้าสู่ระบบ
+class _SignedOutBentoCard extends ConsumerWidget {
+  const _SignedOutBentoCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -299,6 +355,7 @@ class _SignedOutCard extends ConsumerWidget {
     final colors = theme.colorScheme;
 
     return Card(
+      clipBehavior: Clip.antiAlias,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
         child: Column(
@@ -311,7 +368,7 @@ class _SignedOutCard extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Icon(
-                  Icons.person_off_outlined,
+                  Icons.person_pin_circle_outlined,
                   size: 40,
                   color: colors.primary,
                 ),
@@ -320,7 +377,7 @@ class _SignedOutCard extends ConsumerWidget {
             const SizedBox(height: 16),
             Text(
               'ยังไม่ได้เข้าสู่ระบบ',
-              style: theme.textTheme.titleMedium?.copyWith(
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
@@ -334,18 +391,24 @@ class _SignedOutCard extends ConsumerWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: () => context.go(AppRoutes.login),
-              icon: const Icon(Icons.login),
-              label: const Text('ไปหน้าเข้าสู่ระบบ'),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => context.go(AppRoutes.login),
+                icon: const Icon(Icons.login_rounded),
+                label: const Text('ไปหน้าเข้าสู่ระบบ'),
+              ),
             ),
             const SizedBox(height: 10),
-            FilledButton.tonalIcon(
-              onPressed: () async {
-                await ref.read(authRepositoryProvider).signInWithGoogle();
-              },
-              icon: const Icon(Icons.account_circle_outlined),
-              label: const Text('เข้าสู่ระบบด้วย Google (ทดลองใช้งาน)'),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.tonalIcon(
+                onPressed: () async {
+                  await ref.read(authRepositoryProvider).signInWithGoogle();
+                },
+                icon: const Icon(Icons.account_circle_outlined),
+                label: const Text('เข้าสู่ระบบด้วย Google (ทดลองใช้งาน)'),
+              ),
             ),
           ],
         ),
@@ -408,66 +471,6 @@ class _ErrorCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// ออกจากระบบหลังยืนยันใน AlertDialog แล้วกลับไปหน้าเข้าสู่ระบบ.
-class _SignOutButton extends ConsumerWidget {
-  const _SignOutButton();
-
-  Future<void> _confirmAndSignOut(BuildContext context, WidgetRef ref) async {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        icon: Icon(Icons.logout, color: colors.error, size: 28),
-        title: const Text('ออกจากระบบ?'),
-        content: const Text(
-          'คุณต้องเข้าสู่ระบบด้วย Google อีกครั้งเพื่อดูทริปที่บันทึกไว้',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('ยกเลิก'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: colors.error,
-              foregroundColor: colors.onError,
-            ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('ออกจากระบบ'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true || !context.mounted) return;
-
-    try {
-      await ref.read(authRepositoryProvider).signOut();
-      // go() replaces the whole stack, so back cannot return here.
-      if (context.mounted) context.go(AppRoutes.login);
-    } catch (_) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ออกจากระบบไม่สำเร็จ ลองใหม่อีกครั้ง')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = Theme.of(context).colorScheme;
-    return OutlinedButton.icon(
-      style: OutlinedButton.styleFrom(
-        foregroundColor: colors.error,
-        side: BorderSide(color: colors.error.withValues(alpha: 0.4)),
-      ),
-      onPressed: () => _confirmAndSignOut(context, ref),
-      icon: const Icon(Icons.logout),
-      label: const Text('ออกจากระบบ'),
     );
   }
 }
