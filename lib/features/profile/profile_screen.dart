@@ -28,7 +28,7 @@ class ProfileScreen extends ConsumerWidget {
               maxWidth: WindowSizeClass.maxContentWidth,
             ),
             child: ListView(
-              padding: EdgeInsets.fromLTRB(margin, 8, margin, 32),
+              padding: EdgeInsets.fromLTRB(margin, 12, margin, 32),
               children: [
                 switch (user) {
                   AsyncData(value: final u?) => _UserCard(user: u),
@@ -41,12 +41,15 @@ class ProfileScreen extends ConsumerWidget {
                     child: Center(child: CircularProgressIndicator()),
                   ),
                 },
-                const SizedBox(height: 20),
-                const _SectionTitle('การแสดงผลและธีม'),
+                const SizedBox(height: 24),
+                const _SectionTitle(
+                  'การแสดงผลและธีม',
+                  icon: Icons.palette_outlined,
+                ),
                 const SizedBox(height: 8),
                 const _ThemeModeCard(),
                 if (user.value != null) ...[
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
                   const _SignOutButton(),
                 ],
               ],
@@ -59,22 +62,32 @@ class ProfileScreen extends ConsumerWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text);
+  const _SectionTitle(this.text, {this.icon});
 
   final String text;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = theme.colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Text(
-        text,
-        style: theme.textTheme.titleSmall?.copyWith(
-          color: theme.colorScheme.primary,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 0.5,
-        ),
+      child: Row(
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 16, color: colors.primary),
+            const SizedBox(width: 6),
+          ],
+          Text(
+            text,
+            style: theme.textTheme.titleSmall?.copyWith(
+              color: colors.primary,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -90,10 +103,10 @@ class _ThemeModeCard extends ConsumerWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    final String modeLabel = switch (mode) {
-      ThemeMode.system => 'ตามระบบ',
-      ThemeMode.light => 'โหมดสว่าง',
-      ThemeMode.dark => 'โหมดมืด',
+    final (label, icon) = switch (mode) {
+      ThemeMode.system => ('ตามระบบ', Icons.brightness_auto_outlined),
+      ThemeMode.light => ('สว่าง', Icons.light_mode_outlined),
+      ThemeMode.dark => ('มืด', Icons.dark_mode_outlined),
     };
 
     return Card(
@@ -109,7 +122,7 @@ class _ThemeModeCard extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: SizedBox.square(
-                  dimension: 40,
+                  dimension: 42,
                   child: Icon(Icons.palette_outlined, color: colors.primary),
                 ),
               ),
@@ -125,17 +138,24 @@ class _ThemeModeCard extends ConsumerWidget {
                     horizontal: 10,
                     vertical: 4,
                   ),
-                  child: Text(
-                    modeLabel,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(icon, size: 14, color: colors.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                        label,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: SegmentedButton<ThemeMode>(
