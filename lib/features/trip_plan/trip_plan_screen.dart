@@ -8,6 +8,7 @@ import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/coming_soon.dart';
 import 'trip_plan_view_provider.dart';
+import 'widgets/cost_summary_card.dart';
 import 'widgets/stop_detail_sheet.dart';
 import 'widgets/stop_timeline.dart';
 import 'widgets/trip_map.dart';
@@ -371,8 +372,8 @@ class _BottomActions extends StatelessWidget {
   }
 }
 
-/// Trip name, budget status, totals and accommodation (Stitch summary).
-/// The per-category breakdown sheet comes from #36.
+/// Trip name, budget status, the cost summary (#36) and accommodation
+/// (Stitch summary).
 class _TripSummaryCard extends StatelessWidget {
   const _TripSummaryCard({required this.view});
 
@@ -424,58 +425,7 @@ class _TripSummaryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('งบประมาณรวมทั้งทริป', style: muted),
-                          Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: formatBaht(cost.total),
-                                  style: theme.textTheme.headlineSmall
-                                      ?.copyWith(color: colors.primary),
-                                ),
-                                TextSpan(
-                                  text: ' / ${formatBaht(cost.budget)}',
-                                  style: muted,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'เฉลี่ยต่อคน (${request.travellerCount} ท่าน)',
-                          style: muted,
-                        ),
-                        Text(
-                          formatBaht(cost.perPerson),
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: colors.tertiary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            CostSummaryCard(cost: cost, travellerCount: request.travellerCount),
             if (stay != null) ...[
               const SizedBox(height: 12),
               Row(
@@ -496,8 +446,6 @@ class _TripSummaryCard extends StatelessWidget {
                 ],
               ),
             ],
-            const SizedBox(height: 4),
-            Text('ราคาโดยประมาณ', style: muted),
           ],
         ),
       ),
