@@ -123,6 +123,646 @@
       "rating": 4.6,
       "shortDescription": "โรงแรมหรูวิวทะเล อยู่บนห้างเซ็นทรัลพัทยา",
       "breakfastIncluded": true
+    },
+
+
+
+
+    {
+      "id": "chonburi-attraction-bali-hai-pier",
+      "category": "attraction",
+      "name": "แหลมบาลีฮาย",
+      "area": "พัทยา",
+      "location": { "lat": 12.9255, "lng": 100.8667 },
+      "tags": ["viewpoint", "artCulture"],
+      "priceLevel": 1,
+      "rating": 4.3,
+      "dwellMinutes": 60,
+      "shortDescription": "ท่าเรือหลักสำหรับข้ามไปเกาะล้าน และจุดชมวิวอ่าวพัทยา"
+    },
+    {
+      "id": "chonburi-attraction-hello-van-gogh",
+      "category": "attraction",
+      "name": "Hello Van Gogh",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9804, "lng": 100.9186 },
+      "tags": ["artCulture", "family"],
+      "priceLevel": 2,
+      "rating": 4.5,
+      "openingHours": { "mon": ["09:00", "19:00"], "tue": ["09:00", "19:00"], "wed": ["09:00", "19:00"], "thu": ["09:00", "19:00"], "fri": ["09:00", "19:00"], "sat": ["09:00", "19:00"], "sun": ["09:00", "19:00"] },
+      "dwellMinutes": 120,
+      "entranceFee": 300,
+      "shortDescription": "พิพิธภัณฑ์ศิลปะแสดงผลงานของแวนโก๊ะแบบมีชีวิต"
+    },
+    {
+      "id": "chonburi-attraction-bang-saen-beach",
+      "category": "attraction",
+      "name": "หาดบางแสน",
+      "area": "บางแสน",
+      "location": { "lat": 13.2869, "lng": 100.9124 },
+      "tags": ["beach", "family", "nature"],
+      "priceLevel": 1,
+      "rating": 4.3,
+      "dwellMinutes": 120,
+      "shortDescription": "หาดทรายยอดฮิตใกล้กรุงเทพฯ บรรยากาศครอบครัว"
+    },
+    {
+      "id": "chonburi-attraction-mangrove-forest",
+      "category": "attraction",
+      "name": "ศูนย์ศึกษาธรรมชาติป่าชายเลน",
+      "area": "บางแสน",
+      "location": { "lat": 13.3421, "lng": 100.9428 },
+      "tags": ["nature", "family"],
+      "priceLevel": 1,
+      "rating": 4.5,
+      "dwellMinutes": 90,
+      "shortDescription": "สะพานไม้เดินชมธรรมชาติป่าชายเลนที่อุดมสมบูรณ์"
+    },
+    {
+      "id": "chonburi-attraction-dinosaur-kingdom",
+      "category": "attraction",
+      "name": "สวนไดโนเสาร์พัทยา",
+      "area": "จอมเทียน",
+      "location": { "lat": 12.9619, "lng": 100.9095 },
+      "tags": ["family", "adventure"],
+      "priceLevel": 2,
+      "rating": 4.3,
+      "dwellMinutes": 120,
+      "entranceFee": 200,
+      "shortDescription": "สวนสนุกและแหล่งเรียนรู้เรื่องไดโนเสาร์สำหรับครอบครัว"
+    },
+    {
+      "id": "chonburi-attraction-mongchang-cafe",
+      "category": "attraction",
+      "name": "มองช้างคาเฟ่และหมู่บ้านช้าง",
+      "area": "พัทยา",
+      "location": { "lat": 12.9128, "lng": 100.9391 },
+      "tags": ["cafe", "family", "nature"],
+      "priceLevel": 2,
+      "rating": 4.5,
+      "dwellMinutes": 120,
+      "shortDescription": "คาเฟ่บรรยากาศธรรมชาติ พร้อมกิจกรรมนั่งช้างและชมสัตว์"
+    },
+    {
+      "id": "chonburi-attraction-mini-siam",
+      "category": "attraction",
+      "name": "เมืองจำลอง พัทยา",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9555, "lng": 100.9085 },
+      "tags": ["artCulture", "family"],
+      "priceLevel": 2,
+      "rating": 4.1,
+      "dwellMinutes": 120,
+      "entranceFee": 150,
+      "shortDescription": "สถานที่จัดแสดงสถาปัตยกรรมจำลองจากทั่วโลก"
+    },
+    {
+      "id": "chonburi-attraction-khao-chi-chan",
+      "category": "attraction",
+      "name": "เขาชีจรรย์",
+      "area": "สัตหีบ/บางเสร่",
+      "location": { "lat": 12.7636, "lng": 100.9556 },
+      "tags": ["templeHistory", "viewpoint"],
+      "priceLevel": 1,
+      "rating": 4.5,
+      "dwellMinutes": 45,
+      "shortDescription": "พระพุทธรูปแกะสลักด้วยเลเซอร์บนหน้าผาหินขนาดใหญ่"
+    },
+    {
+      "id": "chonburi-attraction-wat-nong-chap-tao",
+      "category": "attraction",
+      "name": "วัดหนองจับเต่า",
+      "area": "สัตหีบ/บางเสร่",
+      "location": { "lat": 12.7914, "lng": 100.9288 },
+      "tags": ["templeHistory", "artCulture"],
+      "priceLevel": 1,
+      "rating": 4.5,
+      "dwellMinutes": 60,
+      "shortDescription": "วัดสวยงามที่มีรูปปั้นพญาเต่าเรือนขนาดใหญ่"
+    },
+    {
+      "id": "chonburi-attraction-columbia-pictures-aquaverse",
+      "category": "attraction",
+      "name": "Columbia Pictures Aquaverse (โคลัมเบีย พิคเจอร์ส อควาเวิร์ส)",
+      "area": "สัตหีบ/บางเสร่",
+      "location": { "lat": 12.7844, "lng": 100.9142 },
+      "tags": ["adventure", "family"],
+      "priceLevel": 4,
+      "rating": 4.5,
+      "openingHours": { "mon": ["10:00", "18:00"], "tue": ["10:00", "18:00"], "thu": ["10:00", "18:00"], "fri": ["10:00", "18:00"], "sat": ["10:00", "18:00"], "sun": ["10:00", "18:00"] },
+      "dwellMinutes": 240,
+      "entranceFee": 1290,
+      "shortDescription": "สวนน้ำธีมภาพยนตร์ฮอลลีวูดแห่งแรกของโลก"
+    },
+    {
+      "id": "chonburi-attraction-walking-street",
+      "category": "attraction",
+      "name": "ถนนคนเดินพัทยา",
+      "area": "พัทยา",
+      "location": { "lat": 12.9274, "lng": 100.8746 },
+      "tags": ["nightlife", "shopping"],
+      "priceLevel": 2,
+      "rating": 4.2,
+      "openingHours": { "mon": ["18:00", "02:00"], "tue": ["18:00", "02:00"], "wed": ["18:00", "02:00"], "thu": ["18:00", "02:00"], "fri": ["18:00", "02:00"], "sat": ["18:00", "02:00"], "sun": ["18:00", "02:00"] },
+      "dwellMinutes": 120,
+      "shortDescription": "แหล่งบันเทิงยามค่ำคืนชื่อดังระดับโลกของพัทยา"
+    },
+    {
+      "id": "chonburi-attraction-house-of-benedict",
+      "category": "attraction",
+      "name": "House Of Benedict",
+      "area": "จอมเทียน",
+      "location": { "lat": 12.8599, "lng": 100.9040 },
+      "tags": ["cafe", "artCulture", "family"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "dwellMinutes": 120,
+      "entranceFee": 200,
+      "shortDescription": "คอมมูนิตี้สเปซและคาเฟ่ที่มีมุมถ่ายรูปตกแต่งอลังการหลายสไตล์"
+    },
+    {
+      "id": "chonburi-attraction-koh-larn",
+      "category": "attraction",
+      "name": "เกาะล้าน",
+      "area": "พัทยา",
+      "location": { "lat": 12.9228, "lng": 100.7888 },
+      "tags": ["beach", "nature", "viewpoint"],
+      "priceLevel": 2,
+      "rating": 4.6,
+      "dwellMinutes": 360,
+      "shortDescription": "เกาะสวยน้ำใสใกล้พัทยา มีชายหาดหลายแห่งให้พักผ่อน"
+    },
+    {
+      "id": "chonburi-attraction-pattaya-floating-market",
+      "category": "attraction",
+      "name": "ตลาดน้ำ 4 ภาค",
+      "area": "จอมเทียน",
+      "location": { "lat": 12.8679, "lng": 100.9047 },
+      "tags": ["shopping", "localFood", "artCulture"],
+      "priceLevel": 2,
+      "rating": 4.1,
+      "dwellMinutes": 120,
+      "entranceFee": 200,
+      "shortDescription": "ตลาดน้ำที่รวบรวมของดีและวัฒนธรรมจาก 4 ภาคของไทย"
+    },
+    {
+      "id": "chonburi-attraction-khao-kheow-zoo",
+      "category": "attraction",
+      "name": "สวนสัตว์เปิดเขาเขียว",
+      "area": "ศรีราชา",
+      "location": { "lat": 13.2156, "lng": 101.0531 },
+      "tags": ["family", "nature"],
+      "priceLevel": 2,
+      "rating": 4.7,
+      "dwellMinutes": 240,
+      "entranceFee": 200,
+      "shortDescription": "สวนสัตว์เปิดขนาดใหญ่ ชมสัตว์ป่าอย่างใกล้ชิด ฮิตมากเรื่องหมูเด้ง"
+    },
+    {
+      "id": "chonburi-attraction-khao-sam-muk",
+      "category": "attraction",
+      "name": "จุดชมวิวเขาสามมุข",
+      "area": "บางแสน",
+      "location": { "lat": 13.3125, "lng": 100.9040 },
+      "tags": ["viewpoint", "nature"],
+      "priceLevel": 1,
+      "rating": 4.4,
+      "dwellMinutes": 60,
+      "shortDescription": "จุดชมวิวทะเลบางแสนยอดฮิต มีศาลเจ้าแม่และฝูงลิง"
+    },
+    {
+      "id": "chonburi-attraction-chantathen-waterfall",
+      "category": "attraction",
+      "name": "น้ำตกชันตาเถร",
+      "area": "ศรีราชา",
+      "location": { "lat": 13.2422, "lng": 101.0455 },
+      "tags": ["nature", "adventure"],
+      "priceLevel": 1,
+      "rating": 4.0,
+      "dwellMinutes": 120,
+      "entranceFee": 20,
+      "shortDescription": "น้ำตกธรรมชาติ เหมาะสำหรับการเดินป่าและพักผ่อน"
+    },
+    {
+      "id": "chonburi-attraction-koh-sichang",
+      "category": "attraction",
+      "name": "เกาะสีชัง",
+      "area": "ศรีราชา",
+      "location": { "lat": 13.1619, "lng": 100.8105 },
+      "tags": ["beach", "templeHistory", "nature"],
+      "priceLevel": 2,
+      "rating": 4.5,
+      "dwellMinutes": 360,
+      "shortDescription": "เกาะบรรยากาศเงียบสงบ มีพระราชวังโบราณและศาลเจ้าพ่อเขาใหญ่"
+    },
+    {
+      "id": "chonburi-attraction-bims-aquarium",
+      "category": "attraction",
+      "name": "สถาบันวิทยาศาสตร์ทางทะเล (พิพิธภัณฑ์สัตว์น้ำบางแสน)",
+      "area": "บางแสน",
+      "location": { "lat": 13.2849, "lng": 100.9249 },
+      "tags": ["family", "nature", "artCulture"],
+      "priceLevel": 1,
+      "rating": 4.6,
+      "dwellMinutes": 120,
+      "entranceFee": 80,
+      "shortDescription": "พิพิธภัณฑ์สัตว์น้ำ ม.บูรพา จุดเด่นคือโซนตู้แมงกะพรุน"
+    },
+    {
+      "id": "chonburi-attraction-bangsaen-fish-market",
+      "category": "attraction",
+      "name": "ตลาดปลาบางแสน",
+      "area": "บางแสน",
+      "location": { "lat": 13.2964, "lng": 100.9216 },
+      "tags": ["shopping", "seafood", "localFood"],
+      "priceLevel": 2,
+      "rating": 4.5,
+      "dwellMinutes": 90,
+      "shortDescription": "ตลาดปลาตกแต่งสไตล์ญี่ปุ่น ถ่ายรูปสวย อาหารทะเลเพียบ"
+    },
+    {
+      "id": "chonburi-attraction-sanctuary-of-truth",
+      "category": "attraction",
+      "name": "ปราสาทสัจธรรม",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9727, "lng": 100.8890 },
+      "tags": ["artCulture", "templeHistory", "viewpoint"],
+      "priceLevel": 2,
+      "rating": 4.6,
+      "openingHours": { "mon": ["08:00", "18:00"], "tue": ["08:00", "18:00"], "wed": ["08:00", "18:00"], "thu": ["08:00", "18:00"], "fri": ["08:00", "18:00"], "sat": ["08:00", "18:00"], "sun": ["08:00", "18:00"] },
+      "dwellMinutes": 120,
+      "entranceFee": 500,
+      "shortDescription": "ปราสาทไม้แกะสลักทั้งหลังริมทะเลนาเกลือ"
+    },
+    {
+      "id": "chonburi-attraction-nong-nooch",
+      "category": "attraction",
+      "name": "สวนนงนุช",
+      "area": "สัตหีบ/บางเสร่",
+      "location": { "lat": 12.7663, "lng": 100.9333 },
+      "tags": ["nature", "family", "artCulture"],
+      "priceLevel": 3,
+      "rating": 4.5,
+      "dwellMinutes": 240,
+      "entranceFee": 300,
+      "shortDescription": "สวนพฤกษศาสตร์ระดับโลก มีโชว์วัฒนธรรมและหุบเขาไดโนเสาร์"
+    },
+    {
+      "id": "chonburi-attraction-j-park",
+      "category": "attraction",
+      "name": "เจพาร์ค นิฮอน มูระ",
+      "area": "ศรีราชา",
+      "location": { "lat": 13.1518, "lng": 100.9839 },
+      "tags": ["shopping", "family", "cafe"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "dwellMinutes": 120,
+      "shortDescription": "คอมมูนิตี้มอลล์สไตล์หมู่บ้านญี่ปุ่น มีร้านอาหารและมุมถ่ายรูปเพียบ"
+    },
+    {
+      "id": "chonburi-attraction-pattaya-viewpoint",
+      "category": "attraction",
+      "name": "จุดชมวิวเขาพระตำหนัก",
+      "area": "พัทยา",
+      "location": { "lat": 12.9213, "lng": 100.8676 },
+      "tags": ["viewpoint", "templeHistory"],
+      "priceLevel": 1,
+      "rating": 4.4,
+      "dwellMinutes": 45,
+      "shortDescription": "จุดชมวิวอ่าวพัทยาแบบพาโนรามาที่สวยงามที่สุด"
+    },
+    {
+      "id": "chonburi-attraction-toey-ngam-beach",
+      "category": "attraction",
+      "name": "หาดเตยงาม",
+      "area": "สัตหีบ/บางเสร่",
+      "location": { "lat": 12.6713, "lng": 100.8576 },
+      "tags": ["beach", "nature", "family"],
+      "priceLevel": 1,
+      "rating": 4.6,
+      "dwellMinutes": 180,
+      "shortDescription": "หาดทรายขาวน้ำใสในเขตทหารเรือ เงียบสงบและปลอดภัย"
+    },
+    {
+      "id": "chonburi-restaurant-bali-hai-by-the-sea",
+      "category": "restaurant",
+      "name": "Bali Hai By The Sea",
+      "area": "พัทยา",
+      "location": { "lat": 12.9248, "lng": 100.8688 },
+      "tags": ["seafood", "viewpoint"],
+      "priceLevel": 3,
+      "rating": 4.2,
+      "openingHours": {
+        "mon": ["10:30", "21:00"], "tue": ["10:30", "21:00"], "wed": ["10:30", "21:00"],
+        "thu": ["10:30", "21:00"], "fri": ["10:30", "21:00"], "sat": ["10:30", "21:00"], "sun": ["10:30", "21:00"]
+      },
+      "dwellMinutes": 90,
+      "shortDescription": "ร้านอาหารวิวท่าเรือบาลีฮาย บรรยากาศดี รับลมทะเลสบายๆ"
+    },
+    {
+      "id": "chonburi-restaurant-nang-nual-pattaya",
+      "category": "restaurant",
+      "name": "นางนวล พัทยา (Nang Nual Pattaya)",
+      "area": "พัทยา",
+      "location": { "lat": 12.9255, "lng": 100.8709 },
+      "tags": ["seafood", "localFood"],
+      "priceLevel": 3,
+      "rating": 4.3,
+      "openingHours": {
+        "mon": ["14:00", "23:00"], "tue": ["14:00", "23:00"], "wed": ["14:00", "23:00"],
+        "thu": ["14:00", "23:00"], "fri": ["14:00", "23:00"], "sat": ["14:00", "23:00"], "sun": ["14:00", "23:00"]
+      },
+      "dwellMinutes": 90,
+      "shortDescription": "ร้านอาหารทะเลยอดนิยมบน Walking Street เปิดมาอย่างยาวนาน"
+    },
+    {
+      "id": "chonburi-restaurant-king-seafood",
+      "category": "restaurant",
+      "name": "King Seafood",
+      "area": "พัทยา",
+      "location": { "lat": 12.9270, "lng": 100.8735 },
+      "tags": ["seafood", "family"],
+      "priceLevel": 4,
+      "rating": 4.4,
+      "openingHours": {
+        "mon": ["15:00", "01:00"], "tue": ["15:00", "01:00"], "wed": ["15:00", "01:00"],
+        "thu": ["15:00", "01:00"], "fri": ["15:00", "01:00"], "sat": ["15:00", "01:00"], "sun": ["15:00", "01:00"]
+      },
+      "dwellMinutes": 90,
+      "shortDescription": "ร้านอาหารทะเลคัดเกรดพรีเมียม สดใหม่ใจกลางพัทยาใต้"
+    },
+    {
+      "id": "chonburi-restaurant-sunset-coffee-roaster",
+      "category": "restaurant",
+      "name": "Sunset Coffee Roaster",
+      "area": "พัทยา",
+      "location": { "lat": 12.9380, "lng": 100.8836 },
+      "tags": ["cafe", "beach"],
+      "priceLevel": 2,
+      "rating": 4.6,
+      "openingHours": {
+        "mon": ["07:30", "18:00"], "tue": ["07:30", "18:00"], "wed": ["07:30", "18:00"],
+        "thu": ["07:30", "18:00"], "fri": ["07:30", "18:00"], "sat": ["07:30", "18:30"], "sun": ["07:30", "18:30"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "คาเฟ่กาแฟสเปเชียลตี้ริมหาดพัทยากลาง บรรยากาศสุดชิล"
+    },
+    {
+      "id": "chonburi-restaurant-albatross-coffee",
+      "category": "restaurant",
+      "name": "Albatross Coffee Roasters",
+      "area": "พัทยา",
+      "location": { "lat": 12.9327, "lng": 100.8804 },
+      "tags": ["cafe"],
+      "priceLevel": 2,
+      "rating": 4.5,
+      "openingHours": {
+        "mon": ["06:30", "21:30"], "tue": ["06:30", "21:30"], "wed": ["06:30", "21:30"],
+        "thu": ["06:30", "21:30"], "fri": ["06:30", "21:30"], "sat": ["06:30", "21:30"], "sun": ["06:30", "21:30"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "คาเฟ่และโรงคั่วกาแฟบรรยากาศดี กาแฟมีเอกลักษณ์"
+    },
+    {
+      "id": "chonburi-restaurant-snowcap-bingsoo",
+      "category": "restaurant",
+      "name": "The Snowcap Bingsoo 9",
+      "area": "พัทยา",
+      "location": { "lat": 12.9248, "lng": 100.8693 },
+      "tags": ["cafe", "family"],
+      "priceLevel": 2,
+      "rating": 4.3,
+      "openingHours": {
+        "mon": ["06:00", "23:30"], "tue": ["06:00", "23:30"], "wed": ["06:00", "23:30"],
+        "thu": ["06:00", "23:30"], "fri": ["06:00", "23:30"], "sat": ["06:00", "23:30"], "sun": ["06:00", "23:30"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านบิงซูและของหวานสไตล์เกาหลีดับร้อนใกล้ท่าเรือ"
+    },
+    {
+      "id": "chonburi-restaurant-swensens-balihai",
+      "category": "restaurant",
+      "name": "Swensen's Balihai Pier",
+      "area": "พัทยา",
+      "location": { "lat": 12.9244, "lng": 100.8676 },
+      "tags": ["family"],
+      "priceLevel": 2,
+      "rating": 4.2,
+      "openingHours": {
+        "mon": ["10:00", "23:59"], "tue": ["10:00", "23:59"], "wed": ["10:00", "23:59"],
+        "thu": ["10:00", "23:59"], "fri": ["10:00", "23:59"], "sat": ["10:00", "23:59"], "sun": ["10:00", "23:59"]
+      },
+      "dwellMinutes": 45,
+      "shortDescription": "ร้านไอศกรีมใกล้ท่าเรือบาลีฮาย นั่งรอขึ้นเรือได้"
+    },
+    {
+      "id": "chonburi-restaurant-la-cremerie",
+      "category": "restaurant",
+      "name": "La Cremerie Flagship Store",
+      "area": "พัทยา",
+      "location": { "lat": 12.9125, "lng": 100.8621 },
+      "tags": ["cafe"],
+      "priceLevel": 3,
+      "rating": 4.4,
+      "openingHours": {
+        "mon": ["07:30", "23:00"], "tue": ["07:30", "23:00"], "wed": ["07:30", "23:00"],
+        "thu": ["07:30", "23:00"], "fri": ["07:30", "23:00"], "sat": ["07:30", "23:00"], "sun": ["07:30", "23:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านเจลาโต้และของหวานสไตล์พรีเมียม ซอยพระตำหนัก 5"
+    },
+    {
+      "id": "chonburi-restaurant-morning-house",
+      "category": "restaurant",
+      "name": "Morning House อาหารเช้าพัทยา",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9792, "lng": 100.9174 },
+      "tags": ["localFood", "family"],
+      "priceLevel": 1,
+      "rating": 4.3,
+      "openingHours": {
+        "mon": ["06:30", "14:30"], "tue": ["06:30", "14:30"], "wed": ["06:30", "14:30"],
+        "thu": ["06:30", "14:30"], "fri": ["06:30", "14:30"], "sat": ["06:30", "14:30"], "sun": ["06:30", "14:30"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านอาหารเช้าชื่อดังในพัทยา-นาเกลือ ราคาประหยัด"
+    },
+    {
+      "id": "chonburi-restaurant-suki-teenoi",
+      "category": "restaurant",
+      "name": "Suki Teenoi FN Outlet Pattaya",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9845, "lng": 100.9206 },
+      "tags": ["family"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "openingHours": {
+        "mon": ["10:30", "05:00"], "tue": ["10:30", "05:00"], "wed": ["10:30", "05:00"],
+        "thu": ["10:30", "05:00"], "fri": ["10:30", "05:00"], "sat": ["10:30", "05:00"], "sun": ["10:30", "05:00"]
+      },
+      "dwellMinutes": 90,
+      "shortDescription": "สุกี้บุฟเฟ่ต์ยอดฮิต สาขาพัทยา เปิดบริการยันเช้า"
+    },
+    {
+      "id": "chonburi-restaurant-big-four-yentafo",
+      "category": "restaurant",
+      "name": "บิ๊กโฟร์ สาขาสี่แยกโรงไม้ขีด",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9838, "lng": 100.9201 },
+      "tags": ["localFood"],
+      "priceLevel": 1,
+      "rating": 4.2,
+      "openingHours": {
+        "mon": ["06:00", "21:30"], "tue": ["06:00", "22:30"], "wed": ["06:00", "22:30"],
+        "thu": ["06:00", "22:30"], "fri": ["06:00", "22:30"], "sat": ["06:00", "22:30"]
+      },
+      "dwellMinutes": 45,
+      "shortDescription": "ร้านเย็นตาโฟรสเด็ด ราคาประหยัด ปิดทุกวันอาทิตย์"
+    },
+    {
+      "id": "chonburi-restaurant-xin-coffee",
+      "category": "restaurant",
+      "name": "XIN Coffee and Co.",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9732, "lng": 100.9068 },
+      "tags": ["cafe"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "openingHours": {
+        "mon": ["08:00", "17:00"], "tue": ["08:00", "17:00"], "wed": ["08:00", "17:00"],
+        "thu": ["08:00", "17:00"], "fri": ["08:00", "17:00"], "sat": ["08:00", "17:00"], "sun": ["08:00", "17:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "คาเฟ่กาแฟสเปเชียลตี้ ตกแต่งสไตล์มินิมอล"
+    },
+    {
+      "id": "chonburi-restaurant-ugly-project",
+      "category": "restaurant",
+      "name": "UGLY PROJECT",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9811, "lng": 100.9274 },
+      "tags": ["cafe"],
+      "priceLevel": 2,
+      "rating": 4.3,
+      "openingHours": {
+        "mon": ["07:30", "16:00"], "tue": ["07:30", "16:00"], "wed": ["07:30", "16:00"],
+        "thu": ["07:30", "16:00"], "fri": ["07:30", "16:00"], "sat": ["07:30", "16:00"], "sun": ["07:30", "16:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านกาแฟตกแต่งเท่ๆ บริการเป็นกันเอง"
+    },
+    {
+      "id": "chonburi-restaurant-wonder-coffee",
+      "category": "restaurant",
+      "name": "Wonder Coffee (SLOW BAR)",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9882, "lng": 100.9241 },
+      "tags": ["cafe"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "openingHours": {
+        "mon": ["06:30", "12:30"], "tue": ["06:30", "12:30"], "wed": ["06:30", "12:30"],
+        "thu": ["06:30", "12:30"], "fri": ["06:30", "13:30"], "sat": ["06:30", "13:30"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านกาแฟสโลว์บาร์ สำหรับคอกาแฟตัวจริง ปิดวันอาทิตย์"
+    },
+    {
+      "id": "chonburi-restaurant-sunny-brew",
+      "category": "restaurant",
+      "name": "Sunny Brew Cafe Pattaya",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9768, "lng": 100.9156 },
+      "tags": ["cafe"],
+      "priceLevel": 2,
+      "rating": 4.5,
+      "openingHours": {
+        "mon": ["08:00", "18:00"], "tue": ["08:00", "18:00"], "wed": ["08:00", "18:00"],
+        "thu": ["08:00", "18:00"], "fri": ["08:00", "18:00"], "sat": ["08:00", "18:00"], "sun": ["08:00", "18:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "คาเฟ่เบเกอรี่และของหวานตกแต่งน่ารัก ถ่ายรูปสวย"
+    },
+    {
+      "id": "chonburi-restaurant-jarin-bangsaen",
+      "category": "restaurant",
+      "name": "Jarin Bangsaen Restaurant",
+      "area": "บางแสน",
+      "location": { "lat": 13.2845, "lng": 100.9175 },
+      "tags": ["seafood", "localFood"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "openingHours": {
+        "mon": ["10:30", "21:00"], "tue": ["10:30", "21:00"], "wed": ["10:30", "21:00"],
+        "thu": ["10:30", "21:00"], "fri": ["10:30", "21:00"], "sat": ["10:30", "21:00"], "sun": ["10:30", "21:00"]
+      },
+      "dwellMinutes": 90,
+      "shortDescription": "ร้านอาหารเก่าแก่บางแสน รสชาติดั้งเดิม"
+    },
+    {
+      "id": "chonburi-restaurant-andys-seafood",
+      "category": "restaurant",
+      "name": "Andy's Seafood",
+      "area": "บางแสน",
+      "location": { "lat": 13.2867, "lng": 100.9133 },
+      "tags": ["seafood", "localFood"],
+      "priceLevel": 2,
+      "rating": 4.3,
+      "openingHours": {
+        "mon": ["10:00", "21:00"], "tue": ["10:00", "21:00"], "wed": ["10:00", "21:00"],
+        "thu": ["10:00", "21:00"], "fri": ["10:00", "21:00"], "sat": ["10:00", "23:00"], "sun": ["10:00", "22:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านอาหารทะเลอร่อย สด ราคาเป็นมิตร"
+    },
+    {
+      "id": "chonburi-restaurant-bangsaen-seafood",
+      "category": "restaurant",
+      "name": "บางแสนซีฟู้ด",
+      "area": "บางแสน",
+      "location": { "lat": 13.2873, "lng": 100.9127 },
+      "tags": ["seafood", "family"],
+      "priceLevel": 2,
+      "rating": 4.2,
+      "openingHours": {
+        "mon": ["10:30", "19:00"], "tue": ["10:30", "19:00"], "wed": ["10:30", "19:00"],
+        "thu": ["10:30", "19:00"], "fri": ["10:30", "19:00"], "sat": ["10:30", "19:00"], "sun": ["10:30", "19:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "ร้านอาหารทะเลสดใหม่ บริเวณหาดบางแสน"
+    },
+    {
+      "id": "chonburi-restaurant-click-cafe",
+      "category": "restaurant",
+      "name": "Click Cafe",
+      "area": "บางแสน",
+      "location": { "lat": 13.2835, "lng": 100.9155 },
+      "tags": ["cafe"],
+      "priceLevel": 2,
+      "rating": 4.3,
+      "openingHours": {
+        "mon": ["11:00", "21:00"], "tue": ["11:00", "21:00"], 
+        "thu": ["11:00", "21:00"], "fri": ["11:00", "21:00"], "sat": ["11:00", "21:00"], "sun": ["11:00", "21:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "คาเฟ่นั่งสบายในบางแสน ปิดให้บริการทุกวันพุธ"
+    },
+    {
+      "id": "chonburi-restaurant-piccolo-street",
+      "category": "restaurant",
+      "name": "Piccolo Street Coffee",
+      "area": "บางแสน",
+      "location": { "lat": 13.2784, "lng": 100.9187 },
+      "tags": ["cafe"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "openingHours": {
+        "mon": ["11:00", "20:00"], "wed": ["11:00", "20:00"],
+        "thu": ["11:00", "20:00"], "fri": ["11:00", "20:00"], "sat": ["10:00", "21:00"], "sun": ["10:00", "21:00"]
+      },
+      "dwellMinutes": 60,
+      "shortDescription": "คาเฟ่สตรีทสไตล์กาแฟอร่อย ปิดทุกวันอังคาร"
     }
   ]
 }
+
