@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../planner/cost_calculator.dart';
 import '../../planner/default_cost_calculator.dart';
+import '../../planner/default_over_budget_advisor.dart';
 import '../../planner/default_planner_service.dart';
 import '../../planner/destination_suggester.dart';
 import '../../planner/mock_planner_service.dart';
@@ -18,9 +19,10 @@ final costCalculatorProvider = FutureProvider<CostCalculator>(
       DefaultCostCalculator(await ref.watch(pricingTableProvider.future)),
 );
 
-/// Replace the body with the real implementation in #37.
-final overBudgetAdvisorProvider = Provider<OverBudgetAdvisor>(
-  (ref) => throw UnimplementedError('OverBudgetAdvisor: see #37'),
+/// Prices its options with [costCalculatorProvider], so it is a future too.
+final overBudgetAdvisorProvider = FutureProvider<OverBudgetAdvisor>(
+  (ref) async =>
+      DefaultOverBudgetAdvisor(await ref.watch(costCalculatorProvider.future)),
 );
 
 /// Replace the body with the real implementation in #25.
@@ -34,18 +36,19 @@ final plannerServiceProvider = Provider<PlannerService>(
       MockPlannerService(loadPlan: () => ref.read(mockTripPlanProvider.future)),
 );
 
-/// The real pipeline (#31). It still needs [overBudgetAdvisorProvider]
-/// (#37); once that lands, point [plannerServiceProvider] here. It is a
-/// future because [costCalculatorProvider] is.
+/// The real pipeline (#31), ready for [plannerServiceProvider] to point
+/// here. It is a future because [costCalculatorProvider] and
+/// [overBudgetAdvisorProvider] are.
 final pipelinePlannerServiceProvider = FutureProvider<PlannerService>((
   ref,
 ) async {
   final selector = PlaceSelector(gemini: ref.watch(geminiServiceProvider));
-  final overBudgetAdvisor = ref.watch(overBudgetAdvisorProvider);
+  final costCalculator = ref.watch(costCalculatorProvider.future);
+  final overBudgetAdvisor = ref.watch(overBudgetAdvisorProvider.future);
   return DefaultPlannerService(
     loadCatalog: () => ref.read(placeCatalogProvider.future),
     selector: selector,
-    costCalculator: await ref.watch(costCalculatorProvider.future),
-    overBudgetAdvisor: overBudgetAdvisor,
+    costCalculator: await costCalculator,
+    overBudgetAdvisor: await overBudgetAdvisor,
   );
 });
