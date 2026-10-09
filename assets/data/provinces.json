@@ -6,12 +6,12 @@
       "center": { "lat": 13.7563, "lng": 100.5018 },
       "regionTag": "central",
       "tags": ["templeHistory", "artCulture", "localFood", "shopping", "cafe", "nightlife"],
-      "seasonality": ["good", "good", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "good", "good"],
-      "seasonNote": "ตัวอย่าง: พ.ย.–ก.พ. อากาศเย็นสบาย มี.ค.–พ.ค. ร้อนจัด มิ.ย.–ต.ค. ฝนตกบ่อย (#20 ตรวจสอบ)",
+      "seasonality": ["good", "good", "avoid", "avoid", "avoid", "ok", "ok", "ok", "ok", "ok", "good", "good"],
+      "seasonNote": "พ.ย.–ก.พ. อากาศเย็นสบาย มี.ค.–พ.ค. ฤดูร้อน มิ.ย.–ต.ค. ฝนตกบ่อยอาจมีน้ำท่วมขัง",
       "intercity": {
         "chonburi": {
           "bus": { "durationMin": 150, "farePerPerson": 131 },
-          "train": { "durationMin": 240, "farePerPerson": 31 },
+          "train": { "durationMin": 173, "farePerPerson": 23 },
           "car": { "durationMin": 120, "distanceKm": 150, "toll": 120 }
         }
       }
@@ -23,7 +23,7 @@
       "regionTag": "east",
       "tags": ["beach", "seafood", "nightlife", "viewpoint", "family", "cafe"],
       "seasonality": ["good", "good", "good", "good", "ok", "ok", "ok", "ok", "ok", "ok", "good", "good"],
-      "seasonNote": "ตัวอย่าง: พ.ย.–เม.ย. ทะเลสวย คลื่นลมสงบ พ.ค.–ต.ค. มีฝนและคลื่นแรงบางวัน (#20 ตรวจสอบ)",
+      "seasonNote": "พ.ย.–เม.ย. ทะเลสวย คลื่นลมสงบ พ.ค.–ต.ค. มีฝนและคลื่นแรงบางวัน",
       "intercity": {
         "bangkok": {
           "bus": { "durationMin": 150, "farePerPerson": 131 },
