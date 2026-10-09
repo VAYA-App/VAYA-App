@@ -1,17 +1,16 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/domain.dart';
 import '../../planner/cost_calculator.dart';
 import '../../planner/default_cost_calculator.dart';
 import '../../planner/default_over_budget_advisor.dart';
 import '../../planner/default_planner_service.dart';
 import '../../planner/destination_suggester.dart';
-import '../../planner/mock_planner_service.dart';
 import '../../planner/over_budget_advisor.dart';
 import '../../planner/place_selector.dart';
 import '../../planner/planner_service.dart';
 import 'ai_providers.dart';
 import 'data_providers.dart';
-import 'mock_providers.dart';
 
 /// Asynchronous because the pricing table is a bundled asset.
 final costCalculatorProvider = FutureProvider<CostCalculator>(
@@ -30,14 +29,15 @@ final destinationSuggesterProvider = Provider<DestinationSuggester>(
   (ref) => throw UnimplementedError('DestinationSuggester: see #25'),
 );
 
-/// Mock for now: replays the bundled plan. The real pipeline lands in #31.
+/// The planner the app uses: the real pipeline (#31). Not a future itself,
+/// so screens and test overrides keep a plain [PlannerService].
 final plannerServiceProvider = Provider<PlannerService>(
-  (ref) =>
-      MockPlannerService(loadPlan: () => ref.read(mockTripPlanProvider.future)),
+  (ref) => _PendingPlannerService(
+    () => ref.read(pipelinePlannerServiceProvider.future),
+  ),
 );
 
-/// The real pipeline (#31), ready for [plannerServiceProvider] to point
-/// here. It is a future because [costCalculatorProvider] and
+/// The real pipeline. It is a future because [costCalculatorProvider] and
 /// [overBudgetAdvisorProvider] are.
 final pipelinePlannerServiceProvider = FutureProvider<PlannerService>((
   ref,
@@ -52,3 +52,19 @@ final pipelinePlannerServiceProvider = FutureProvider<PlannerService>((
     overBudgetAdvisor: await overBudgetAdvisor,
   );
 });
+
+/// Waits for [load] on each run, then replays that planner's progress.
+class _PendingPlannerService implements PlannerService {
+  const _PendingPlannerService(this.load);
+
+  final Future<PlannerService> Function() load;
+
+  @override
+  Stream<PlanningProgress> generate({
+    required TripRequest request,
+    required String destinationId,
+  }) async* {
+    final planner = await load();
+    yield* planner.generate(request: request, destinationId: destinationId);
+  }
+}
