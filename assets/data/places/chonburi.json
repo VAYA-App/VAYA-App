@@ -762,6 +762,102 @@
       },
       "dwellMinutes": 60,
       "shortDescription": "คาเฟ่สตรีทสไตล์กาแฟอร่อย ปิดทุกวันอังคาร"
+    },
+    {
+      "id": "chonburi-accommodation-cape-dara",
+      "category": "accommodation",
+      "name": "Cape Dara Resort",
+      "area": "นาเกลือ",
+      "location": { "lat": 12.9565, "lng": 100.8845 },
+      "tags": ["beach", "wellness"],
+      "priceLevel": 4,
+      "rating": 4.6,
+      "shortDescription": "รีสอร์ทหรูระดับ 5 ดาวริมทะเลพัทยาเหนือ มีสระว่ายน้ำสวย",
+      "breakfastIncluded": true
+    },
+    {
+      "id": "chonburi-accommodation-hilton-pattaya",
+      "category": "accommodation",
+      "name": "Hilton Pattaya",
+      "area": "พัทยา",
+      "location": { "lat": 12.9346, "lng": 100.8829 },
+      "tags": ["beach", "viewpoint"],
+      "priceLevel": 4,
+      "rating": 4.6,
+      "shortDescription": "โรงแรมหรูวิวทะเลแบบพาโนรามา ตั้งอยู่บนเซ็นทรัลพัทยา",
+      "breakfastIncluded": true
+    },
+    {
+      "id": "chonburi-accommodation-hard-rock",
+      "category": "accommodation",
+      "name": "Hard Rock Hotel Pattaya",
+      "area": "พัทยา",
+      "location": { "lat": 12.9420, "lng": 100.8840 },
+      "tags": ["family", "nightlife"],
+      "priceLevel": 3,
+      "rating": 4.3,
+      "shortDescription": "โรงแรมธีมดนตรีร็อก มีสระว่ายน้ำขนาดใหญ่และกิจกรรมเยอะ",
+      "breakfastIncluded": true
+    },
+    {
+      "id": "chonburi-accommodation-u-jomtien",
+      "category": "accommodation",
+      "name": "U Jomtien Pattaya",
+      "area": "จอมเทียน",
+      "location": { "lat": 12.8765, "lng": 100.8891 },
+      "tags": ["beach", "viewpoint"],
+      "priceLevel": 3,
+      "rating": 4.5,
+      "shortDescription": "โรงแรมบูติกร่วมสมัยริมหาดจอมเทียน มีสระว่ายน้ำดาดฟ้า",
+      "breakfastIncluded": true
+    },
+    {
+      "id": "chonburi-accommodation-bangsaen-heritage",
+      "category": "accommodation",
+      "name": "Bangsaen Heritage Hotel",
+      "area": "บางแสน",
+      "location": { "lat": 13.2981, "lng": 100.9067 },
+      "tags": ["family"],
+      "priceLevel": 2,
+      "rating": 4.2,
+      "shortDescription": "โรงแรมคู่หาดบางแสน มีบ้านพักสไตล์วิลล่าสำหรับครอบครัว",
+      "breakfastIncluded": true
+    },
+    {
+      "id": "chonburi-accommodation-novotel-sriracha",
+      "category": "accommodation",
+      "name": "Novotel Marina Sriracha",
+      "area": "ศรีราชา",
+      "location": { "lat": 13.1702, "lng": 100.9234 },
+      "tags": ["wellness", "viewpoint"],
+      "priceLevel": 3,
+      "rating": 4.4,
+      "shortDescription": "โรงแรมริมทะเลใจกลางศรีราชา สิ่งอำนวยความสะดวกครบ",
+      "breakfastIncluded": true
+    },
+    {
+      "id": "chonburi-accommodation-kept-bangsaray",
+      "category": "accommodation",
+      "name": "Kept Bangsaray Hotel",
+      "area": "สัตหีบ/บางเสร่",
+      "location": { "lat": 12.7661, "lng": 100.8953 },
+      "tags": ["beach", "viewpoint"],
+      "priceLevel": 4,
+      "rating": 4.6,
+      "shortDescription": "ที่พักสไตล์มัลดีฟส์ ยื่นลงไปในทะเลบางเสร่ บรรยากาศส่วนตัว",
+      "breakfastIncluded": true
+    },
+    {
+      "id": "chonburi-accommodation-ozo-north-pattaya",
+      "category": "accommodation",
+      "name": "OZO North Pattaya",
+      "area": "พัทยา",
+      "location": { "lat": 12.9490, "lng": 100.8872 },
+      "tags": ["beach", "family"],
+      "priceLevel": 2,
+      "rating": 4.4,
+      "shortDescription": "โรงแรมราคาคุ้มค่า ห้องพักสะอาด สระว่ายน้ำน่าเล่น",
+      "breakfastIncluded": false
     }
   ]
 }
