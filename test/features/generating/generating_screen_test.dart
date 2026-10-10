@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:vaya_app/ai/mock_gemini_service.dart';
 import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/providers/mock_providers.dart';
@@ -9,7 +10,10 @@ import 'package:vaya_app/app/router.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/generating/generating_screen.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
+import 'package:vaya_app/planner/default_over_budget_advisor.dart';
+import 'package:vaya_app/planner/default_planner_service.dart';
 import 'package:vaya_app/planner/mock_planner_service.dart';
+import 'package:vaya_app/planner/place_selector.dart';
 import 'package:vaya_app/planner/planner_service.dart';
 
 class _FailingPlanner implements PlannerService {
@@ -115,6 +119,42 @@ void main() {
           .path,
       AppRoutes.tripPlan('draft-1'),
     );
+  });
+
+  testWidgets('opens a plan built by the real pipeline', (tester) async {
+    // Asset loading needs real async; build the pipeline from it first.
+    final planner = await tester.runAsync(() async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final catalog = await container.read(placeCatalogProvider.future);
+      final calculator = await container.read(costCalculatorProvider.future);
+      return DefaultPlannerService(
+        loadCatalog: () async => catalog,
+        selector: const PlaceSelector(gemini: MockGeminiService()),
+        costCalculator: calculator,
+        overBudgetAdvisor: DefaultOverBudgetAdvisor(calculator),
+      );
+    });
+    final container = await pumpGenerating(tester, planner: planner);
+
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(find.text('เสร็จแล้ว! ไปดูแผนกันเลย'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      container
+          .read(routerProvider)
+          .routerDelegate
+          .currentConfiguration
+          .uri
+          .path,
+      AppRoutes.tripPlan('draft-1'),
+    );
+    final draft = container.read(draftTripsProvider)['draft-1']!;
+    expect(draft.plan.destinationId, 'chonburi');
+    expect(draft.plan.days, hasLength(draft.request.dayCount));
   });
 
   testWidgets('offers a retry when planning fails', (tester) async {
