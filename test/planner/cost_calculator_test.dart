@@ -452,6 +452,38 @@ void main() {
     });
   });
 
+  group('rejects a request without', () {
+    final plan = _plan([
+      [_stop('free')],
+    ]);
+
+    test('travellers', () {
+      expect(
+        () => price(_request(travellers: 0), plan),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.name,
+            'name',
+            'request.travellerCount',
+          ),
+        ),
+      );
+    });
+
+    test('days', () {
+      expect(
+        () => price(_request(days: 0), plan),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.name,
+            'name',
+            'request.dayCount',
+          ),
+        ),
+      );
+    });
+  });
+
   test('the mock trip plan matches the calculator', () {
     final real = DefaultCostCalculator(
       PricingTable.fromJson(readJson('assets/data/pricing.json')),

@@ -66,6 +66,34 @@ void main() {
   int minimum(TripRequest request, [Province? province]) =>
       calculator.minimumTripCost(request: request, province: province ?? dest);
 
+  group('rejects a request without', () {
+    test('travellers', () {
+      expect(
+        () => minimum(_request(travellers: 0)),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.name,
+            'name',
+            'request.travellerCount',
+          ),
+        ),
+      );
+    });
+
+    test('days, instead of a negative minimum', () {
+      expect(
+        () => minimum(_request(days: 0, origin: 'home')),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.name,
+            'name',
+            'request.dayCount',
+          ),
+        ),
+      );
+    });
+  });
+
   group('a trip inside the origin province', () {
     test('one day: no intercity, no room, one way back', () {
       // 5 slots, 2 meals: food 80 × 2 × 2 + breakfast 200 = 520
