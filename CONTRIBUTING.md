@@ -7,7 +7,7 @@
 1. **1 issue = 1 branch = 1 PR** ทุกงานต้องมี issue ก่อน (ดูได้จาก [Project board](https://github.com/users/Kritternai/projects/4))
 2. **ห้าม push ตรงเข้า `main`** ทุกอย่างต้องผ่าน PR
 3. **Merge ด้วย "Squash and merge" เท่านั้น** แล้วกด **Delete branch** (ห้ามใช้ "Create a merge commit" หรือ "Rebase and merge")
-4. **ไม่บังคับรีวิว:** เจ้าของ PR merge เองได้เมื่อ check ของ [CI](#ci-github-actions) ผ่าน (✅) และทำครบ checklist ใน PR template แล้ว ถ้าอยากให้เพื่อนช่วยดูก็ขอได้ (`--reviewer <ชื่อ>`) แต่ไม่ต้องรอ
+4. **ต้องมี 1 Approve จากคนอื่นในทีมก่อน merge** และ check ของ [CI](#ci-github-actions) ต้องผ่าน (✅) และทำครบ checklist ใน PR template แล้ว ขอรีวิวตอนเปิด PR ด้วย `--reviewer <ชื่อ>` (ใครก็ได้ที่ไม่ใช่เจ้าของ PR) GitHub ไม่ให้เจ้าของ PR กด Approve เอง และ repo นี้ตั้ง branch protection ไม่ได้ จึงเป็นกติกาที่ทุกคนต้องเช็คเองก่อนกด merge (#120)
 5. ถ้า PR แก้ `lib/domain/` หรือ `lib/app/theme/` ต้อง**แจ้งในกลุ่มก่อน merge** เพราะกระทบงานของทุกคน
 
 ## ชื่อ branch
@@ -68,6 +68,7 @@ git push -u origin feat/18-trip-request-form
 gh pr create --base main \
   --title "feat(trip-request): add multi-step trip request form (#18)" \
   --body "Closes #18" \
+  --reviewer <ชื่อเพื่อน> \
   --assignee @me
 
 # ถ้า rebase หลัง push ไปแล้ว ให้ใช้คำสั่งนี้แทน git push ธรรมดา
@@ -112,7 +113,7 @@ repo เป็น private บนแผนฟรี จึงตั้งให�
 |---|---|
 | **Todo** | ยังไม่เริ่ม |
 | **In Progress** | แตก branch แล้ว |
-| **In Review** | เปิด PR แล้ว ยังไม่ merge |
+| **In Review** | เปิด PR แล้ว รอ Approve |
 | **Done** | merge แล้ว (issue ปิดอัตโนมัติจาก `Closes #`) |
 
 ## ถ้าต้อง revert
