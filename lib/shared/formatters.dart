@@ -24,3 +24,14 @@ const _months = [
 /// `2026-11-14` → `ส. 14 พ.ย.`
 String formatThaiShortDate(DateTime date) =>
     '${_weekdays[date.weekday - 1]} ${date.day} ${_months[date.month - 1]}';
+
+/// `2026-11-14`, `2026-11-15` → `14–15 พ.ย.`
+String formatDateRange(DateTime start, DateTime end) {
+  if (start.year == end.year && start.month == end.month) {
+    if (start.day == end.day) {
+      return '${start.day} ${_months[start.month - 1]}';
+    }
+    return '${start.day}–${end.day} ${_months[start.month - 1]}';
+  }
+  return '${start.day} ${_months[start.month - 1]} – ${end.day} ${_months[end.month - 1]}';
+}

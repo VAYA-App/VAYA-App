@@ -3,7 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
+import '../../app/providers/data_providers.dart';
 import '../../app/router.dart';
+import '../../domain/domain.dart';
+import '../../shared/formatters.dart';
 import '../../shared/widgets/mascot_view.dart';
 import '../../shared/widgets/theme_picker_sheet.dart';
 import '../explore/trip_ideas.dart';
@@ -12,13 +15,14 @@ import 'greeting.dart';
 
 /// ทริปของฉัน. Layout skeleton in the Stitch style; the saved trips list
 /// and its empty/delete states are built in #42.
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final margin = context.windowSizeClass.pageMargin;
+    final trips = ref.watch(savedTripsProvider).value ?? const [];
 
     return Scaffold(
       body: SafeArea(
@@ -41,7 +45,10 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 32),
                 Text('ทริปที่บันทึกไว้', style: theme.textTheme.titleLarge),
                 const SizedBox(height: 12),
-                const _EmptyTrips(),
+                if (trips.isEmpty)
+                  const _EmptyTrips()
+                else
+                  _SavedTrips(trips: trips),
               ],
             ),
           ),
@@ -276,6 +283,129 @@ class _EmptyTrips extends StatelessWidget {
               label: const Text('ดูแผนตัวอย่าง'),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SavedTrips extends ConsumerWidget {
+  const _SavedTrips({required this.trips});
+
+  final List<Trip> trips;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalog = ref.watch(placeCatalogProvider).value;
+    final windowSize = context.windowSizeClass;
+
+    if (windowSize == WindowSizeClass.compact) {
+      return Column(
+        children: [
+          for (final trip in trips) ...[
+            _TripCard(trip: trip, catalog: catalog),
+            const SizedBox(height: 12),
+          ],
+        ],
+      );
+    }
+
+    final crossAxisCount = windowSize.index >= WindowSizeClass.expanded.index
+        ? 3
+        : 2;
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: trips.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: crossAxisCount,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+        childAspectRatio: 2.4,
+      ),
+      itemBuilder: (context, index) {
+        return _TripCard(trip: trips[index], catalog: catalog);
+      },
+    );
+  }
+}
+
+class _TripCard extends StatelessWidget {
+  const _TripCard({required this.trip, required this.catalog});
+
+  final Trip trip;
+  final PlaceCatalog? catalog;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final province =
+        catalog?.findProvince(trip.plan.destinationId)?.name ??
+        trip.plan.destinationId;
+    final dateRange = formatDateRange(
+      trip.request.startDate,
+      trip.request.endDate,
+    );
+    final cost = trip.plan.cost;
+
+    return Card.outlined(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        onTap: trip.id != null
+            ? () => context.push(AppRoutes.tripPlan(trip.id!))
+            : null,
+        title: Row(
+          children: [
+            Flexible(
+              child: Text(
+                province,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (cost.isOverBudget) ...[
+              const SizedBox(width: 8),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.errorContainer,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  child: Text(
+                    'เกินงบ',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colors.onErrorContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(
+            '$dateRange · ${trip.request.travellerCount} คน',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ),
+        trailing: Text(
+          formatBaht(cost.total),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: cost.isOverBudget ? colors.error : colors.primary,
+          ),
         ),
       ),
     );
