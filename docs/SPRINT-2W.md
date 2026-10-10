@@ -15,7 +15,7 @@
 | **@Nirapada-p** | **M3** Destination Suggestion + **ข้อมูลจังหวัดและสถานที่ทั้งหมด** | #5 |
 | **@gunruethaiz** | **M1** ล็อกอิน + Profile · **M8** บันทึกและรายการทริป | #3 #10 |
 
-- **การรีวิว PR:** ไม่บังคับ เจ้าของ PR merge เองได้ (ขอให้เพื่อนช่วยดูได้ถ้าต้องการ)
+- **การรีวิว PR:** ต้องมี 1 Approve จากคนอื่นในทีมก่อน merge ยกเว้น PR ของ @Kritternai ที่ merge ได้เลยแล้วให้เพื่อน Approve ตามหลัง (ดู [CONTRIBUTING.md](../CONTRIBUTING.md) ข้อ 4)
 - **Should/Could** (S1, S2, C1–C4) อยู่ใน backlog โดยยังไม่มีเจ้าของ และจะเริ่มทำหลังจาก Must ครบ
 
 ---
