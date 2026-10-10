@@ -31,3 +31,8 @@ final tripRepositoryProvider = Provider<TripRepository>((ref) {
   ref.onDispose(repository.dispose);
   return repository;
 });
+
+/// Real-time stream of the current user's saved trips (#42).
+final savedTripsProvider = StreamProvider<List<Trip>>((ref) {
+  return ref.watch(tripRepositoryProvider).watchMyTrips();
+});
