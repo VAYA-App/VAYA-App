@@ -7,7 +7,7 @@
 1. **1 issue = 1 branch = 1 PR** ทุกงานต้องมี issue ก่อน (ดูได้จาก [Project board](https://github.com/users/Kritternai/projects/4))
 2. **ห้าม push ตรงเข้า `main`** ทุกอย่างต้องผ่าน PR
 3. **Merge ด้วย "Squash and merge" เท่านั้น** แล้วกด **Delete branch** (ห้ามใช้ "Create a merge commit" หรือ "Rebase and merge")
-4. **ไม่บังคับรีวิว:** เจ้าของ PR merge เองได้เมื่อ `flutter analyze` และ `flutter test` ผ่าน และทำครบ checklist ใน PR template แล้ว ถ้าอยากให้เพื่อนช่วยดูก็ขอได้ (`--reviewer <ชื่อ>`) แต่ไม่ต้องรอ
+4. **ไม่บังคับรีวิว:** เจ้าของ PR merge เองได้เมื่อ check ของ [CI](#ci-github-actions) ผ่าน (✅) และทำครบ checklist ใน PR template แล้ว ถ้าอยากให้เพื่อนช่วยดูก็ขอได้ (`--reviewer <ชื่อ>`) แต่ไม่ต้องรอ
 5. ถ้า PR แก้ `lib/domain/` หรือ `lib/app/theme/` ต้อง**แจ้งในกลุ่มก่อน merge** เพราะกระทบงานของทุกคน
 
 ## ชื่อ branch
@@ -85,6 +85,26 @@ git branch -D feat/18-trip-request-form
 - ใส่ `Closes #เลข` ใน PR เพื่อให้ issue ปิดเองเมื่อ merge
 - กรอก checklist ใน PR template ให้ครบ ถ้ามี UI ต้องแนบภาพตาม [docs/DESIGN.md](docs/DESIGN.md)
 - PR ควรเล็ก ถ้าเกิน ~400 บรรทัด (ไม่นับไฟล์ JSON ข้อมูล) ให้แบ่งเป็นหลาย PR
+
+## CI (GitHub Actions)
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) รัน `dart format` (ตรวจอย่างเดียว), `flutter analyze` และ `flutter test` ด้วย Flutter 3.44.4 ใช้เวลาราว 3–5 นาที
+
+| เมื่อไร | ดูผลที่ไหน |
+|---|---|
+| เปิด PR เข้า `main` หรือ push เพิ่มใน PR | ส่วน Checks ท้าย PR (push ใหม่จะยกเลิกรอบเก่าของ PR นั้น) |
+| merge เข้า `main` | ✅/❌ ข้าง commit บน `main` และในแท็บ [Actions](https://github.com/VAYA-App/VAYA-App/actions) |
+| อยากรันเอง | Actions → CI → **Run workflow** |
+
+repo เป็น private บนแผนฟรี จึงตั้งให้ check ต้องผ่านก่อน merge ไม่ได้ **ห้าม merge PR ที่ check ยังเป็น ❌** (กติกาข้อ 4)
+
+ถ้า `main` ❌ หลัง merge:
+
+1. คน merge จะได้อีเมลจาก GitHub ให้เปิด run ที่ ❌ ดูว่าขั้นไหนพัง
+2. แจ้งในกลุ่มว่า `main` พัง อย่าเพิ่ง merge PR อื่นจนกว่าจะแก้เสร็จ
+3. แก้ใน PR `fix/*` ใหม่ ถ้าแก้ไม่ทันให้ revert ตามหัวข้อ [ถ้าต้อง revert](#ถ้าต้อง-revert)
+
+ถ้าขั้น format ❌ ให้รัน `dart format lib test` ในเครื่องแล้ว commit
 
 ## สถานะบน Project board
 

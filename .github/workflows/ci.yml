@@ -1,0 +1,40 @@
+# Checks every PR into main and every commit on main after a merge (#118).
+# The repo is private on the free plan, so this cannot block a merge; it
+# shows ✅/❌ on the PR and on the commit instead. See CONTRIBUTING.md.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# A new push to a PR replaces its running check. Every commit on main keeps
+# its own run, so a broken merge is always pinned to the commit that broke it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  check:
+    name: format, analyze, test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.4
+          cache: true
+
+      - run: flutter pub get
+
+      - name: dart format (check only)
+        run: dart format --output=none --set-exit-if-changed lib test
+
+      - run: flutter analyze
+
+      - run: flutter test
