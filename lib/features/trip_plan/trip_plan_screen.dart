@@ -8,7 +8,9 @@ import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/coming_soon.dart';
 import 'trip_plan_view_provider.dart';
+import 'widgets/budget_advice_list.dart';
 import 'widgets/cost_summary_card.dart';
+import 'widgets/over_budget_banner.dart';
 import 'widgets/stop_detail_sheet.dart';
 import 'widgets/stop_timeline.dart';
 import 'widgets/trip_map.dart';
@@ -22,7 +24,10 @@ class TripPlanScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return switch (ref.watch(tripPlanViewProvider(tripId))) {
-      AsyncData(value: final view?) => _TripPlanBody(view: view),
+      AsyncData(value: final view?) => _TripPlanBody(
+        tripId: tripId,
+        view: view,
+      ),
       AsyncData() => const _MessageScaffold(
         icon: Icons.search_off,
         message: 'ไม่พบแผนการเดินทางนี้',
@@ -37,7 +42,9 @@ class TripPlanScreen extends ConsumerWidget {
 }
 
 class _TripPlanBody extends StatefulWidget {
-  const _TripPlanBody({required this.view});
+  const _TripPlanBody({required this.tripId, required this.view});
+
+  final String tripId;
 
   final TripPlanView view;
 
@@ -106,7 +113,18 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
   Widget build(BuildContext context) {
     final sizeClass = context.windowSizeClass;
     final margin = sizeClass.pageMargin;
-    final summary = _TripSummaryCard(view: widget.view);
+    final over = _plan.cost.isOverBudget;
+    final summary = [
+      if (over) ...[
+        OverBudgetBanner(
+          cost: _plan.cost,
+          hasAdvice: _plan.overBudgetAdvice.isNotEmpty,
+        ),
+        const SizedBox(height: 12),
+      ],
+      _TripSummaryCard(view: widget.view),
+      if (over) _OverBudgetHelp(tripId: widget.tripId, plan: _plan),
+    ];
     final dayHeader = _DayHeader(
       dayIndex: _day,
       date: _dayPlan.date,
@@ -122,7 +140,7 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
             child: ListView(
               padding: EdgeInsets.all(margin),
               children: [
-                summary,
+                ...summary,
                 const SizedBox(height: 20),
                 _dayChips(),
                 const SizedBox(height: 20),
@@ -188,7 +206,7 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
           : ListView(
               padding: EdgeInsets.fromLTRB(margin, 8, margin, margin),
               children: [
-                summary,
+                ...summary,
                 const SizedBox(height: 20),
                 toggle,
                 const SizedBox(height: 12),
@@ -368,6 +386,37 @@ class _BottomActions extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// Ways to save on an Over Budget plan and, when they are not enough, the
+/// budget the trip needs (#38).
+class _OverBudgetHelp extends ConsumerWidget {
+  const _OverBudgetHelp({required this.tripId, required this.plan});
+
+  final String tripId;
+  final TripPlan plan;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rescue = ref.watch(budgetRescueProvider(tripId)).value;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (plan.overBudgetAdvice.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          BudgetAdviceList(advice: plan.overBudgetAdvice),
+        ],
+        if (rescue != null) ...[
+          const SizedBox(height: 12),
+          BudgetRescueCard(
+            rescue: rescue,
+            dayCount: plan.days.length,
+            budget: plan.cost.budget,
+          ),
+        ],
+      ],
     );
   }
 }

@@ -18,10 +18,16 @@ final costCalculatorProvider = FutureProvider<CostCalculator>(
       DefaultCostCalculator(await ref.watch(pricingTableProvider.future)),
 );
 
-/// Prices its options with [costCalculatorProvider], so it is a future too.
-final overBudgetAdvisorProvider = FutureProvider<OverBudgetAdvisor>(
+/// The advisor as its own type: besides advice it works out the budget a
+/// trip needs (`rescue`), which the plan screen shows (#38). It prices with
+/// [costCalculatorProvider], so it is a future too.
+final budgetRescuerProvider = FutureProvider<DefaultOverBudgetAdvisor>(
   (ref) async =>
       DefaultOverBudgetAdvisor(await ref.watch(costCalculatorProvider.future)),
+);
+
+final overBudgetAdvisorProvider = FutureProvider<OverBudgetAdvisor>(
+  (ref) => ref.watch(budgetRescuerProvider.future),
 );
 
 /// Replace the body with the real implementation in #25.
