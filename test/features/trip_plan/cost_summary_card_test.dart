@@ -4,12 +4,11 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/providers/mock_providers.dart';
-import 'package:vaya_app/app/router.dart';
 import 'package:vaya_app/app/theme/app_theme.dart';
 import 'package:vaya_app/domain/domain.dart';
+import 'package:vaya_app/features/trip_plan/trip_plan_screen.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
 import 'package:vaya_app/features/trip_plan/widgets/cost_summary_card.dart';
 
@@ -203,10 +202,17 @@ void main() {
       await container.read(tripPlanViewProvider(mockTripId).future);
     });
 
+    // The screen on its own, not through the app's router, so this does
+    // not depend on being signed in (#15).
     await tester.pumpWidget(
-      UncontrolledProviderScope(container: container, child: const VayaApp()),
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          theme: AppTheme.light(),
+          home: const TripPlanScreen(tripId: mockTripId),
+        ),
+      ),
     );
-    container.read(routerProvider).go(AppRoutes.tripPlan(mockTripId));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 

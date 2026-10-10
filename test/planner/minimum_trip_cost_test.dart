@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vaya_app/ai/mock_gemini_service.dart';
 import 'package:vaya_app/domain/domain.dart';
@@ -186,19 +188,39 @@ void main() {
       PricingTable.fromJson(readJson('assets/data/pricing.json')),
     );
 
-    test('demo trip: train and taxi are the cheapest', () {
+    // No baht amount here: fares and prices in the bundled files change
+    // as the data is checked (#20, #22). The worked figures are in the
+    // groups above, on data this file owns.
+    test('demo trip: the cheapest of the ways the route offers', () {
       final request = TripRequest.fromJson(
         readJson('assets/mock/trip_request_demo.json'),
       );
+      final chonburi = catalog.province('chonburi');
+      int minimumIn(Province province) =>
+          real.minimumTripCost(request: request, province: province);
 
-      // train 124 + room 700 + food 480 + 200 + taxi 40 × 7 = 1784 + 10%
-      expect(
-        real.minimumTripCost(
-          request: request,
-          province: catalog.province('chonburi'),
-        ),
-        1962,
-      );
+      final byMode = {
+        for (final MapEntry(key: mode, value: option)
+            in chonburi.intercity[request.originId]!.entries)
+          mode: minimumIn(
+            Province(
+              id: chonburi.id,
+              name: chonburi.name,
+              center: chonburi.center,
+              regionTag: chonburi.regionTag,
+              tags: chonburi.tags,
+              seasonality: chonburi.seasonality,
+              seasonNote: chonburi.seasonNote,
+              intercity: {
+                request.originId: {mode: option},
+              },
+            ),
+          ),
+      };
+
+      expect(byMode.keys, containsAll(IntercityMode.values));
+      expect(byMode.values.toSet().length, greaterThan(1));
+      expect(minimumIn(chonburi), byMode.values.reduce(math.min));
     });
 
     test('is never above a plan the pipeline builds', () async {
@@ -226,19 +248,21 @@ void main() {
                     ),
       ];
 
-      for (final request in requests) {
-        final done = await planner
-            .generate(request: request, destinationId: 'chonburi')
-            .last;
+      for (final destination in ['chonburi', 'bangkok']) {
+        for (final request in requests) {
+          final done = await planner
+              .generate(request: request, destinationId: destination)
+              .last;
 
-        expect(
-          real.minimumTripCost(
-            request: request,
-            province: catalog.province('chonburi'),
-          ),
-          lessThanOrEqualTo(done.plan!.cost.total),
-          reason: '${request.toJson()}',
-        );
+          expect(
+            real.minimumTripCost(
+              request: request,
+              province: catalog.province(destination),
+            ),
+            lessThanOrEqualTo(done.plan!.cost.total),
+            reason: '$destination ${request.toJson()}',
+          );
+        }
       }
       expect(requests, hasLength(648));
     });
