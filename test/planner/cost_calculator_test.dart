@@ -11,6 +11,9 @@ const _pricing = section9Pricing;
 const _center = GeoPoint(13, 100);
 const _far = GeoPoint(13.05, 100.05);
 
+const _bus = IntercityOption(durationMin: 60, farePerPerson: 100);
+const _car = IntercityOption(durationMin: 50, distanceKm: 101, toll: 50);
+
 Province _province(String id, {String? reachedFrom}) => Province(
   id: id,
   name: id,
@@ -20,14 +23,18 @@ Province _province(String id, {String? reachedFrom}) => Province(
   seasonality: List.filled(12, SeasonRating.good),
   seasonNote: '',
   intercity: {
-    ?reachedFrom: const {
-      IntercityMode.bus: IntercityOption(durationMin: 60, farePerPerson: 100),
-      IntercityMode.train: IntercityOption(durationMin: 90, farePerPerson: 40),
-      IntercityMode.car: IntercityOption(
-        durationMin: 50,
-        distanceKm: 101,
-        toll: 50,
-      ),
+    if (reachedFrom != null) ...{
+      reachedFrom: const {
+        IntercityMode.bus: _bus,
+        IntercityMode.train: IntercityOption(
+          durationMin: 90,
+          farePerPerson: 40,
+        ),
+        IntercityMode.car: _car,
+      },
+      // Routes that lack some modes (#98).
+      'busOnly': const {IntercityMode.bus: _bus},
+      'carOnly': const {IntercityMode.car: _car},
     },
   },
 );
@@ -350,6 +357,24 @@ void main() {
       // (101 × 2.5 + 50) × 2
       expect(priced(IntercityMode.car, 1).cost.intercity, 605);
       expect(priced(IntercityMode.car, 5).cost.intercity, 605);
+    });
+
+    test('a route without the chosen mode prices the mode it has', () {
+      TripPlan from(String origin, IntercityMode chosen) => price(
+        _request(travellers: 3, origin: origin),
+        _plan([
+          [_stop('free')],
+        ], intercity: chosen),
+      );
+
+      final bus = from('busOnly', IntercityMode.car);
+      expect(bus.intercity!.mode, IntercityMode.bus);
+      expect(bus.cost.intercity, 100 * 3 * 2);
+
+      final car = from('carOnly', IntercityMode.bus);
+      expect(car.intercity!.mode, IntercityMode.car);
+      expect(car.intercity!.durationMin, 50);
+      expect(car.cost.intercity, 605);
     });
 
     test('a trip inside the origin province costs nothing', () {

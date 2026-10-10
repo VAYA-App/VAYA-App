@@ -78,8 +78,9 @@ void main() {
     MockGeminiResponder? gemini,
     int perStop = 100,
     _Advisor? advisor,
+    PlaceCatalog? data,
   }) => DefaultPlannerService(
-    loadCatalog: () async => catalog,
+    loadCatalog: () async => data ?? catalog,
     selector: PlaceSelector(gemini: MockGeminiService(responder: gemini)),
     costCalculator: _FlatCost(perStop),
     overBudgetAdvisor: advisor ?? _Advisor(),
@@ -101,6 +102,42 @@ void main() {
       expect(catalog.place(stop.placeId).provinceId, 'chonburi');
     }
     expect(plan.nightStays.single.night, 1);
+    expect(plan.intercity?.mode, IntercityMode.bus);
+    expect(plan.intercity?.durationMin, 150);
+  });
+
+  test('a route without the chosen mode uses the mode it has', () async {
+    final chonburi = catalog.province('chonburi');
+    final busOnly = PlaceCatalog(
+      provinces: [
+        for (final p in catalog.provinces)
+          if (p.id != 'chonburi')
+            p
+          else
+            Province(
+              id: p.id,
+              name: p.name,
+              center: p.center,
+              regionTag: p.regionTag,
+              tags: p.tags,
+              seasonality: p.seasonality,
+              seasonNote: p.seasonNote,
+              intercity: {
+                'bangkok': {
+                  IntercityMode.bus:
+                      chonburi.intercity['bangkok']![IntercityMode.bus]!,
+                },
+              },
+            ),
+      ],
+      places: catalog.places.toList(),
+    );
+    final request = demoRequest().copyWith(
+      intercityMode: () => IntercityMode.car,
+    );
+
+    final plan = (await run(request, data: busOnly)).last.plan!;
+
     expect(plan.intercity?.mode, IntercityMode.bus);
     expect(plan.intercity?.durationMin, 150);
   });
