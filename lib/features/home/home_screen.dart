@@ -26,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: null,
         onPressed: () => context.push(AppRoutes.newTrip),
         icon: const Icon(Icons.add),
         label: const Text('วางแผนทริปใหม่'),
@@ -323,7 +324,7 @@ class _SavedTrips extends ConsumerWidget {
         crossAxisCount: crossAxisCount,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
-        childAspectRatio: 2.4,
+        childAspectRatio: 2.2,
       ),
       itemBuilder: (context, index) {
         return _TripCard(trip: trips[index], catalog: catalog);
@@ -342,6 +343,8 @@ class _TripCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final tripRepo = ref.read(tripRepositoryProvider);
+    final messenger = ScaffoldMessenger.of(context);
     final province =
         catalog?.findProvince(trip.plan.destinationId)?.name ??
         trip.plan.destinationId;
@@ -365,16 +368,16 @@ class _TripCard extends ConsumerWidget {
       ),
       onDismissed: (_) {
         if (trip.id != null) {
-          ref.read(tripRepositoryProvider).deleteTrip(trip.id!);
+          tripRepo.deleteTrip(trip.id!);
         }
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
+        messenger.clearSnackBars();
+        messenger.showSnackBar(
           SnackBar(
             content: Text('ลบทริป$provinceแล้ว'),
             action: SnackBarAction(
               label: 'เลิกทำ',
               onPressed: () {
-                ref.read(tripRepositoryProvider).saveTrip(trip);
+                tripRepo.saveTrip(trip);
               },
             ),
           ),
@@ -387,19 +390,18 @@ class _TripCard extends ConsumerWidget {
           onTap: trip.id != null
               ? () => context.push(AppRoutes.tripPlan(trip.id!))
               : null,
-          title: Row(
+          title: Wrap(
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 4,
             children: [
-              Flexible(
-                child: Text(
-                  province,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                province,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              if (cost.isOverBudget) ...[
-                const SizedBox(width: 8),
+              if (cost.isOverBudget)
                 DecoratedBox(
                   decoration: BoxDecoration(
                     color: colors.errorContainer,
@@ -419,24 +421,28 @@ class _TripCard extends ConsumerWidget {
                     ),
                   ),
                 ),
-              ],
             ],
           ),
-          subtitle: Padding(
-            padding: const EdgeInsets.only(top: 4),
-            child: Text(
-              '$dateRange · ${trip.request.travellerCount} คน',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant,
+          subtitle: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 4),
+              Text(
+                '$dateRange · ${trip.request.travellerCount} คน',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
               ),
-            ),
-          ),
-          trailing: Text(
-            formatBaht(cost.total),
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: cost.isOverBudget ? colors.error : colors.primary,
-            ),
+              const SizedBox(height: 4),
+              Text(
+                formatBaht(cost.total),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: cost.isOverBudget ? colors.error : colors.primary,
+                ),
+              ),
+            ],
           ),
         ),
       ),
