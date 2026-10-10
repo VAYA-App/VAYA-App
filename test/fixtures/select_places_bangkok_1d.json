@@ -1,0 +1,15 @@
+{
+  "_comment": "Handwritten in the shape Gemini returns (#27) for demo 2: a temple day in Bangkok on ฿1,500 (#32).",
+  "days": [
+    {
+      "slots": [
+        { "slot": "morning", "placeId": "bangkok-attraction-wat-pho", "note": "พระนอนองค์ใหญ่ เริ่มเช้าก่อนคนเยอะ" },
+        { "slot": "lunch", "placeId": "bangkok-restaurant-thipsamai", "note": "ผัดไทยเจ้าดังใกล้เกาะรัตนโกสินทร์" },
+        { "slot": "afternoon", "placeId": "bangkok-attraction-wat-arun", "note": "ข้ามฟากไปชมพระปรางค์ริมเจ้าพระยา" },
+        { "slot": "afternoon", "placeId": "bangkok-attraction-chatuchak", "note": "ตลาดนัดสุดสัปดาห์ ของกินเยอะ" },
+        { "slot": "dinner", "placeId": "bangkok-restaurant-pier21-asok", "note": "ศูนย์อาหารราคาประหยัด" }
+      ]
+    }
+  ],
+  "accommodationTier": 1
+}

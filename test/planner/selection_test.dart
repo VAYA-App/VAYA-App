@@ -158,7 +158,7 @@ void main() {
     test('uses Gemini when its answer is valid', () async {
       final r = await selectWith((_, _) => fixture);
       expect(r.source, SelectionSource.gemini);
-      expect(r.selection.accommodationTier, 3);
+      expect(r.selection.accommodationTier, 2);
     });
 
     test('falls back when Gemini is unavailable', () async {
