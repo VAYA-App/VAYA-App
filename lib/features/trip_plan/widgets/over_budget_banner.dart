@@ -11,12 +11,16 @@ class OverBudgetBanner extends StatelessWidget {
     super.key,
     required this.cost,
     this.hasAdvice = true,
+    this.canShorten = true,
   });
 
   final CostEstimate cost;
 
   /// Whether ways to save money are listed further down the screen.
   final bool hasAdvice;
+
+  /// Whether the trip has a day to give up; a day trip does not.
+  final bool canShorten;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +45,9 @@ class OverBudgetBanner extends StatelessWidget {
       title = 'เกินงบ ${formatBaht(cost.overBy)}';
       body = hasAdvice
           ? 'ยังแสดงแผนให้ครบ ดูวิธีลดค่าใช้จ่ายด้านล่าง'
-          : 'ยังแสดงแผนให้ครบ ลองเพิ่มงบหรือลดจำนวนวันดู';
+          : canShorten
+          ? 'ยังแสดงแผนให้ครบ ลองเพิ่มงบหรือลดจำนวนวันดู'
+          : 'ยังแสดงแผนให้ครบ ลองเพิ่มงบดู';
     }
 
     return Semantics(

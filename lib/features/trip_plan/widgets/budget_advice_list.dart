@@ -47,8 +47,9 @@ class BudgetAdviceList extends StatelessWidget {
   }
 }
 
-/// Shown when every option together still leaves the plan Over Budget:
-/// the budget this trip needs, or how short it would have to be.
+/// Shown when every option together still leaves the plan Over Budget. It
+/// leads with how far over the plan stays, then the budget this trip needs
+/// or how short it would have to be.
 ///
 /// The figures from [BudgetRescue] are the cheapest any trip here could be,
 /// not this plan made cheaper, and the card says so. When that cheapest
@@ -58,11 +59,15 @@ class BudgetRescueCard extends StatelessWidget {
   const BudgetRescueCard({
     super.key,
     required this.rescue,
+    required this.advice,
     required this.dayCount,
     required this.budget,
   });
 
   final BudgetRescue rescue;
+
+  /// The options listed above the card, so it claims no more than they do.
+  final List<BudgetAdvice> advice;
 
   /// Days of the trip as planned.
   final int dayCount;
@@ -70,13 +75,28 @@ class BudgetRescueCard extends StatelessWidget {
   /// The Budget the plan was priced against.
   final int budget;
 
+  /// [BudgetRescue.stillOverBy] comes from the priced options only; another
+  /// province is an estimate the rescue never applies.
+  String get _title {
+    final stillOver = formatBaht(rescue.stillOverBy);
+    final priced = advice.where(
+      (item) => item.kind != BudgetAdviceKind.changeDestination,
+    );
+    if (priced.isEmpty) {
+      return 'แผนนี้ลดค่าใช้จ่ายต่อไม่ได้แล้ว ยังเกินงบอีก $stillOver';
+    }
+    return priced.length < advice.length
+        ? 'ทำทุกวิธีข้างบนพร้อมกัน ยกเว้นเปลี่ยนจังหวัด '
+              'ยังเกินงบอีก $stillOver'
+        : 'ทำทุกวิธีข้างบนพร้อมกันแล้วยังเกินงบอีก $stillOver';
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final foreground = colors.onTertiaryContainer;
     final body = theme.textTheme.bodyMedium?.copyWith(color: foreground);
-    final stillOver = formatBaht(rescue.stillOverBy);
     final needsBiggerBudget = rescue.minimumBudget > budget;
 
     return Card.filled(
@@ -93,11 +113,7 @@ class BudgetRescueCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    needsBiggerBudget
-                        ? 'ควรมีงบอย่างน้อย '
-                              '${formatBaht(rescue.minimumBudget)} '
-                              'สำหรับทริป $dayCount วัน'
-                        : 'ทำทุกวิธีข้างบนแล้วยังเกินงบอีก $stillOver',
+                    _title,
                     style: theme.textTheme.titleMedium?.copyWith(
                       color: foreground,
                     ),
@@ -107,7 +123,11 @@ class BudgetRescueCard extends StatelessWidget {
             ),
             const SizedBox(height: 6),
             if (needsBiggerBudget) ...[
-              Text('ทำทุกวิธีข้างบนแล้วยังเกินงบอีก $stillOver', style: body),
+              Text(
+                'ควรมีงบอย่างน้อย ${formatBaht(rescue.minimumBudget)} '
+                'สำหรับทริป $dayCount วัน',
+                style: body,
+              ),
               const SizedBox(height: 6),
               if (rescue.daysThatFit case final days?)
                 Text(
@@ -125,7 +145,7 @@ class BudgetRescueCard extends StatelessWidget {
               ),
             ] else
               Text(
-                'ลองเพิ่มงบอีกราว $stillOver '
+                'ลองเพิ่มงบอีกราว ${formatBaht(rescue.stillOverBy)} '
                 'หรือเลือกที่พักและร้านอาหารที่ราคาต่ำลง',
                 style: body,
               ),

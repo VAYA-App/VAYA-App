@@ -8,6 +8,7 @@ import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
 import 'package:vaya_app/features/trip_plan/widgets/budget_advice_list.dart';
 import 'package:vaya_app/features/trip_plan/widgets/over_budget_banner.dart';
 import 'package:vaya_app/planner/default_over_budget_advisor.dart';
+import 'package:vaya_app/shared/formatters.dart';
 import 'package:vaya_app/shared/widgets/mascot_view.dart';
 
 /// The mock plan's cost (real cost 5,984 + buffer 598 = 6,582) against
@@ -46,6 +47,9 @@ const _advice = [
     description: 'เที่ยวกรุงเทพมหานครแทน เริ่มต้นถูกกว่า ~฿400',
   ),
 ];
+
+/// Without the province estimate, which the rescue never applies.
+final _pricedAdvice = _advice.sublist(0, 3);
 
 void main() {
   Future<void> pump(
@@ -93,6 +97,20 @@ void main() {
 
       expect(find.textContaining('ด้านล่าง'), findsNothing);
       expect(find.textContaining('ลองเพิ่มงบหรือลดจำนวนวัน'), findsOneWidget);
+    });
+
+    testWidgets('a day trip is not told to drop a day', (tester) async {
+      await pump(
+        tester,
+        OverBudgetBanner(
+          cost: _cost(5000),
+          hasAdvice: false,
+          canShorten: false,
+        ),
+      );
+
+      expect(find.textContaining('ลดจำนวนวัน'), findsNothing);
+      expect(find.textContaining('ลองเพิ่มงบดู'), findsOneWidget);
     });
 
     testWidgets('is softer when only the buffer goes over', (tester) async {
@@ -168,10 +186,11 @@ void main() {
     ) async {
       await pump(
         tester,
-        const BudgetRescueCard(
+        BudgetRescueCard(
+          advice: _pricedAdvice,
           dayCount: 3,
           budget: 3000,
-          rescue: BudgetRescue(
+          rescue: const BudgetRescue(
             stillOverBy: 7789,
             minimumBudget: 6100,
             daysThatFit: 1,
@@ -180,11 +199,15 @@ void main() {
         ),
       );
 
+      // What is left of this plan leads; the cheapest trip comes second.
+      final title = find.text('ทำทุกวิธีข้างบนพร้อมกันแล้วยังเกินงบอีก ฿7,789');
+      final minimum = find.text('ควรมีงบอย่างน้อย ฿6,100 สำหรับทริป 3 วัน');
+      expect(title, findsOneWidget);
+      expect(minimum, findsOneWidget);
       expect(
-        find.text('ควรมีงบอย่างน้อย ฿6,100 สำหรับทริป 3 วัน'),
-        findsOneWidget,
+        tester.getTopLeft(title).dy,
+        lessThan(tester.getTopLeft(minimum).dy),
       );
-      expect(find.textContaining('ยังเกินงบอีก ฿7,789'), findsOneWidget);
       expect(
         find.text('หรือลดเหลือ 1 วันแบบประหยัดสุด เริ่มต้น ~฿1,197'),
         findsOneWidget,
@@ -198,14 +221,24 @@ void main() {
 
       await pump(
         tester,
-        const BudgetRescueCard(dayCount: 2, budget: 500, rescue: rescue),
+        BudgetRescueCard(
+          advice: _pricedAdvice,
+          dayCount: 2,
+          budget: 500,
+          rescue: rescue,
+        ),
       );
       expect(find.text('งบนี้ยังไม่พอแม้เป็นทริป 1 วัน'), findsOneWidget);
 
       // Already a day trip: nothing shorter to mention.
       await pump(
         tester,
-        const BudgetRescueCard(dayCount: 1, budget: 500, rescue: rescue),
+        BudgetRescueCard(
+          advice: _pricedAdvice,
+          dayCount: 1,
+          budget: 500,
+          rescue: rescue,
+        ),
       );
       expect(find.textContaining('แม้เป็นทริป 1 วัน'), findsNothing);
     });
@@ -215,10 +248,11 @@ void main() {
       // option applied is still 342 over.
       await pump(
         tester,
-        const BudgetRescueCard(
+        BudgetRescueCard(
+          advice: _pricedAdvice,
           dayCount: 2,
           budget: 2500,
-          rescue: BudgetRescue(
+          rescue: const BudgetRescue(
             stillOverBy: 342,
             minimumBudget: 2000,
             daysThatFit: 1,
@@ -229,8 +263,63 @@ void main() {
 
       expect(find.textContaining('ควรมีงบอย่างน้อย'), findsNothing);
       expect(find.textContaining('฿2,000'), findsNothing);
-      expect(find.text('ทำทุกวิธีข้างบนแล้วยังเกินงบอีก ฿342'), findsOneWidget);
+      expect(
+        find.text('ทำทุกวิธีข้างบนพร้อมกันแล้วยังเกินงบอีก ฿342'),
+        findsOneWidget,
+      );
       expect(find.textContaining('ลองเพิ่มงบอีกราว ฿342'), findsOneWidget);
+    });
+
+    testWidgets('does not claim to have tried another province', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        const BudgetRescueCard(
+          advice: _advice,
+          dayCount: 2,
+          budget: 2500,
+          rescue: BudgetRescue(stillOverBy: 342, minimumBudget: 2000),
+        ),
+      );
+
+      expect(
+        find.text(
+          'ทำทุกวิธีข้างบนพร้อมกัน ยกเว้นเปลี่ยนจังหวัด ยังเกินงบอีก ฿342',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('says nothing can be cut when no option is priced', (
+      tester,
+    ) async {
+      const rescue = BudgetRescue(stillOverBy: 342, minimumBudget: 2000);
+      const title = 'แผนนี้ลดค่าใช้จ่ายต่อไม่ได้แล้ว ยังเกินงบอีก ฿342';
+
+      await pump(
+        tester,
+        const BudgetRescueCard(
+          advice: [],
+          dayCount: 1,
+          budget: 2500,
+          rescue: rescue,
+        ),
+      );
+      expect(find.text(title), findsOneWidget);
+      expect(find.textContaining('ข้างบน'), findsNothing);
+
+      // Another province is listed, but it is not this plan made cheaper.
+      await pump(
+        tester,
+        BudgetRescueCard(
+          advice: [_advice.last],
+          dayCount: 1,
+          budget: 2500,
+          rescue: rescue,
+        ),
+      );
+      expect(find.text(title), findsOneWidget);
     });
   });
 
@@ -245,6 +334,7 @@ void main() {
             OverBudgetBanner(cost: _cost(6200)),
             const BudgetAdviceList(advice: _advice),
             const BudgetRescueCard(
+              advice: _advice,
               dayCount: 3,
               budget: 3000,
               rescue: BudgetRescue(
@@ -317,6 +407,26 @@ void main() {
       expect(find.byType(MascotView), findsOneWidget);
     });
 
+    testWidgets('an over-budget plan says how far over only once', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final container = await open(tester, mockOverBudgetTripId);
+      final cost = container
+          .read(tripPlanViewProvider(mockOverBudgetTripId))
+          .value!
+          .plan
+          .cost;
+      final amount = RegExp(
+        '^เกินงบ ${RegExp.escape(formatBaht(cost.overBy))}',
+      );
+
+      expect(find.textContaining(amount), findsOneWidget);
+      expect(find.bySemanticsLabel(amount), findsOneWidget);
+      expect(find.text('อยู่ในงบ'), findsNothing);
+      semantics.dispose();
+    });
+
     testWidgets('a plan within budget gets none of them', (tester) async {
       final container = await open(tester, mockTripId);
 
@@ -324,6 +434,8 @@ void main() {
       expect(find.byType(OverBudgetBanner), findsNothing);
       expect(find.byType(BudgetAdviceList), findsNothing);
       expect(find.byType(BudgetRescueCard), findsNothing);
+      expect(find.text('อยู่ในงบ'), findsOneWidget);
+      expect(find.textContaining('เกินงบ'), findsNothing);
     });
   });
 }
