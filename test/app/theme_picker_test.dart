@@ -2,16 +2,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/app/app.dart';
+import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/theme/app_theme.dart';
 import 'package:vaya_app/app/theme/theme_mode_provider.dart';
 import 'package:vaya_app/app/theme/theme_palette.dart';
+import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 
 void main() {
   testWidgets('home palette button changes mode and palette', (tester) async {
     tester.view.physicalSize = const Size(412, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final container = ProviderContainer();
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(
+          MockAuthRepository(initialUser: MockAuthRepository.demoUser),
+        ),
+      ],
+    );
     addTearDown(container.dispose);
 
     await tester.pumpWidget(
