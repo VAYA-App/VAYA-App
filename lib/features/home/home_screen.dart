@@ -332,14 +332,14 @@ class _SavedTrips extends ConsumerWidget {
   }
 }
 
-class _TripCard extends StatelessWidget {
+class _TripCard extends ConsumerWidget {
   const _TripCard({required this.trip, required this.catalog});
 
   final Trip trip;
   final PlaceCatalog? catalog;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final province =
@@ -351,62 +351,92 @@ class _TripCard extends StatelessWidget {
     );
     final cost = trip.plan.cost;
 
-    return Card.outlined(
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        onTap: trip.id != null
-            ? () => context.push(AppRoutes.tripPlan(trip.id!))
-            : null,
-        title: Row(
-          children: [
-            Flexible(
-              child: Text(
-                province,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
+    return Dismissible(
+      key: ValueKey(trip.id ?? trip.createdAt.toIso8601String()),
+      direction: DismissDirection.endToStart,
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        decoration: BoxDecoration(
+          color: colors.errorContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(Icons.delete_outline, color: colors.onErrorContainer),
+      ),
+      onDismissed: (_) {
+        if (trip.id != null) {
+          ref.read(tripRepositoryProvider).deleteTrip(trip.id!);
+        }
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('ลบทริป$provinceแล้ว'),
+            action: SnackBarAction(
+              label: 'เลิกทำ',
+              onPressed: () {
+                ref.read(tripRepositoryProvider).saveTrip(trip);
+              },
             ),
-            if (cost.isOverBudget) ...[
-              const SizedBox(width: 8),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors.errorContainer,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
+          ),
+        );
+      },
+      child: Card.outlined(
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        child: ListTile(
+          onTap: trip.id != null
+              ? () => context.push(AppRoutes.tripPlan(trip.id!))
+              : null,
+          title: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  province,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
                   ),
-                  child: Text(
-                    'เกินงบ',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colors.onErrorContainer,
-                      fontWeight: FontWeight.bold,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (cost.isOverBudget) ...[
+                const SizedBox(width: 8),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: colors.errorContainer,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    child: Text(
+                      'เกินงบ',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colors.onErrorContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
-          ],
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            '$dateRange · ${trip.request.travellerCount} คน',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.onSurfaceVariant,
+          ),
+          subtitle: Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Text(
+              '$dateRange · ${trip.request.travellerCount} คน',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.onSurfaceVariant,
+              ),
             ),
           ),
-        ),
-        trailing: Text(
-          formatBaht(cost.total),
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: cost.isOverBudget ? colors.error : colors.primary,
+          trailing: Text(
+            formatBaht(cost.total),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: cost.isOverBudget ? colors.error : colors.primary,
+            ),
           ),
         ),
       ),
