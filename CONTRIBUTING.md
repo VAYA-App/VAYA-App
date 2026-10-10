@@ -8,6 +8,7 @@
 2. **ห้าม push ตรงเข้า `main`** ทุกอย่างต้องผ่าน PR
 3. **Merge ด้วย "Squash and merge" เท่านั้น** แล้วกด **Delete branch** (ห้ามใช้ "Create a merge commit" หรือ "Rebase and merge")
 4. **ต้องมี 1 Approve จากคนอื่นในทีมก่อน merge** และ check ของ [CI](#ci-github-actions) ต้องผ่าน (✅) และทำครบ checklist ใน PR template แล้ว ขอรีวิวตอนเปิด PR ด้วย `--reviewer <ชื่อ>` (ใครก็ได้ที่ไม่ใช่เจ้าของ PR) GitHub ไม่ให้เจ้าของ PR กด Approve เอง และ repo นี้ตั้ง branch protection ไม่ได้ จึงเป็นกติกาที่ทุกคนต้องเช็คเองก่อนกด merge (#120)
+   - **ยกเว้น PR ของ @Kritternai (manager):** merge ได้เลยเมื่อ CI ✅ ไม่ต้องรอ แต่ยังต้องใส่ `--reviewer` ไว้ ให้เพื่อน Approve ตามหลังได้ (GitHub รับ Approve หลัง merge)
 5. ถ้า PR แก้ `lib/domain/` หรือ `lib/app/theme/` ต้อง**แจ้งในกลุ่มก่อน merge** เพราะกระทบงานของทุกคน
 
 ## ชื่อ branch
