@@ -41,7 +41,7 @@ class DefaultPlannerService implements PlannerService {
     final intercity = _intercity(request, province);
     final days = SlotTemplate.forTrip(
       request,
-      intercityMinutes: intercity?.durationMin,
+      intercityMinutes: intercity?.option.durationMin,
     );
     final candidates = candidateBuilder.build(
       request: request,
@@ -96,8 +96,8 @@ class DefaultPlannerService implements PlannerService {
       intercity: intercity == null
           ? null
           : IntercityLeg(
-              mode: request.intercityMode ?? IntercityMode.bus,
-              durationMin: intercity.durationMin,
+              mode: intercity.mode,
+              durationMin: intercity.option.durationMin,
               cost: 0,
             ),
       nightStays: nightStays,
@@ -123,13 +123,21 @@ class DefaultPlannerService implements PlannerService {
     );
   }
 
-  /// The chosen way to reach [province], or `null` when the trip stays in
-  /// the Origin (or there is no fare data for the route).
-  IntercityOption? _intercity(TripRequest request, Province province) {
+  /// The way to reach [province], or `null` when the trip stays in the
+  /// Origin (or there is no fare data for the route). When the route lacks
+  /// the chosen mode, the first mode it has is used and the leg says so.
+  ({IntercityMode mode, IntercityOption option})? _intercity(
+    TripRequest request,
+    Province province,
+  ) {
     if (request.staysInOrigin(province.id)) return null;
     final options = province.intercity[request.originId];
     if (options == null || options.isEmpty) return null;
-    return options[request.intercityMode ?? IntercityMode.bus] ??
-        options.values.first;
+    final chosen = request.intercityMode ?? IntercityMode.bus;
+    if (options[chosen] case final option?) {
+      return (mode: chosen, option: option);
+    }
+    final MapEntry(key: mode, value: option) = options.entries.first;
+    return (mode: mode, option: option);
   }
 }

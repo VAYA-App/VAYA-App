@@ -44,9 +44,7 @@ class DefaultCostCalculator implements CostCalculator {
         ),
     ];
     final intercity = switch (plan.intercity) {
-      final leg? => leg.copyWithCost(
-        _intercityCost(request, province, leg.mode),
-      ),
+      final leg? => _pricedLeg(request, province, leg),
       null => null,
     };
 
@@ -246,18 +244,24 @@ class DefaultCostCalculator implements CostCalculator {
     return province.center;
   }
 
-  int _intercityCost(
+  /// [leg] with the fare of the option it actually uses. A route that lacks
+  /// the leg's mode falls back to its first mode, as the pipeline does, and
+  /// the leg switches to that mode so the price matches what it says.
+  IntercityLeg _pricedLeg(
     TripRequest request,
     Province province,
-    IntercityMode mode,
+    IntercityLeg leg,
   ) {
     final options = province.intercity[request.originId];
-    if (options == null || options.isEmpty) return 0;
-    // Same fallback as the pipeline when the route lacks the chosen mode.
-    return _fare(
-      options[mode] ?? options.values.first,
-      mode,
-      request.travellerCount,
+    if (options == null || options.isEmpty) return leg.copyWithCost(0);
+    if (options[leg.mode] case final option?) {
+      return leg.copyWithCost(_fare(option, leg.mode, request.travellerCount));
+    }
+    final MapEntry(key: mode, value: option) = options.entries.first;
+    return IntercityLeg(
+      mode: mode,
+      durationMin: option.durationMin,
+      cost: _fare(option, mode, request.travellerCount),
     );
   }
 
