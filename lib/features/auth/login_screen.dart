@@ -139,29 +139,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              color: colors.secondaryContainer.withValues(
-                                alpha: 0.7,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              child: Text(
-                                'AI TRIP PLANNER',
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: colors.primary,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1.2,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
                           Text(
                             'VAYA',
                             style: theme.textTheme.displaySmall?.copyWith(
@@ -190,21 +167,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           const SizedBox(height: 32),
                           SizedBox(
                             width: double.infinity,
-                            child: OutlinedButton.icon(
+                            child: FilledButton.icon(
                               onPressed: _isLoading ? null : _signIn,
                               icon: _isLoading
                                   ? SizedBox.square(
                                       dimension: 20,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: colors.primary,
+                                        color: colors.onPrimary,
                                       ),
                                     )
                                   : Container(
                                       width: 24,
                                       height: 24,
                                       decoration: BoxDecoration(
-                                        color: colors.secondaryContainer,
+                                        color: colors.surface,
                                         shape: BoxShape.circle,
                                       ),
                                       alignment: Alignment.center,
@@ -218,6 +195,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       ),
                                     ),
                               label: const Text('เข้าสู่ระบบด้วย Google'),
+                              style: FilledButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                  horizontal: 20,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
