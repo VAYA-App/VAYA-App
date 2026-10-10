@@ -25,6 +25,11 @@ class HomeScreen extends ConsumerWidget {
     final trips = ref.watch(savedTripsProvider).value ?? const [];
 
     return Scaffold(
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push(AppRoutes.newTrip),
+        icon: const Icon(Icons.add),
+        label: const Text('วางแผนทริปใหม่'),
+      ),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -256,22 +261,19 @@ class _EmptyTrips extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
         child: Column(
           children: [
-            Icon(Icons.luggage_outlined, size: 40, color: colors.outline),
+            Icon(Icons.luggage_outlined, size: 48, color: colors.outline),
             const SizedBox(height: 12),
-            Text(
-              'ยังไม่มีทริปที่บันทึกไว้',
-              style: theme.textTheme.titleMedium,
-            ),
+            Text('ยังไม่มีทริป', style: theme.textTheme.titleMedium),
             const SizedBox(height: 4),
             Text(
-              'แผนที่คุณบันทึกจะแสดงที่นี่ (กำลังพัฒนา · #42)',
+              'แผนที่คุณบันทึกจะแสดงที่นี่',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: colors.onSurfaceVariant,
               ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            FilledButton.tonalIcon(
+            FilledButton.icon(
               onPressed: () => context.push(AppRoutes.newTrip),
               icon: const Icon(Icons.add),
               label: const Text('เริ่มวางแผนทริปแรก'),
