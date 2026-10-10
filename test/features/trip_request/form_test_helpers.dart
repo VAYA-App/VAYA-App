@@ -7,7 +7,6 @@ import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/providers/planner_providers.dart';
 import 'package:vaya_app/app/router.dart';
-import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/trip_request/trip_request_form_notifier.dart';
 import 'package:vaya_app/features/trip_request/widgets/option_card.dart';
@@ -34,9 +33,6 @@ Future<ProviderContainer> pumpForm(
   addTearDown(tester.view.reset);
   final container = ProviderContainer(
     overrides: [
-      authRepositoryProvider.overrideWithValue(
-        MockAuthRepository(initialUser: MockAuthRepository.demoUser),
-      ),
       todayProvider.overrideWithValue(DateTime(2026, 11, 1)),
       plannerServiceProvider.overrideWithValue(_IdlePlanner()),
     ],

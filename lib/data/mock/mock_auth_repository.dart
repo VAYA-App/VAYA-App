@@ -5,10 +5,7 @@ import '../auth_repository.dart';
 /// Stand-in for Firebase Auth until Firebase is set up (deferred, see #14).
 /// "Signing in with Google" succeeds immediately as a demo user.
 class MockAuthRepository implements AuthRepository {
-  MockAuthRepository({
-    this.signInDelay = const Duration(milliseconds: 600),
-    AppUser? initialUser,
-  }) : _user = initialUser;
+  MockAuthRepository({this.signInDelay = const Duration(milliseconds: 600)});
 
   static const demoUser = AppUser(
     uid: 'demo-user',

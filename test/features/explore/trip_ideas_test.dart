@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/router.dart';
-import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/explore/trip_ideas.dart';
 import 'package:vaya_app/features/trip_request/trip_request_form_notifier.dart';
@@ -35,13 +34,7 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final container = ProviderContainer(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(
-          MockAuthRepository(initialUser: MockAuthRepository.demoUser),
-        ),
-      ],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
     late List<TripIdea> ideas;
     await tester.runAsync(() async {
