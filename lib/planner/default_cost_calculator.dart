@@ -21,6 +21,7 @@ class DefaultCostCalculator implements CostCalculator {
     required TripPlan plan,
     required PlaceCatalog catalog,
   }) {
+    _checkRequest(request);
     final travellers = request.travellerCount;
     final province = catalog.province(plan.destinationId);
 
@@ -97,6 +98,7 @@ class DefaultCostCalculator implements CostCalculator {
     required TripRequest request,
     required Province province,
   }) {
+    _checkRequest(request);
     final options = request.staysInOrigin(province.id)
         ? null
         : province.intercity[request.originId];
@@ -263,6 +265,25 @@ class DefaultCostCalculator implements CostCalculator {
       durationMin: option.durationMin,
       cost: _fare(option, mode, request.travellerCount),
     );
+  }
+
+  /// The trip request form never sends these, but the province filter (#24)
+  /// and the over-budget advisor call the calculator directly.
+  static void _checkRequest(TripRequest request) {
+    if (request.travellerCount < 1) {
+      throw ArgumentError.value(
+        request.travellerCount,
+        'request.travellerCount',
+        'must be at least 1',
+      );
+    }
+    if (request.dayCount < 1) {
+      throw ArgumentError.value(
+        request.dayCount,
+        'request.dayCount',
+        'must be at least 1 (endDate is before startDate)',
+      );
+    }
   }
 
   /// Both directions. Tickets are per person; a car pays fuel and the toll
