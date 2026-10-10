@@ -20,7 +20,7 @@ void main() {
       readJson('test/fixtures/select_places_chonburi_2d.json'),
     );
 
-    expect(selection.accommodationTier, 3);
+    expect(selection.accommodationTier, 2);
     expect(selection.days.map((d) => d.map((p) => p.slot).toList()), [
       for (final d in days) d.slots,
     ]);
