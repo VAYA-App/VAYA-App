@@ -47,7 +47,7 @@ class CostSummaryCard extends StatelessWidget {
                   alignment: WrapAlignment.spaceBetween,
                   spacing: 8,
                   children: [
-                    Text('งบประมาณรวมทั้งทริป', style: muted),
+                    Text('ค่าใช้จ่ายรวมทั้งทริป', style: muted),
                     Text('ราคาโดยประมาณ', style: muted),
                   ],
                 ),

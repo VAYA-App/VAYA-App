@@ -71,6 +71,8 @@ void main() {
   ) async {
     await pumpCard(tester, _mockCost());
 
+    // The big number is what the trip costs, not the budget (#102).
+    expect(find.text('ค่าใช้จ่ายรวมทั้งทริป'), findsOneWidget);
     expect(find.textContaining('฿6,582'), findsOneWidget);
     expect(find.textContaining('งบ ฿7,000'), findsOneWidget);
     expect(find.textContaining('฿3,291'), findsOneWidget);
