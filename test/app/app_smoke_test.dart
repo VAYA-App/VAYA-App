@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/layout/window_size_class.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
-import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 import 'package:vaya_app/features/explore/trip_ideas.dart';
 
 void main() {
@@ -12,13 +11,7 @@ void main() {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
-    final container = ProviderContainer(
-      overrides: [
-        authRepositoryProvider.overrideWithValue(
-          MockAuthRepository(initialUser: MockAuthRepository.demoUser),
-        ),
-      ],
-    );
+    final container = ProviderContainer();
     addTearDown(container.dispose);
     // Asset loading needs real async; load what the tabs read first.
     await tester.runAsync(() async {

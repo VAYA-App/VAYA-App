@@ -1,11 +1,6 @@
-import 'dart:async';
-
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../data/auth_repository.dart';
-import 'providers/data_providers.dart';
 import '../features/assistant/assistant_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/explore/explore_screen.dart';
@@ -30,47 +25,10 @@ abstract final class AppRoutes {
   static String tripPlan(String tripId) => '/trips/$tripId';
 }
 
-class _AuthRefreshNotifier extends ChangeNotifier {
-  _AuthRefreshNotifier(Stream<AppUser?> stream) {
-    _subscription = stream.listen((_) => notifyListeners());
-  }
-
-  late final StreamSubscription<AppUser?> _subscription;
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
-  }
-}
-
-/// Auth redirect based on auth state (#15).
+/// Auth redirect is added by #15.
 final routerProvider = Provider<GoRouter>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  final refreshNotifier = _AuthRefreshNotifier(
-    authRepository.authStateChanges(),
-  );
-  ref.onDispose(refreshNotifier.dispose);
-
   final router = GoRouter(
     initialLocation: AppRoutes.home,
-    refreshListenable: refreshNotifier,
-    redirect: (context, state) {
-      final loggedIn = authRepository.currentUser != null;
-      final loggingIn = state.matchedLocation == AppRoutes.login;
-
-      // ยังไม่ล็อกอิน → /login
-      if (!loggedIn) {
-        return loggingIn ? null : AppRoutes.login;
-      }
-
-      // ล็อกอินแล้วแต่อยู่ที่ /login → /
-      if (loggingIn) {
-        return AppRoutes.home;
-      }
-
-      return null;
-    },
     routes: [
       GoRoute(
         path: AppRoutes.login,
