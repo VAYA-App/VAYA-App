@@ -7,6 +7,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/providers/mock_providers.dart';
 import 'package:vaya_app/app/theme/app_theme.dart';
+import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_screen.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
@@ -192,7 +193,13 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
 
-    final container = ProviderContainer();
+    final container = ProviderContainer(
+      overrides: [
+        authRepositoryProvider.overrideWithValue(
+          MockAuthRepository(initialUser: MockAuthRepository.demoUser),
+        ),
+      ],
+    );
     addTearDown(container.dispose);
     // Asset loading needs real async; load what the screen reads first.
     await tester.runAsync(() async {
