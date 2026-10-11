@@ -238,15 +238,20 @@ void main() {
     expect(find.byType(TripPlanScreen), findsOneWidget);
   });
 
-  testWidgets('expanded window shows multi-column grid', (tester) async {
+  testWidgets('expanded window shows multi-column layout', (tester) async {
     final repo = InMemoryTripRepository();
     await repo.saveTrip(_createTrip(id: 't-1', destinationId: 'chonburi'));
     await repo.saveTrip(_createTrip(id: 't-2', destinationId: 'bangkok'));
 
     await pumpHome(tester, tripRepository: repo, size: const Size(1000, 800));
 
-    expect(find.byType(GridView), findsOneWidget);
     expect(find.text('ชลบุรี'), findsOneWidget);
+    expect(find.text('กรุงเทพมหานคร'), findsOneWidget);
+
+    final chonburi = tester.getTopLeft(find.text('ชลบุรี'));
+    final bangkok = tester.getTopLeft(find.text('กรุงเทพมหานคร'));
+    expect(chonburi.dy, closeTo(bangkok.dy, 1.0));
+    expect((chonburi.dx - bangkok.dx).abs(), greaterThan(200));
   });
 
   for (final theme in [ThemeMode.light, ThemeMode.dark]) {
@@ -265,6 +270,32 @@ void main() {
           tester,
           tripRepository: repo,
           size: const Size(360, 800),
+          themeMode: theme,
+        );
+
+        expect(tester.takeException(), isNull);
+        final chonburi = find.text('ชลบุรี');
+        await tester.scrollUntilVisible(chonburi, 300);
+        expect(chonburi, findsOneWidget);
+        expect(find.text('เกินงบ'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'expanded window at 200% font scaling renders cleanly (${theme.name})',
+      (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = 2;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+        final repo = InMemoryTripRepository();
+        await repo.saveTrip(
+          _createTrip(destinationId: 'chonburi', totalCost: 9000, budget: 6000),
+        );
+
+        await pumpHome(
+          tester,
+          tripRepository: repo,
+          size: const Size(1000, 800),
           themeMode: theme,
         );
 

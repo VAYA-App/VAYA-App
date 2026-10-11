@@ -316,20 +316,26 @@ class _SavedTrips extends ConsumerWidget {
     final crossAxisCount = windowSize.index >= WindowSizeClass.expanded.index
         ? 3
         : 2;
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: trips.length,
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: crossAxisCount,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 2.2,
-      ),
-      itemBuilder: (context, index) {
-        return _TripCard(trip: trips[index], catalog: catalog);
-      },
-    );
+    final rows = <Widget>[];
+    for (var i = 0; i < trips.length; i += crossAxisCount) {
+      rows.add(
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var col = 0; col < crossAxisCount; col++) ...[
+              if (col > 0) const SizedBox(width: 12),
+              Expanded(
+                child: i + col < trips.length
+                    ? _TripCard(trip: trips[i + col], catalog: catalog)
+                    : const SizedBox.shrink(),
+              ),
+            ],
+          ],
+        ),
+      );
+      rows.add(const SizedBox(height: 12));
+    }
+    return Column(children: rows);
   }
 }
 
