@@ -119,6 +119,7 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
         OverBudgetBanner(
           cost: _plan.cost,
           hasAdvice: _plan.overBudgetAdvice.isNotEmpty,
+          canShorten: _plan.days.length > 1,
         ),
         const SizedBox(height: 12),
       ],
@@ -412,6 +413,7 @@ class _OverBudgetHelp extends ConsumerWidget {
           const SizedBox(height: 12),
           BudgetRescueCard(
             rescue: rescue,
+            advice: plan.overBudgetAdvice,
             dayCount: plan.days.length,
             budget: plan.cost.budget,
           ),
@@ -469,8 +471,11 @@ class _TripSummaryCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                const SizedBox(width: 8),
-                _BudgetBadge(cost: cost),
+                // Over Budget is the banner's to say, once.
+                if (!cost.isOverBudget) ...[
+                  const SizedBox(width: 8),
+                  const _WithinBudgetBadge(),
+                ],
               ],
             ),
             const SizedBox(height: 16),
@@ -502,23 +507,18 @@ class _TripSummaryCard extends StatelessWidget {
   }
 }
 
-class _BudgetBadge extends StatelessWidget {
-  const _BudgetBadge({required this.cost});
-
-  final CostEstimate cost;
+class _WithinBudgetBadge extends StatelessWidget {
+  const _WithinBudgetBadge();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final over = cost.isOverBudget;
-    final (bg, fg) = over
-        ? (colors.errorContainer, colors.onErrorContainer)
-        : (colors.secondaryContainer, colors.onSecondaryContainer);
+    final fg = colors.onSecondaryContainer;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: bg,
+        color: colors.secondaryContainer,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Padding(
@@ -526,14 +526,10 @@ class _BudgetBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              over ? Icons.warning_amber_outlined : Icons.check_circle_outline,
-              size: 16,
-              color: fg,
-            ),
+            Icon(Icons.check_circle_outline, size: 16, color: fg),
             const SizedBox(width: 4),
             Text(
-              over ? 'เกินงบ ${formatBaht(cost.overBy)}' : 'อยู่ในงบ',
+              'อยู่ในงบ',
               style: theme.textTheme.labelMedium?.copyWith(color: fg),
             ),
           ],
