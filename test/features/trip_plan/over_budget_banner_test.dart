@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:vaya_app/app/providers/data_providers.dart';
+import 'package:vaya_app/app/providers/mock_providers.dart';
+import 'package:vaya_app/app/providers/planner_providers.dart';
 import 'package:vaya_app/app/theme/app_theme.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_screen.dart';
@@ -291,11 +294,12 @@ void main() {
       );
     });
 
-    testWidgets('says nothing can be cut when no option is priced', (
+    testWidgets('leaves the amount to the banner when no option is priced', (
       tester,
     ) async {
+      // Nothing was applied, so what is left is what the banner said.
       const rescue = BudgetRescue(stillOverBy: 342, minimumBudget: 2000);
-      const title = 'แผนนี้ลดค่าใช้จ่ายต่อไม่ได้แล้ว ยังเกินงบอีก ฿342';
+      const title = 'ระบบยังหาวิธีลดค่าใช้จ่ายของแผนนี้ให้ไม่ได้';
 
       await pump(
         tester,
@@ -308,6 +312,14 @@ void main() {
       );
       expect(find.text(title), findsOneWidget);
       expect(find.textContaining('ข้างบน'), findsNothing);
+      expect(find.textContaining('฿'), findsNothing);
+      // Cheaper places can still be picked by hand; a day trip has no hotel.
+      expect(find.textContaining('ลดค่าใช้จ่ายต่อไม่ได้'), findsNothing);
+      expect(find.textContaining('ที่พัก'), findsNothing);
+      expect(
+        find.text('ลองเพิ่มงบ หรือเลือกร้านอาหารและที่เที่ยวที่ราคาต่ำลง'),
+        findsOneWidget,
+      );
 
       // Another province is listed, but it is not this plan made cheaper.
       await pump(
@@ -320,6 +332,27 @@ void main() {
         ),
       );
       expect(find.text(title), findsOneWidget);
+      expect(find.textContaining('฿'), findsNothing);
+    });
+
+    testWidgets('still names the budget needed when no option is priced', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        const BudgetRescueCard(
+          advice: [],
+          dayCount: 1,
+          budget: 1500,
+          rescue: BudgetRescue(stillOverBy: 342, minimumBudget: 2000),
+        ),
+      );
+
+      expect(find.textContaining('฿342'), findsNothing);
+      expect(
+        find.text('ควรมีงบอย่างน้อย ฿2,000 สำหรับทริป 1 วัน'),
+        findsOneWidget,
+      );
     });
   });
 
@@ -356,15 +389,24 @@ void main() {
   }
 
   group('on the trip plan screen', () {
-    Future<ProviderContainer> open(WidgetTester tester, String tripId) async {
+    /// The over-budget amount wherever it is written, and not as the start
+    /// of a longer number.
+    RegExp amountOf(CostEstimate cost) =>
+        RegExp('${RegExp.escape(formatBaht(cost.overBy))}(?![\\d,])');
+
+    Future<ProviderContainer> open(
+      WidgetTester tester,
+      String tripId, {
+      ProviderContainer? within,
+    }) async {
       // Wide enough for the two-pane layout; the map's attribution row
       // overflows a phone-sized map in the test font.
       tester.view.physicalSize = const Size(1400, 900);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
 
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
+      final container = within ?? ProviderContainer();
+      if (within == null) addTearDown(container.dispose);
       // Asset loading needs real async; load what the screen reads first.
       await tester.runAsync(() async {
         await container.read(tripPlanViewProvider(tripId).future);
@@ -417,13 +459,87 @@ void main() {
           .value!
           .plan
           .cost;
-      final amount = RegExp(
-        '^เกินงบ ${RegExp.escape(formatBaht(cost.overBy))}',
-      );
+      final amount = amountOf(cost);
 
       expect(find.textContaining(amount), findsOneWidget);
       expect(find.bySemanticsLabel(amount), findsOneWidget);
       expect(find.text('อยู่ในงบ'), findsNothing);
+      semantics.dispose();
+    });
+
+    testWidgets('a plan with nothing to cut still says it only once', (
+      tester,
+    ) async {
+      final semantics = tester.ensureSemantics();
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // The mock plan as a day trip on the cheapest local transport, with a
+      // budget the cheapest day trip fits: no night to move, no day to drop.
+      late final String tripId;
+      await tester.runAsync(() async {
+        final catalog = await container.read(placeCatalogProvider.future);
+        final calculator = await container.read(costCalculatorProvider.future);
+        final advisor = await container.read(overBudgetAdvisorProvider.future);
+        final mock = await container.read(mockTripPlanProvider.future);
+        final mockRequest = await container.read(
+          mockTripRequestProvider.future,
+        );
+        final dayTrip = mock.copyWith(
+          days: [mock.days.first],
+          nightStays: const [],
+        );
+        TripPlan priced(TripRequest request) => calculator.applyCosts(
+          request: request,
+          plan: dayTrip,
+          catalog: catalog,
+        );
+
+        var request = mockRequest.copyWith(endDate: mockRequest.startDate);
+        for (final mode in LocalTransportMode.values) {
+          final other = request.copyWith(localTransportMode: mode);
+          if (priced(other).cost.total < priced(request).cost.total) {
+            request = other;
+          }
+        }
+        final minimum = calculator.minimumTripCost(
+          request: request,
+          province: catalog.province(dayTrip.destinationId),
+        );
+        request = request.copyWith(budget: (minimum / 100).ceil() * 100);
+        final plan = priced(request);
+        tripId = container
+            .read(draftTripsProvider.notifier)
+            .add(
+              plan.copyWith(
+                overBudgetAdvice: advisor.advise(
+                  request: request,
+                  plan: plan,
+                  catalog: catalog,
+                ),
+              ),
+              request,
+            );
+      });
+      await open(tester, tripId, within: container);
+
+      final plan = container.read(tripPlanViewProvider(tripId)).value!.plan;
+      final rescue = container.read(budgetRescueProvider(tripId)).value!;
+      expect(plan.status, PlanStatus.overBudget);
+      expect(
+        plan.overBudgetAdvice.where(
+          (item) => item.kind != BudgetAdviceKind.changeDestination,
+        ),
+        isEmpty,
+      );
+      // Nothing was applied, so the rescue is left with the banner's amount.
+      expect(rescue.stillOverBy, plan.cost.overBy);
+      expect(rescue.minimumBudget, lessThanOrEqualTo(plan.cost.budget));
+
+      final amount = amountOf(plan.cost);
+      expect(find.byType(BudgetRescueCard), findsOneWidget);
+      expect(find.textContaining(amount), findsOneWidget);
+      expect(find.bySemanticsLabel(amount), findsOneWidget);
       semantics.dispose();
     });
 

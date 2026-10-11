@@ -49,7 +49,8 @@ class BudgetAdviceList extends StatelessWidget {
 
 /// Shown when every option together still leaves the plan Over Budget. It
 /// leads with how far over the plan stays, then the budget this trip needs
-/// or how short it would have to be.
+/// or how short it would have to be. With no option to apply, what is left
+/// is the amount the banner already gave, so the card does not repeat it.
 ///
 /// The figures from [BudgetRescue] are the cheapest any trip here could be,
 /// not this plan made cheaper, and the card says so. When that cheapest
@@ -77,14 +78,13 @@ class BudgetRescueCard extends StatelessWidget {
 
   /// [BudgetRescue.stillOverBy] comes from the priced options only; another
   /// province is an estimate the rescue never applies.
+  Iterable<BudgetAdvice> get _priced =>
+      advice.where((item) => item.kind != BudgetAdviceKind.changeDestination);
+
   String get _title {
+    final priced = _priced;
+    if (priced.isEmpty) return 'ระบบยังหาวิธีลดค่าใช้จ่ายของแผนนี้ให้ไม่ได้';
     final stillOver = formatBaht(rescue.stillOverBy);
-    final priced = advice.where(
-      (item) => item.kind != BudgetAdviceKind.changeDestination,
-    );
-    if (priced.isEmpty) {
-      return 'แผนนี้ลดค่าใช้จ่ายต่อไม่ได้แล้ว ยังเกินงบอีก $stillOver';
-    }
     return priced.length < advice.length
         ? 'ทำทุกวิธีข้างบนพร้อมกัน ยกเว้นเปลี่ยนจังหวัด '
               'ยังเกินงบอีก $stillOver'
@@ -145,8 +145,10 @@ class BudgetRescueCard extends StatelessWidget {
               ),
             ] else
               Text(
-                'ลองเพิ่มงบอีกราว ${formatBaht(rescue.stillOverBy)} '
-                'หรือเลือกที่พักและร้านอาหารที่ราคาต่ำลง',
+                _priced.isEmpty
+                    ? 'ลองเพิ่มงบ หรือเลือกร้านอาหารและที่เที่ยวที่ราคาต่ำลง'
+                    : 'ลองเพิ่มงบอีกราว ${formatBaht(rescue.stillOverBy)} '
+                          'หรือเลือกที่พักและร้านอาหารที่ราคาต่ำลง',
                 style: body,
               ),
           ],
