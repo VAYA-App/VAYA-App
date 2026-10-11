@@ -156,16 +156,8 @@ void main() {
     expect(location(container), AppRoutes.profile);
   });
 
-  testWidgets('signed out shows an empty state with a way to sign in', (
-    tester,
-  ) async {
+  testWidgets('signed out redirects to login', (tester) async {
     final (container, _) = await pumpProfile(tester, user: null);
-
-    expect(find.text('ยังไม่ได้เข้าสู่ระบบ'), findsOneWidget);
-    expect(find.widgetWithText(OutlinedButton, 'ออกจากระบบ'), findsNothing);
-
-    await tester.tap(find.text('ไปหน้าเข้าสู่ระบบ'));
-    await tester.pumpAndSettle();
     expect(location(container), AppRoutes.login);
   });
 
