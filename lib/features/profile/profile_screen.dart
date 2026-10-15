@@ -10,7 +10,6 @@ import '../../data/auth_repository.dart';
 import 'current_user_provider.dart';
 
 /// โปรไฟล์: ข้อมูลผู้ใช้ ธีม และออกจากระบบ (#16)
-/// ออกแบบในสไตล์ Bento Grid / การ์ดโมเดิร์น Material 3 (Siam Wanderlust)
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
@@ -32,8 +31,8 @@ class ProfileScreen extends ConsumerWidget {
               padding: EdgeInsets.fromLTRB(margin, 12, margin, 32),
               children: [
                 switch (user) {
-                  AsyncData(value: final u?) => _UserBentoCard(user: u),
-                  AsyncData() => const _SignedOutBentoCard(),
+                  AsyncData(value: final u?) => _UserCard(user: u),
+                  AsyncData() => const SizedBox.shrink(),
                   AsyncError() => _ErrorCard(
                     onRetry: () => ref.invalidate(currentUserProvider),
                   ),
@@ -43,10 +42,10 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                 },
                 const SizedBox(height: 16),
-                const _ThemeBentoCard(),
+                const _ThemeCard(),
                 if (user.value != null) ...[
                   const SizedBox(height: 16),
-                  const _SignOutBentoCard(),
+                  const _SignOutCard(),
                 ],
               ],
             ),
@@ -57,9 +56,9 @@ class ProfileScreen extends ConsumerWidget {
   }
 }
 
-/// Bento Card 1: ข้อมูลผู้ใช้และสถานะนักเดินทาง
-class _UserBentoCard extends StatelessWidget {
-  const _UserBentoCard({required this.user});
+/// การ์ดข้อมูลผู้ใช้: รูป, ชื่อ, และอีเมล
+class _UserCard extends StatelessWidget {
+  const _UserCard({required this.user});
 
   final AppUser user;
 
@@ -76,29 +75,18 @@ class _UserBentoCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: colors.primary.withValues(alpha: 0.25),
-                  width: 3,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(3),
-                child: CircleAvatar(
-                  radius: 34,
-                  backgroundColor: colors.secondaryContainer,
-                  foregroundColor: colors.onSecondaryContainer,
-                  foregroundImage: photo == null ? null : NetworkImage(photo),
-                  child: Text(
-                    name.isEmpty ? '?' : name.characters.first,
-                    style: theme.textTheme.headlineSmall?.copyWith(
-                      color: colors.onSecondaryContainer,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+            CircleAvatar(
+              radius: 34,
+              backgroundColor: colors.secondaryContainer,
+              foregroundColor: colors.onSecondaryContainer,
+              foregroundImage: photo == null ? null : NetworkImage(photo),
+              child: Text(
+                name.isEmpty ? '?' : name.characters.first,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: colors.onSecondaryContainer,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -107,67 +95,37 @@ class _UserBentoCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Flexible(
-                        child: Text(
-                          name,
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Icon(
-                        Icons.verified_rounded,
-                        size: 18,
-                        color: colors.primary,
-                      ),
-                    ],
+                  Text(
+                    name,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   if (email != null) ...[
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 4),
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          Icons.mail_outline_rounded,
-                          size: 14,
-                          color: colors.onSurfaceVariant,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Icon(
+                            Icons.mail_outline_rounded,
+                            size: 16,
+                            color: colors.onSurfaceVariant,
+                          ),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 6),
                         Expanded(
                           child: Text(
                             email,
                             style: theme.textTheme.bodyMedium?.copyWith(
                               color: colors.onSurfaceVariant,
                             ),
-                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                       ],
                     ),
                   ],
-                  const SizedBox(height: 8),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.secondaryContainer,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      child: Text(
-                        'สมาชิก VAYA',
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colors.onSecondaryContainer,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -178,21 +136,14 @@ class _UserBentoCard extends StatelessWidget {
   }
 }
 
-/// Bento Card 2: แผงควบคุมและเลือกธีมการแสดงผล
-class _ThemeBentoCard extends ConsumerWidget {
-  const _ThemeBentoCard();
+/// การ์ดเลือกธีมการแสดงผล: ตามระบบ / สว่าง / มืด
+class _ThemeCard extends ConsumerWidget {
+  const _ThemeCard();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(themeModeProvider);
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    final (label, icon) = switch (mode) {
-      ThemeMode.system => ('ตามระบบ', Icons.brightness_auto_outlined),
-      ThemeMode.light => ('สว่าง', Icons.light_mode_outlined),
-      ThemeMode.dark => ('มืด', Icons.dark_mode_outlined),
-    };
+    final colors = Theme.of(context).colorScheme;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -214,32 +165,6 @@ class _ThemeBentoCard extends ConsumerWidget {
               ),
               title: const Text('ธีม'),
               subtitle: const Text('เลือกโหมดสว่างหรือมืดของแอป'),
-              trailing: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors.surfaceContainerHigh,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 4,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(icon, size: 14, color: colors.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                        label,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: colors.primary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             ),
             const SizedBox(height: 8),
             Padding(
@@ -275,9 +200,9 @@ class _ThemeBentoCard extends ConsumerWidget {
   }
 }
 
-/// Bento Card 3: การ์ดออกจากระบบ
-class _SignOutBentoCard extends ConsumerWidget {
-  const _SignOutBentoCard();
+/// การ์ดออกจากระบบพร้อมยืนยันผ่าน AlertDialog
+class _SignOutCard extends ConsumerWidget {
+  const _SignOutCard();
 
   Future<void> _confirmAndSignOut(BuildContext context, WidgetRef ref) async {
     final theme = Theme.of(context);
@@ -339,78 +264,6 @@ class _SignOutBentoCard extends ConsumerWidget {
             icon: const Icon(Icons.logout_rounded),
             label: const Text('ออกจากระบบ'),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Empty state Bento Card: ยังไม่ได้เข้าสู่ระบบ
-class _SignedOutBentoCard extends ConsumerWidget {
-  const _SignedOutBentoCard();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-        child: Column(
-          children: [
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.secondaryContainer,
-                shape: BoxShape.circle,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Icon(
-                  Icons.person_pin_circle_outlined,
-                  size: 40,
-                  color: colors.primary,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'ยังไม่ได้เข้าสู่ระบบ',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'เข้าสู่ระบบด้วย Google เพื่อดูโปรไฟล์และทริปที่บันทึกไว้',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () => context.go(AppRoutes.login),
-                icon: const Icon(Icons.login_rounded),
-                label: const Text('ไปหน้าเข้าสู่ระบบ'),
-              ),
-            ),
-            const SizedBox(height: 10),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.tonalIcon(
-                onPressed: () async {
-                  await ref.read(authRepositoryProvider).signInWithGoogle();
-                },
-                icon: const Icon(Icons.account_circle_outlined),
-                label: const Text('เข้าสู่ระบบด้วย Google (ทดลองใช้งาน)'),
-              ),
-            ),
-          ],
         ),
       ),
     );

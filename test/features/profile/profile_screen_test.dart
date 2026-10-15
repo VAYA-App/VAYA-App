@@ -190,4 +190,31 @@ void main() {
 
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'does not overflow or truncate with long name and email at 200% text size',
+    (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 2;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+
+      const longUser = AppUser(
+        uid: 'u-long',
+        email: 'somchai.sakuldeemaneechai.vaya@example.com',
+        displayName: 'สมชาย สกุลดีมณีชัยสุขเจริญ',
+      );
+
+      await pumpProfile(tester, user: longUser, size: const Size(360, 800));
+
+      expect(tester.takeException(), isNull);
+      expect(find.text(longUser.displayName), findsOneWidget);
+      expect(find.text(longUser.email!), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.widgetWithText(OutlinedButton, 'ออกจากระบบ'),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
 }
