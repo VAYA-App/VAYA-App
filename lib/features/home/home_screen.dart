@@ -39,7 +39,7 @@ class HomeScreen extends ConsumerWidget {
               maxWidth: WindowSizeClass.maxContentWidth,
             ),
             child: ListView(
-              padding: EdgeInsets.fromLTRB(margin, 16, margin, 32),
+              padding: EdgeInsets.fromLTRB(margin, 16, margin, 96),
               children: [
                 const _Brand(),
                 const SizedBox(height: 24),
@@ -368,7 +368,7 @@ class _TripCard extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
           color: colors.errorContainer,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Icon(Icons.delete_outline, color: colors.onErrorContainer),
       ),
@@ -418,12 +418,23 @@ class _TripCard extends ConsumerWidget {
                       horizontal: 6,
                       vertical: 2,
                     ),
-                    child: Text(
-                      'เกินงบ',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.onErrorContainer,
-                        fontWeight: FontWeight.bold,
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.warning_amber_outlined,
+                          size: 14,
+                          color: colors.onErrorContainer,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          'เกินงบ',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colors.onErrorContainer,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -446,6 +457,13 @@ class _TripCard extends ConsumerWidget {
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: cost.isOverBudget ? colors.error : colors.primary,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                'ราคาโดยประมาณ',
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colors.onSurfaceVariant,
                 ),
               ),
             ],

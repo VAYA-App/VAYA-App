@@ -150,6 +150,7 @@ void main() {
     expect(find.text('ชลบุรี'), findsOneWidget);
     expect(find.text('14–15 พ.ย. · 2 คน'), findsOneWidget);
     expect(find.text('฿5,640'), findsOneWidget);
+    expect(find.text('ราคาโดยประมาณ'), findsOneWidget);
     expect(find.text('เกินงบ'), findsNothing);
   });
 
@@ -165,6 +166,7 @@ void main() {
 
     expect(find.text('ชลบุรี'), findsOneWidget);
     expect(find.text('เกินงบ'), findsOneWidget);
+    expect(find.byIcon(Icons.warning_amber_outlined), findsOneWidget);
   });
 
   testWidgets('FAB opens the new trip screen', (tester) async {
