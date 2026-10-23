@@ -3,6 +3,7 @@ import 'candidate_builder.dart';
 import 'cost_calculator.dart';
 import 'night_stay_planner.dart';
 import 'over_budget_advisor.dart';
+import 'plan_editor.dart';
 import 'place_selector.dart';
 import 'planner_service.dart';
 import 'route_orderer.dart';
@@ -72,55 +73,28 @@ class DefaultPlannerService implements PlannerService {
       accommodations: candidates.accommodations,
       fallbackCenter: province.center,
     );
-    final hotel = nightStays.isEmpty
-        ? null
-        : catalog.place(nightStays.first.placeId).location;
-    final dayPlans = [
-      for (final (i, day) in days.indexed)
-        routeOrderer.orderDay(
-          date: day.date,
-          picks: selection.days[i],
-          // Day one starts where the travellers arrive; later days at the
-          // hotel. The province centre stands in for the arrival point.
-          start: i == 0 ? province.center : hotel ?? province.center,
-          dayStart: day.start,
-          dayEnd: day.end,
-          catalog: catalog,
-        ),
-    ];
-
     yield const PlanningProgress(PlanningStage.pricing);
-    final draft = TripPlan(
-      destinationId: destinationId,
-      status: PlanStatus.ok,
-      intercity: intercity == null
-          ? null
-          : IntercityLeg(
-              mode: intercity.mode,
-              durationMin: intercity.option.durationMin,
-              cost: 0,
-            ),
-      nightStays: nightStays,
-      days: dayPlans,
-      cost: CostEstimate.unpriced(request.budget),
-    );
-    final priced = costCalculator.applyCosts(
-      request: request,
-      plan: draft,
-      catalog: catalog,
-    );
-    final advice = priced.cost.isOverBudget
-        ? overBudgetAdvisor.advise(
-            request: request,
-            plan: priced,
-            catalog: catalog,
-          )
-        : const <BudgetAdvice>[];
+    final plan =
+        PlanEditor(
+          costCalculator: costCalculator,
+          overBudgetAdvisor: overBudgetAdvisor,
+          routeOrderer: routeOrderer,
+        ).assemble(
+          request: request,
+          catalog: catalog,
+          destinationId: destinationId,
+          intercity: intercity == null
+              ? null
+              : IntercityLeg(
+                  mode: intercity.mode,
+                  durationMin: intercity.option.durationMin,
+                  cost: 0,
+                ),
+          nightStays: nightStays,
+          picks: selection.days,
+        );
 
-    yield PlanningProgress(
-      PlanningStage.done,
-      plan: priced.copyWith(overBudgetAdvice: advice),
-    );
+    yield PlanningProgress(PlanningStage.done, plan: plan);
   }
 
   /// The way to reach [province], or `null` when the trip stays in the
