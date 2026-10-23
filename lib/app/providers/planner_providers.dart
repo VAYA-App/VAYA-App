@@ -6,6 +6,7 @@ import '../../planner/default_cost_calculator.dart';
 import '../../planner/default_over_budget_advisor.dart';
 import '../../planner/default_planner_service.dart';
 import '../../planner/destination_suggester.dart';
+import '../../planner/gemini_destination_suggester.dart';
 import '../../planner/over_budget_advisor.dart';
 import '../../planner/place_selector.dart';
 import '../../planner/planner_service.dart';
@@ -30,9 +31,14 @@ final overBudgetAdvisorProvider = FutureProvider<OverBudgetAdvisor>(
   (ref) => ref.watch(budgetRescuerProvider.future),
 );
 
-/// Replace the body with the real implementation in #25.
+/// Pipeline ②–③ (#24, #25). Without Gemini (#26) it ranks the provinces
+/// that fit by their minimum cost.
 final destinationSuggesterProvider = Provider<DestinationSuggester>(
-  (ref) => throw UnimplementedError('DestinationSuggester: see #25'),
+  (ref) => GeminiDestinationSuggester(
+    gemini: ref.watch(geminiServiceProvider),
+    loadCatalog: () => ref.read(placeCatalogProvider.future),
+    loadCostCalculator: () => ref.read(costCalculatorProvider.future),
+  ),
 );
 
 /// The planner the app uses: the real pipeline (#31). Not a future itself,
