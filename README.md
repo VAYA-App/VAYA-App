@@ -23,6 +23,20 @@ flutter pub get
 flutter run
 ```
 
+### เปิดใช้ Gemini จริง
+
+ถ้าไม่ใส่ key แอปใช้ mock และทุกขั้นที่ใช้ AI จะใช้ fallback ที่คำนวณด้วยโค้ดแทน ถ้าจะใช้ Gemini จริง:
+
+1. สร้าง API key ที่ [Google AI Studio](https://aistudio.google.com/apikey) แล้วจำกัดให้ใช้ได้เฉพาะ Generative Language API
+2. copy `env.example.json` เป็น `env.json` แล้วใส่ key (`env.json` อยู่ใน `.gitignore` ห้าม commit)
+3. รันด้วย
+
+```bash
+flutter run --dart-define-from-file=env.json
+```
+
+key จะถูกฝังอยู่ในแอป ใช้สำหรับ demo เท่านั้น เมื่อตั้ง Firebase AI Logic แล้ว (#26) ให้ย้ายไปใช้ตัวนั้น
+
 ### ดู UI ใน Chrome (ไม่ต้องมี simulator)
 
 ```bash
