@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/domain.dart';
 import '../../../shared/formatters.dart';
+import '../../../shared/widgets/motion.dart';
 
 /// `90` → `1 ชม. 30 นาที`.
 String formatMinutes(int minutes) {
@@ -66,7 +67,8 @@ class CategoryPill extends StatelessWidget {
 
 /// One Day Plan as a minimal vertical timeline: numbered Stops on a thin
 /// emerald rail, travel rows between them, and the Night Stay at the end.
-/// Numbers match the map markers.
+/// Numbers match the map markers. Stops appear one after another when the
+/// timeline is first shown (#85).
 class StopTimeline extends StatelessWidget {
   const StopTimeline({
     super.key,
@@ -93,18 +95,33 @@ class StopTimeline extends StatelessWidget {
       children: [
         for (final (i, stop) in day.stops.indexed) ...[
           if (stop.travelFromPrevMin > 0)
-            _TravelRow(stop: stop, icon: localTransportIcon(transport)),
-          _StopEntry(
-            number: i + 1,
-            stop: stop,
-            place: catalog.place(stop.placeId),
-            selected: selectedIndex == i,
-            isLast: i == day.stops.length - 1 && stay == null,
-            onTap: onSelect == null ? null : () => onSelect!(i),
+            StaggeredEntrance(
+              index: i,
+              child: _TravelRow(
+                stop: stop,
+                icon: localTransportIcon(transport),
+              ),
+            ),
+          StaggeredEntrance(
+            index: i,
+            child: _StopEntry(
+              number: i + 1,
+              stop: stop,
+              place: catalog.place(stop.placeId),
+              selected: selectedIndex == i,
+              isLast: i == day.stops.length - 1 && stay == null,
+              onTap: onSelect == null ? null : () => onSelect!(i),
+            ),
           ),
         ],
         if (stay != null)
-          _NightStayEntry(stay: stay, place: catalog.place(stay.placeId)),
+          StaggeredEntrance(
+            index: day.stops.length,
+            child: _NightStayEntry(
+              stay: stay,
+              place: catalog.place(stay.placeId),
+            ),
+          ),
       ],
     );
   }
