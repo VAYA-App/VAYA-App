@@ -46,3 +46,9 @@ app.*.map.json
 
 # Local secrets for --dart-define-from-file (#144)
 env.json
+
+# Firestore rules tests (#145)
+firestore/node_modules/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
