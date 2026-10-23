@@ -29,6 +29,7 @@ class PlaceSelector {
     required Province province,
     required List<DayTemplate> days,
     required Candidates candidates,
+    Map<PreferenceTag, int> tasteWeights = const {},
   }) async {
     var errors = <String>[];
     for (var attempt = 0; attempt < maxAttempts; attempt++) {
@@ -40,6 +41,7 @@ class PlaceSelector {
             province: province,
             days: days,
             candidates: candidates,
+            tasteWeights: tasteWeights,
             previousErrors: errors,
           ),
           responseSchema: SelectPlacesPrompt.responseSchema,
@@ -61,6 +63,7 @@ class PlaceSelector {
         request: request,
         days: days,
         candidates: candidates,
+        tasteWeights: tasteWeights,
       ),
       source: SelectionSource.fallback,
     );

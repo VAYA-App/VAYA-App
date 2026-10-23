@@ -132,17 +132,19 @@ class PlanEditor {
   }
 
   /// Up to [count] Places that could replace the Stop: same kind, same
-  /// province, not in the plan yet, closest first.
+  /// province, not in the plan yet nor [excluded] (disliked, #49), closest
+  /// first.
   static List<Place> alternatives(
     TripPlan plan,
     PlaceCatalog catalog, {
     required int day,
     required int index,
     int count = 5,
+    Set<String> excluded = const {},
   }) {
     final stop = plan.days[day].stops[index];
     final here = catalog.place(stop.placeId).location;
-    final used = _placeIdsIn(plan);
+    final used = {..._placeIdsIn(plan), ...excluded};
     final options =
         [
           for (final place in catalog.placesIn(
