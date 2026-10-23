@@ -5,6 +5,7 @@ import '../../app/providers/mock_providers.dart';
 import '../../app/providers/planner_providers.dart';
 import '../../domain/domain.dart';
 import '../../planner/default_over_budget_advisor.dart';
+import '../../planner/plan_editor.dart';
 
 /// Id that opens the bundled mock plan (`assets/mock/`).
 const mockTripId = 'mock';
@@ -61,6 +62,65 @@ class DraftTripsNotifier extends Notifier<Map<String, DraftTrip>> {
     final id = 'draft-${++_lastId}';
     state = {...state, id: DraftTrip(plan: plan, request: request)};
     return id;
+  }
+
+  /// Puts an edited [plan] in place of the draft's (#45).
+  void replace(String id, TripPlan plan) {
+    final draft = state[id];
+    if (draft == null) throw StateError('No draft $id');
+    state = {...state, id: DraftTrip(plan: plan, request: draft.request)};
+  }
+}
+
+/// Edits the plan of a trip wherever it lives (#45).
+final tripPlanEditsProvider = Provider<TripPlanEdits>(TripPlanEdits.new);
+
+class TripPlanEdits {
+  TripPlanEdits(this._ref);
+
+  final Ref _ref;
+
+  /// Applies [edit] to the plan of [tripId] and returns the id that opens
+  /// the result: the same one, or a new draft when [tripId] is a read-only
+  /// mock. Throws [ArgumentError] when the edit does not fit the plan.
+  Future<String> apply(String tripId, PlanEdit edit) async {
+    final view = await _ref.read(tripPlanViewProvider(tripId).future);
+    if (view == null) throw StateError('No trip $tripId');
+    final editor = await _ref.read(planEditorProvider.future);
+    final plan = editor.apply(
+      edit,
+      plan: view.plan,
+      request: view.request,
+      catalog: view.catalog,
+    );
+    return replacePlan(tripId, view, plan);
+  }
+
+  /// Puts [plan] back as the plan of [tripId], to undo an edit.
+  Future<void> restore(String tripId, TripPlan plan) async {
+    final view = await _ref.read(tripPlanViewProvider(tripId).future);
+    if (view != null) await replacePlan(tripId, view, plan);
+  }
+
+  /// Stores [plan] for [tripId].
+  Future<String> replacePlan(
+    String tripId,
+    TripPlanView view,
+    TripPlan plan,
+  ) async {
+    if (view.savedTrip case final trip?) {
+      await _ref
+          .read(tripRepositoryProvider)
+          .saveTrip(trip.copyWith(plan: plan));
+      _ref.invalidate(tripPlanViewProvider(tripId));
+      return tripId;
+    }
+    final drafts = _ref.read(draftTripsProvider.notifier);
+    if (_ref.read(draftTripsProvider).containsKey(tripId)) {
+      drafts.replace(tripId, plan);
+      return tripId;
+    }
+    return drafts.add(plan, view.request);
   }
 }
 

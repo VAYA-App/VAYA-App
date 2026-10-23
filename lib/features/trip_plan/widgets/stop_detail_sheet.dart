@@ -2,37 +2,79 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/domain.dart';
 import '../../../shared/formatters.dart';
-import '../../../shared/widgets/coming_soon.dart';
+import '../../../planner/geo.dart';
 import 'stop_timeline.dart';
 
-/// Opens the details of one Stop as a modal bottom sheet.
-Future<void> showStopDetailSheet(
+/// What the user chose in the sheet (#45).
+sealed class StopAction {
+  const StopAction();
+}
+
+final class SwapStop extends StopAction {
+  const SwapStop(this.place);
+
+  final Place place;
+}
+
+final class DeleteStop extends StopAction {
+  const DeleteStop();
+}
+
+/// Opens the details of one Stop as a modal bottom sheet. With
+/// [alternatives] it offers to swap the Stop for one of them, and
+/// [canRemove] offers to take it out of the plan; the choice is returned.
+Future<StopAction?> showStopDetailSheet(
   BuildContext context, {
   required int number,
   required Stop stop,
   required Place place,
   required DateTime date,
+  List<Place> alternatives = const [],
+  bool canRemove = false,
 }) {
-  return showModalBottomSheet<void>(
+  return showModalBottomSheet<StopAction>(
     context: context,
     isScrollControlled: true,
-    builder: (context) =>
-        _StopDetail(number: number, stop: stop, place: place, date: date),
+    builder: (context) => _StopDetail(
+      number: number,
+      stop: stop,
+      place: place,
+      date: date,
+      alternatives: alternatives,
+      canRemove: canRemove,
+    ),
   );
 }
 
-class _StopDetail extends StatelessWidget {
+class _StopDetail extends StatefulWidget {
   const _StopDetail({
     required this.number,
     required this.stop,
     required this.place,
     required this.date,
+    required this.alternatives,
+    required this.canRemove,
   });
 
   final int number;
   final Stop stop;
   final Place place;
   final DateTime date;
+  final List<Place> alternatives;
+  final bool canRemove;
+
+  @override
+  State<_StopDetail> createState() => _StopDetailState();
+}
+
+class _StopDetailState extends State<_StopDetail> {
+  /// Showing the places to swap to instead of the swap button.
+  var _choosing = false;
+
+  int get number => widget.number;
+  Stop get stop => widget.stop;
+  Place get place => widget.place;
+  DateTime get date => widget.date;
 
   @override
   Widget build(BuildContext context) {
@@ -170,18 +212,40 @@ class _StopDetail extends StatelessWidget {
               ),
             ],
             const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () => showComingSoon(
-                  context,
-                  'สลับเป็นสถานที่ใกล้เคียง',
-                  issue: 45,
-                ),
-                icon: const Icon(Icons.swap_horiz),
-                label: const Text('สลับเป็นสถานที่ใกล้เคียง'),
+            if (_choosing) ...[
+              Text(
+                'เลือกสถานที่แทน (ใกล้ที่สุดก่อน)',
+                style: theme.textTheme.titleSmall,
               ),
-            ),
+              const SizedBox(height: 8),
+              for (final option in widget.alternatives)
+                _AlternativeTile(
+                  place: option,
+                  km: haversineKm(place.location, option.location),
+                  onTap: () => Navigator.of(context).pop(SwapStop(option)),
+                ),
+            ] else if (widget.alternatives.isNotEmpty)
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => setState(() => _choosing = true),
+                  icon: const Icon(Icons.swap_horiz),
+                  label: const Text('สลับเป็นสถานที่ใกล้เคียง'),
+                ),
+              ),
+            if (widget.canRemove) ...[
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton.icon(
+                  style: TextButton.styleFrom(foregroundColor: colors.error),
+                  onPressed: () =>
+                      Navigator.of(context).pop(const DeleteStop()),
+                  icon: const Icon(Icons.delete_outline),
+                  label: const Text('ลบจุดนี้ออกจากแผน'),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -232,6 +296,40 @@ class _InfoRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// One place to swap to: name, kind, distance from the current Stop and
+/// price level.
+class _AlternativeTile extends StatelessWidget {
+  const _AlternativeTile({
+    required this.place,
+    required this.km,
+    required this.onTap,
+  });
+
+  final Place place;
+  final double km;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card.outlined(
+      margin: const EdgeInsets.only(bottom: 8),
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        onTap: onTap,
+        title: Text(place.name),
+        subtitle: Text(
+          [
+            'ห่าง ~${km.toStringAsFixed(1)} กม.',
+            '฿' * place.priceLevel,
+            if (place.rating case final rating?) '★ $rating',
+          ].join(' · '),
+        ),
+        trailing: const Icon(Icons.chevron_right),
       ),
     );
   }

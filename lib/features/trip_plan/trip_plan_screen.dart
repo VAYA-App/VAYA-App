@@ -6,6 +6,7 @@ import '../../app/layout/window_size_class.dart';
 import '../../app/providers/data_providers.dart';
 import '../../app/router.dart';
 import '../../domain/domain.dart';
+import '../../planner/plan_editor.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/coming_soon.dart';
 import 'trip_plan_view_provider.dart';
@@ -43,7 +44,7 @@ class TripPlanScreen extends ConsumerWidget {
   }
 }
 
-class _TripPlanBody extends StatefulWidget {
+class _TripPlanBody extends ConsumerStatefulWidget {
   const _TripPlanBody({required this.tripId, required this.view});
 
   final String tripId;
@@ -51,10 +52,10 @@ class _TripPlanBody extends StatefulWidget {
   final TripPlanView view;
 
   @override
-  State<_TripPlanBody> createState() => _TripPlanBodyState();
+  ConsumerState<_TripPlanBody> createState() => _TripPlanBodyState();
 }
 
-class _TripPlanBodyState extends State<_TripPlanBody> {
+class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
   var _day = 0;
 
   /// Compact windows show either the timeline or the map.
@@ -79,16 +80,69 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
     _selectedStop = null;
   });
 
-  void _selectStop(int index) {
+  Future<void> _selectStop(int index) async {
     setState(() => _selectedStop = index);
     final stop = _dayPlan.stops[index];
-    showStopDetailSheet(
+    final place = widget.view.catalog.place(stop.placeId);
+    final action = await showStopDetailSheet(
       context,
       number: index + 1,
       stop: stop,
-      place: widget.view.catalog.place(stop.placeId),
+      place: place,
       date: _dayPlan.date,
+      alternatives: PlanEditor.alternatives(
+        _plan,
+        widget.view.catalog,
+        day: _day,
+        index: index,
+      ),
+      canRemove: _dayPlan.stops.length > 1,
     );
+    if (action == null || !mounted) return;
+    await _edit(
+      switch (action) {
+        SwapStop(:final place) => ReplaceStop(
+          day: _day,
+          index: index,
+          placeId: place.id,
+        ),
+        DeleteStop() => RemoveStop(day: _day, index: index),
+      },
+      done: switch (action) {
+        SwapStop(place: final next) =>
+          'เปลี่ยน${place.name}เป็น${next.name}แล้ว',
+        DeleteStop() => 'ลบ${place.name}ออกจากแผนแล้ว',
+      },
+    );
+  }
+
+  /// Applies [edit], reopens the plan under its new id when a mock became a
+  /// draft, and offers to undo (#45).
+  Future<void> _edit(PlanEdit edit, {required String done}) async {
+    final edits = ref.read(tripPlanEditsProvider);
+    final before = widget.view;
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    try {
+      final id = await edits.apply(widget.tripId, edit);
+      if (mounted) setState(() => _selectedStop = null);
+      if (id != widget.tripId) router.replace(AppRoutes.tripPlan(id));
+      messenger
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(done),
+            action: SnackBarAction(
+              label: 'เลิกทำ',
+              onPressed: () => edits.restore(id, before.plan),
+            ),
+          ),
+        );
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('แก้แผนไม่สำเร็จ ลองใหม่อีกครั้ง')),
+      );
+    }
   }
 
   Widget _timeline() => StopTimeline(
