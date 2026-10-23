@@ -1,8 +1,8 @@
 # ใช้ OpenStreetMap ผ่าน flutter_map แทน Google Maps
 
-แผนที่ในหน้า Trip Plan ใช้แพ็กเกจ `flutter_map` กับ tile ของ OpenStreetMap หมุดลำดับเลขและเส้นทางเป็น widget ที่วาดเองด้วยสีจาก Material 3 theme และในรอบนี้เส้นทางเป็นเส้นตรงเชื่อมหมุดตามลำดับ Stop ต้องแสดง attribution "© OpenStreetMap contributors" บนแผนที่เสมอตามเงื่อนไขของ OSM
+แผนที่ในหน้า Trip Plan ใช้แพ็กเกจ `flutter_map` กับ tile ของ OpenStreetMap หมุดลำดับเลขและเส้นทางเป็น widget ที่วาดเองด้วยสีจาก Material 3 theme เส้นทางลากตามถนนจริงโดยขอรูปทรงถนนจาก OSRM (`lib/data/road_router.dart`, #140) ถ้าออฟไลน์หรือเรียกไม่สำเร็จจะเป็นเส้นตรงเชื่อมหมุดตามลำดับ Stop แทน ต้องแสดง attribution "© OpenStreetMap contributors" บนแผนที่เสมอตามเงื่อนไขของ OSM
 
-เราเลือกแบบนี้เพราะ Google Maps SDK กับ Routes API ต้องผูกบัตรเครดิตกับ Google Cloud และต้องจัดการ API key ทั้ง Android และ iOS ส่วน `flutter_map` ไม่ต้องใช้ key ไม่มีค่าใช้จ่าย และปรับหน้าตาหมุดให้เข้ากับ M3 ได้ง่ายกว่า ถ้าจะเพิ่มเส้นทางตามถนนจริงภายหลัง ให้เรียก routing service เช่น OSRM แล้ววาด polyline บนแผนที่เดิมได้เลย
+เราเลือกแบบนี้เพราะ Google Maps SDK กับ Routes API ต้องผูกบัตรเครดิตกับ Google Cloud และต้องจัดการ API key ทั้ง Android และ iOS ส่วน `flutter_map` ไม่ต้องใช้ key ไม่มีค่าใช้จ่าย และปรับหน้าตาหมุดให้เข้ากับ M3 ได้ง่ายกว่า เส้นทางตามถนนใช้เซิร์ฟเวอร์สาธิตของ OSRM (`router.project-osrm.org`) ซึ่งไม่ต้องใช้ key แต่จำกัดการใช้งานไว้สำหรับทดลอง (ไม่เกินราว 1 ครั้งต่อวินาที) จึงพอสำหรับโปรเจกต์นี้ ถ้าจะใช้จริงต้องตั้งเซิร์ฟเวอร์ OSRM เองหรือเปลี่ยนผู้ให้บริการ ใช้แค่วาดแผนที่ ส่วนเวลาและระยะทางในแผนยังคำนวณจากระยะเส้นตรง × 1.3 (`lib/planner/geo.dart`)
 
 ## Considered Options
 
