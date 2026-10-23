@@ -1,0 +1,14 @@
+{
+  "name": "vaya-firestore-rules-tests",
+  "private": true,
+  "type": "module",
+  "description": "Security tests for firestore.rules on the Firestore emulator (#145).",
+  "scripts": {
+    "test": "node --test",
+    "test:emulator": "firebase emulators:exec --only firestore --project demo-vaya --config ../firebase.json \"node --test\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "6.0.0",
+    "firebase": "13.1.0"
+  }
+}
