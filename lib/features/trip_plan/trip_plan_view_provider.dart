@@ -83,12 +83,16 @@ class TripPlanEdits {
   /// Applies [edit] to the plan of [tripId] and returns the id that opens
   /// the result: the same one, or a new draft when [tripId] is a read-only
   /// mock. Throws [ArgumentError] when the edit does not fit the plan.
-  Future<String> apply(String tripId, PlanEdit edit) async {
+  Future<String> apply(String tripId, PlanEdit edit) =>
+      applyAll(tripId, [edit]);
+
+  /// Applies [edits] together, like [apply] (#46).
+  Future<String> applyAll(String tripId, List<PlanEdit> edits) async {
     final view = await _ref.read(tripPlanViewProvider(tripId).future);
     if (view == null) throw StateError('No trip $tripId');
     final editor = await _ref.read(planEditorProvider.future);
-    final plan = editor.apply(
-      edit,
+    final plan = editor.applyAll(
+      edits,
       plan: view.plan,
       request: view.request,
       catalog: view.catalog,
