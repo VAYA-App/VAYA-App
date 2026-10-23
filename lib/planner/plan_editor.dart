@@ -53,30 +53,53 @@ class PlanEditor {
     required TripPlan plan,
     required TripRequest request,
     required PlaceCatalog catalog,
+  }) => applyAll([edit], plan: plan, request: request, catalog: catalog);
+
+  /// Applies [edits] together, all pointing at Stops of [plan] as it is
+  /// now, then rebuilds the plan once. Throws [ArgumentError] like [apply],
+  /// and when two edits touch the same Stop or bring in the same Place.
+  TripPlan applyAll(
+    List<PlanEdit> edits, {
+    required TripPlan plan,
+    required TripRequest request,
+    required PlaceCatalog catalog,
   }) {
-    if (edit.day < 0 ||
-        edit.day >= plan.days.length ||
-        edit.index < 0 ||
-        edit.index >= plan.days[edit.day].stops.length) {
-      throw ArgumentError('No stop ${edit.index + 1} on day ${edit.day + 1}');
-    }
-    final picks = [
+    final picks = <List<SlotPick?>>[
       for (final day in plan.days)
         [
           for (final stop in day.stops)
             SlotPick(slot: stop.slot, placeId: stop.placeId, note: stop.note),
         ],
     ];
-    final current = picks[edit.day][edit.index];
-    switch (edit) {
-      case RemoveStop():
-        picks[edit.day].removeAt(edit.index);
-      case ReplaceStop(:final placeId):
-        _checkReplacement(placeId, current.slot, plan, catalog);
-        picks[edit.day][edit.index] = SlotPick(
-          slot: current.slot,
-          placeId: placeId,
+    final touched = <(int, int)>{};
+    final added = <String>{};
+    for (final edit in edits) {
+      if (edit.day < 0 ||
+          edit.day >= plan.days.length ||
+          edit.index < 0 ||
+          edit.index >= plan.days[edit.day].stops.length) {
+        throw ArgumentError('No stop ${edit.index + 1} on day ${edit.day + 1}');
+      }
+      if (!touched.add((edit.day, edit.index))) {
+        throw ArgumentError(
+          'Stop ${edit.index + 1} on day ${edit.day + 1} is edited twice',
         );
+      }
+      final current = picks[edit.day][edit.index]!;
+      switch (edit) {
+        case RemoveStop():
+          // Removed after all edits are read, so indices stay valid.
+          picks[edit.day][edit.index] = null;
+        case ReplaceStop(:final placeId):
+          _checkReplacement(placeId, current.slot, plan, catalog);
+          if (!added.add(placeId)) {
+            throw ArgumentError('$placeId is added twice');
+          }
+          picks[edit.day][edit.index] = SlotPick(
+            slot: current.slot,
+            placeId: placeId,
+          );
+      }
     }
 
     return assemble(
@@ -85,7 +108,7 @@ class PlanEditor {
       destinationId: plan.destinationId,
       intercity: plan.intercity,
       nightStays: plan.nightStays,
-      picks: picks,
+      picks: [for (final day in picks) day.nonNulls.toList()],
     );
   }
 
