@@ -25,6 +25,9 @@ const _months = [
 String formatThaiShortDate(DateTime date) =>
     '${_weekdays[date.weekday - 1]} ${date.day} ${_months[date.month - 1]}';
 
+/// `2026-11-14` → `พ.ย.`
+String formatThaiMonth(DateTime date) => _months[date.month - 1];
+
 /// `2026-11-14`, `2026-11-15` → `14–15 พ.ย.`
 String formatDateRange(DateTime start, DateTime end) {
   if (start.year == end.year && start.month == end.month) {
