@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../app/layout/window_size_class.dart';
+import '../../app/providers/data_providers.dart';
 import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
@@ -249,10 +250,11 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
             tooltip: 'แชร์แผน',
             onPressed: () => showComingSoon(context, 'แชร์แผน', issue: 48),
           ),
+          if (widget.view.savedTrip case final trip?) _TripMenu(trip: trip),
         ],
       ),
       body: SafeArea(child: body),
-      bottomNavigationBar: const _BottomActions(),
+      bottomNavigationBar: _BottomActions(view: widget.view),
     );
   }
 }
@@ -336,13 +338,118 @@ class _MapPreview extends StatelessWidget {
   }
 }
 
-/// Actions for features that come next: saving (#43) and AI edits (#46).
-class _BottomActions extends StatelessWidget {
-  const _BottomActions();
+/// More actions on a saved trip: delete it after confirming (#43).
+class _TripMenu extends ConsumerWidget {
+  const _TripMenu({required this.trip});
+
+  final Trip trip;
+
+  Future<void> _confirmDelete(BuildContext context, WidgetRef ref) async {
+    final colors = Theme.of(context).colorScheme;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        icon: const Icon(Icons.delete_outline),
+        title: const Text('ลบทริปนี้?'),
+        content: const Text('ทริปที่ลบแล้วจะหายจากรายการทริปของคุณ'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('ยกเลิก'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: colors.error,
+              foregroundColor: colors.onError,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('ลบ'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref.read(tripRepositoryProvider).deleteTrip(trip.id!);
+      messenger.showSnackBar(const SnackBar(content: Text('ลบทริปแล้ว')));
+      if (context.mounted) context.go(AppRoutes.home);
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('ลบทริปไม่สำเร็จ ลองใหม่อีกครั้ง')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return MenuAnchor(
+      menuChildren: [
+        MenuItemButton(
+          leadingIcon: const Icon(Icons.delete_outline),
+          onPressed: () => _confirmDelete(context, ref),
+          child: const Text('ลบทริป'),
+        ),
+      ],
+      builder: (context, controller, _) => IconButton(
+        icon: const Icon(Icons.more_vert),
+        tooltip: 'ตัวเลือกเพิ่มเติม',
+        onPressed: () =>
+            controller.isOpen ? controller.close() : controller.open(),
+      ),
+    );
+  }
+}
+
+/// Saving the plan (#43) and AI edits, which come next (#46).
+class _BottomActions extends ConsumerStatefulWidget {
+  const _BottomActions({required this.view});
+
+  final TripPlanView view;
+
+  @override
+  ConsumerState<_BottomActions> createState() => _BottomActionsState();
+}
+
+class _BottomActionsState extends ConsumerState<_BottomActions> {
+  var _saving = false;
+
+  Future<void> _save() async {
+    final user = ref.read(authRepositoryProvider).currentUser;
+    if (user == null) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final now = DateTime.now();
+    setState(() => _saving = true);
+    try {
+      final trip = await ref
+          .read(tripRepositoryProvider)
+          .saveTrip(
+            Trip(
+              ownerUid: user.uid,
+              createdAt: now,
+              updatedAt: now,
+              request: widget.view.request,
+              plan: widget.view.plan,
+            ),
+          );
+      messenger.showSnackBar(const SnackBar(content: Text('บันทึกแล้ว')));
+      // Reopen as the saved trip, so saving twice is not possible and the
+      // delete menu appears.
+      if (mounted) context.replace(AppRoutes.tripPlan(trip.id!));
+    } catch (_) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('บันทึกไม่สำเร็จ ลองใหม่อีกครั้ง')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
+    final saved = widget.view.isSaved;
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
@@ -362,10 +469,11 @@ class _BottomActions extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () =>
-                          showComingSoon(context, 'บันทึกทริป', issue: 43),
-                      icon: const Icon(Icons.bookmark_border),
-                      label: const Text('บันทึกทริป'),
+                      onPressed: saved || _saving ? null : _save,
+                      icon: Icon(
+                        saved ? Icons.bookmark_added : Icons.bookmark_border,
+                      ),
+                      label: Text(saved ? 'บันทึกแล้ว' : 'บันทึกทริป'),
                     ),
                   ),
                   const SizedBox(width: 12),
