@@ -73,6 +73,7 @@ final pipelinePlannerServiceProvider = FutureProvider<PlannerService>((
     selector: selector,
     costCalculator: await costCalculator,
     overBudgetAdvisor: await overBudgetAdvisor,
+    loadTaste: () => ref.read(tasteProfileProvider),
   );
 });
 

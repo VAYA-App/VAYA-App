@@ -5,7 +5,8 @@ import 'route_orderer.dart';
 import 'slot_template.dart';
 
 /// Fills every slot without Gemini (pipeline ⑦ fallback): score each Place
-/// by matching Preference Tags × rating and take the best unused one.
+/// by matching Preference Tags (plus the Taste Profile, #49) × rating and
+/// take the best unused one.
 class FallbackScorer {
   const FallbackScorer();
 
@@ -16,9 +17,12 @@ class FallbackScorer {
     required TripRequest request,
     required List<DayTemplate> days,
     required Candidates candidates,
+    Map<PreferenceTag, int> tasteWeights = const {},
   }) {
     double score(Place p) =>
-        (CandidateBuilder.tagMatches(request, p) + 1) *
+        (CandidateBuilder.tagMatches(request, p) +
+            1 +
+            _tasteBonus(p, tasteWeights)) *
         (p.rating ?? defaultRating);
 
     List<Place> ranked(List<Place> pool) => [...pool]
@@ -56,5 +60,12 @@ class FallbackScorer {
         for (final day in days) [for (final slot in day.slots) ?fill(slot)],
       ],
     );
+  }
+
+  /// Half a point per liked tag weight, from −1 to +2, so taste nudges but
+  /// never outweighs the tags chosen for this trip.
+  static double _tasteBonus(Place place, Map<PreferenceTag, int> weights) {
+    final sum = place.tags.fold(0, (s, t) => s + (weights[t] ?? 0));
+    return (sum * 0.5).clamp(-1.0, 2.0);
   }
 }

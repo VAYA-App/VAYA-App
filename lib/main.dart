@@ -11,9 +11,13 @@ Future<void> main() async {
   // Saved trips live in a local database until Firestore is set up (#142).
   await Hive.initFlutter();
   final trips = await HiveTripRepository.open();
+  final feedback = await Hive.openBox<String>(TasteProfileNotifier.boxName);
   runApp(
     ProviderScope(
-      overrides: [tripRepositoryProvider.overrideWithValue(trips)],
+      overrides: [
+        tripRepositoryProvider.overrideWithValue(trips),
+        placeFeedbackBoxProvider.overrideWithValue(feedback),
+      ],
       child: const VayaApp(),
     ),
   );

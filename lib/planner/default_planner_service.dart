@@ -8,6 +8,7 @@ import 'place_selector.dart';
 import 'planner_service.dart';
 import 'route_orderer.dart';
 import 'slot_template.dart';
+import 'taste_profile.dart';
 
 /// The real planning pipeline ⑤–⑩ (PROJECT-PLAN §8):
 /// candidates → Gemini selection (validated, with fallback) → night stay →
@@ -21,7 +22,10 @@ class DefaultPlannerService implements PlannerService {
     this.candidateBuilder = const CandidateBuilder(),
     this.nightStayPlanner = const NightStayPlanner(),
     this.routeOrderer = const RouteOrderer(),
+    this.loadTaste = _noTaste,
   });
+
+  static TasteProfile _noTaste() => const TasteProfile();
 
   final Future<PlaceCatalog> Function() loadCatalog;
   final PlaceSelector selector;
@@ -30,6 +34,10 @@ class DefaultPlannerService implements PlannerService {
   final CandidateBuilder candidateBuilder;
   final NightStayPlanner nightStayPlanner;
   final RouteOrderer routeOrderer;
+
+  /// The traveller's Taste Profile (#49): disliked Places are left out and
+  /// liked tags weigh in.
+  final TasteProfile Function() loadTaste;
 
   @override
   Stream<PlanningProgress> generate({
@@ -44,16 +52,19 @@ class DefaultPlannerService implements PlannerService {
       request,
       intercityMinutes: intercity?.option.durationMin,
     );
+    final taste = loadTaste();
     final candidates = candidateBuilder.build(
       request: request,
       provinceId: destinationId,
       catalog: catalog,
+      excludedPlaceIds: taste.disliked,
     );
     final (:selection, source: _) = await selector.select(
       request: request,
       province: province,
       days: days,
       candidates: candidates,
+      tasteWeights: taste.tagWeights(catalog),
     );
 
     // Validation and the Gemini retry happen inside the selector.

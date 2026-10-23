@@ -64,8 +64,13 @@ Rules:
     required Province province,
     required List<DayTemplate> days,
     required Candidates candidates,
+    Map<PreferenceTag, int> tasteWeights = const {},
     List<String> previousErrors = const [],
   }) {
+    String tags(bool liked) => [
+      for (final MapEntry(key: tag, value: w) in tasteWeights.entries)
+        if (liked ? w > 0 : w < 0) tag.name,
+    ].join(', ');
     String line(Place p) => [
       p.id,
       p.category.name,
@@ -85,6 +90,9 @@ Rules:
       'Pace: ${request.pace.name}',
       'Tags: ${request.preferenceTags.map((t) => t.name).join(', ')}',
       if (request.note.isNotEmpty) 'Traveller note: ${request.note}',
+      // From thumbs up/down on earlier trips (#49).
+      if (tags(true).isNotEmpty) 'Liked before: ${tags(true)}',
+      if (tags(false).isNotEmpty) 'Disliked before: ${tags(false)}',
       '',
       'Slots to fill:',
       for (final (i, d) in days.indexed)

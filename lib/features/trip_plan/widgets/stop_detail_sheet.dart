@@ -1,8 +1,12 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
+
+import '../../../app/providers/data_providers.dart';
 
 import '../../../domain/domain.dart';
 import '../../../shared/formatters.dart';
 import '../../../planner/geo.dart';
+import '../../../planner/taste_profile.dart';
 import 'stop_timeline.dart';
 
 /// What the user chose in the sheet (#45).
@@ -211,7 +215,9 @@ class _StopDetailState extends State<_StopDetail> {
                 ],
               ),
             ],
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            _FeedbackRow(placeId: place.id),
+            const SizedBox(height: 16),
             if (_choosing) ...[
               Text(
                 'เลือกสถานที่แทน (ใกล้ที่สุดก่อน)',
@@ -331,6 +337,58 @@ class _AlternativeTile extends StatelessWidget {
         ),
         trailing: const Icon(Icons.chevron_right),
       ),
+    );
+  }
+}
+
+/// 👍 / 👎 on the Place, which feeds the Taste Profile (#49). Tapping the
+/// chosen one again clears it.
+class _FeedbackRow extends ConsumerWidget {
+  const _FeedbackRow({required this.placeId});
+
+  final String placeId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final current = ref.watch(
+      tasteProfileProvider.select((t) => t.feedback[placeId]),
+    );
+    final taste = ref.read(tasteProfileProvider.notifier);
+
+    Widget button(PlaceFeedback value, IconData off, IconData on, String tip) {
+      final selected = current == value;
+      return IconButton(
+        isSelected: selected,
+        tooltip: tip,
+        icon: Icon(off),
+        selectedIcon: Icon(on),
+        onPressed: () => taste.set(placeId, selected ? null : value),
+      );
+    }
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(switch (current) {
+            PlaceFeedback.like => 'ชอบที่นี่ จะแนะนำที่แบบนี้มากขึ้น',
+            PlaceFeedback.dislike => 'ไม่ชอบ จะไม่แนะนำที่นี่อีก',
+            null => 'ชอบที่นี่ไหม?',
+          }, style: theme.textTheme.bodyMedium),
+        ),
+        button(
+          PlaceFeedback.like,
+          Icons.thumb_up_outlined,
+          Icons.thumb_up,
+          'ชอบ',
+        ),
+        button(
+          PlaceFeedback.dislike,
+          Icons.thumb_down_outlined,
+          Icons.thumb_down,
+          'ไม่ชอบ',
+        ),
+      ],
     );
   }
 }
