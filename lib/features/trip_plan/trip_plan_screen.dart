@@ -11,6 +11,7 @@ import '../../shared/widgets/coming_soon.dart';
 import 'trip_plan_view_provider.dart';
 import 'widgets/budget_advice_list.dart';
 import 'widgets/cost_summary_card.dart';
+import 'widgets/day_weather.dart';
 import 'widgets/over_budget_banner.dart';
 import 'widgets/stop_detail_sheet.dart';
 import 'widgets/stop_timeline.dart';
@@ -132,6 +133,12 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
       date: _dayPlan.date,
       pace: widget.view.request.pace,
     );
+    final weather = DayWeatherRow(
+      place: widget.view.destination.center,
+      start: widget.view.request.startDate,
+      end: widget.view.request.endDate,
+      date: _dayPlan.date,
+    );
 
     final Widget body;
     if (sizeClass.isAtLeast(WindowSizeClass.expanded)) {
@@ -147,6 +154,8 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
                 _dayChips(),
                 const SizedBox(height: 20),
                 dayHeader,
+                const SizedBox(height: 8),
+                weather,
                 const SizedBox(height: 16),
                 _timeline(),
               ],
@@ -227,6 +236,8 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
                 ),
                 const SizedBox(height: 24),
                 dayHeader,
+                const SizedBox(height: 8),
+                weather,
                 const SizedBox(height: 16),
                 _timeline(),
               ],
