@@ -42,7 +42,11 @@ Future<ProviderContainer> pumpForm(
     ],
   );
   addTearDown(container.dispose);
-  await tester.runAsync(() => container.read(placeCatalogProvider.future));
+  await tester.runAsync(() async {
+    await container.read(placeCatalogProvider.future);
+    // The suggestion screen prices provinces with it (#24).
+    await container.read(costCalculatorProvider.future);
+  });
   await tester.pumpWidget(
     UncontrolledProviderScope(container: container, child: const VayaApp()),
   );
