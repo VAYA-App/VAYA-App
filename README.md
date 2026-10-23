@@ -14,6 +14,7 @@ Flutter (Android + iOS) · Material 3 · Firebase (Auth, Firestore, AI Logic + G
 | [CONTEXT.md](CONTEXT.md) | ศัพท์ของโดเมน (Trip Request, Stop, Night Stay, …) |
 | [docs/PROJECT-PLAN.md](docs/PROJECT-PLAN.md) | schema, สูตรราคา, pipeline |
 | [docs/adr/](docs/adr/) | เหตุผลของการตัดสินใจสำคัญ |
+| [docs/USABILITY-TEST.md](docs/USABILITY-TEST.md) | แผนและผล Usability Testing |
 
 ## เริ่มต้น
 
