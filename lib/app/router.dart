@@ -15,6 +15,7 @@ import '../features/profile/profile_screen.dart';
 import '../features/suggestion/suggestion_screen.dart';
 import '../features/trip_plan/trip_plan_screen.dart';
 import '../features/trip_request/trip_request_screen.dart';
+import '../features/trips/trip_calendar_screen.dart';
 import 'layout/adaptive_shell.dart';
 
 /// Every location in the app. Use these instead of string literals.
@@ -27,6 +28,7 @@ abstract final class AppRoutes {
   static const newTrip = '/new-trip';
   static const suggestions = '/new-trip/suggestions';
   static const generating = '/new-trip/generating';
+  static const tripCalendar = '/calendar';
   static String tripPlan(String tripId) => '/trips/$tripId';
 }
 
@@ -130,6 +132,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.tripCalendar,
+        builder: (context, state) => const TripCalendarScreen(),
       ),
       GoRoute(
         path: '/trips/:tripId',

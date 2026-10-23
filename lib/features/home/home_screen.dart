@@ -49,7 +49,22 @@ class HomeScreen extends ConsumerWidget {
                 const SizedBox(height: 32),
                 const _Inspiration(),
                 const SizedBox(height: 32),
-                Text('ทริปที่บันทึกไว้', style: theme.textTheme.titleLarge),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'ทริปที่บันทึกไว้',
+                        style: theme.textTheme.titleLarge,
+                      ),
+                    ),
+                    if (trips.isNotEmpty)
+                      TextButton.icon(
+                        onPressed: () => context.push(AppRoutes.tripCalendar),
+                        icon: const Icon(Icons.calendar_month_outlined),
+                        label: const Text('ปฏิทิน'),
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 if (trips.isEmpty)
                   const _EmptyTrips()
