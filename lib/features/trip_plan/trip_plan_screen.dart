@@ -97,6 +97,7 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
         widget.view.catalog,
         day: _day,
         index: index,
+        excluded: ref.read(tasteProfileProvider).disliked,
       ),
       canRemove: _dayPlan.stops.length > 1,
     );

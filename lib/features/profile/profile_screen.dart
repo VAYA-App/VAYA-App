@@ -43,6 +43,7 @@ class ProfileScreen extends ConsumerWidget {
                 },
                 const SizedBox(height: 16),
                 const _ThemeCard(),
+                const _TasteCard(),
                 if (user.value != null) ...[
                   const SizedBox(height: 16),
                   const _SignOutCard(),
@@ -194,6 +195,76 @@ class _ThemeCard extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// โปรไฟล์ความชอบจาก 👍/👎 (#49); ซ่อนเมื่อยังไม่เคยกด
+class _TasteCard extends ConsumerWidget {
+  const _TasteCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final taste = ref.watch(tasteProfileProvider);
+    final catalog = ref.watch(placeCatalogProvider).value;
+    if (taste.isEmpty || catalog == null) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final liked =
+        taste.tagWeights(catalog).entries.where((e) => e.value > 0).toList()
+          ..sort((a, b) => b.value.compareTo(a.value));
+    final disliked = taste.disliked.length;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('ความชอบของคุณ', style: theme.textTheme.titleMedium),
+              const SizedBox(height: 4),
+              Text(
+                'จากการกดชอบ/ไม่ชอบสถานที่ ใช้ปรับการแนะนำทริปถัดไป',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+              if (liked.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final e in liked.take(5))
+                      Chip(
+                        avatar: const Icon(Icons.thumb_up_outlined),
+                        label: Text(e.key.label),
+                      ),
+                  ],
+                ),
+              ],
+              if (disliked > 0) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'ไม่แนะนำอีก $disliked แห่ง',
+                  style: theme.textTheme.bodyMedium,
+                ),
+              ],
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () =>
+                      ref.read(tasteProfileProvider.notifier).clear(),
+                  child: const Text('ล้างความชอบ'),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
