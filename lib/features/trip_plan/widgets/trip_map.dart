@@ -1,15 +1,33 @@
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../data/road_router.dart';
 import '../../../domain/domain.dart';
 
 /// Where map tiles come from. `null` uses OpenStreetMap over the network;
 /// tests override it so they never hit the network.
 final mapTileProviderProvider = Provider<TileProvider?>((ref) => null);
 
-/// OpenStreetMap of one Day Plan (ADR-0003).
+/// Road paths for the route line; tests override it so they never hit the
+/// network.
+final roadRouterProvider = Provider<RoadRouter>((ref) {
+  final client = http.Client();
+  ref.onDispose(client.close);
+  return RoadRouter(client);
+});
+
+/// The road path through a day's points, kept for the session so switching
+/// days does not ask again. `null` means draw straight lines (#140).
+final roadRouteProvider = FutureProvider.family<List<GeoPoint>?, RoutePoints>(
+  (ref, points) => ref.watch(roadRouterProvider).route(points.points),
+);
+
+/// OpenStreetMap of one Day Plan (ADR-0003). The line follows the roads
+/// once their shape arrives, and stays straight between the pins until then
+/// or when offline.
 class TripMap extends ConsumerStatefulWidget {
   const TripMap({
     super.key,
@@ -37,15 +55,19 @@ class TripMap extends ConsumerStatefulWidget {
 class _TripMapState extends ConsumerState<TripMap> {
   final _controller = MapController();
 
-  LatLng _at(String placeId) {
-    final location = widget.catalog.place(placeId).location;
-    return LatLng(location.lat, location.lng);
-  }
+  LatLng _at(String placeId) => _latLng(widget.catalog.place(placeId).location);
 
-  List<LatLng> get _points => [
-    for (final stop in widget.day.stops) _at(stop.placeId),
-    if (widget.nightStay case final stay?) _at(stay.placeId),
+  static LatLng _latLng(GeoPoint p) => LatLng(p.lat, p.lng);
+
+  /// The day's Stops in order, then the Night Stay.
+  List<GeoPoint> get _stops => [
+    for (final stop in widget.day.stops)
+      widget.catalog.place(stop.placeId).location,
+    if (widget.nightStay case final stay?)
+      widget.catalog.place(stay.placeId).location,
   ];
+
+  List<LatLng> get _points => [for (final p in _stops) _latLng(p)];
 
   CameraFit get _fitAll => CameraFit.coordinates(
     coordinates: _points,
@@ -77,6 +99,7 @@ class _TripMapState extends ConsumerState<TripMap> {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final road = ref.watch(roadRouteProvider(RoutePoints(_stops))).value;
 
     return FlutterMap(
       mapController: _controller,
@@ -98,7 +121,9 @@ class _TripMapState extends ConsumerState<TripMap> {
         PolylineLayer(
           polylines: [
             Polyline(
-              points: _points,
+              points: road == null
+                  ? _points
+                  : [for (final p in road) _latLng(p)],
               color: colors.primary,
               strokeWidth: 4,
               borderColor: colors.surface,
