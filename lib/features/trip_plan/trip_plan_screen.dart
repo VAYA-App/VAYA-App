@@ -9,6 +9,7 @@ import '../../domain/domain.dart';
 import '../../planner/plan_editor.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/coming_soon.dart';
+import '../assistant/plan_chat_panel.dart';
 import 'trip_plan_view_provider.dart';
 import 'trip_summary.dart';
 import 'widgets/budget_advice_list.dart';
@@ -114,6 +115,35 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
           'เปลี่ยน${place.name}เป็น${next.name}แล้ว',
         DeleteStop() => 'ลบ${place.name}ออกจากแผนแล้ว',
       },
+    );
+  }
+
+  /// The AI chat for this plan in a sheet (#46). When a read-only plan
+  /// becomes a draft, the screen follows it.
+  void _openChat() {
+    final router = GoRouter.of(context);
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
+      builder: (context) => FractionallySizedBox(
+        heightFactor: 0.85,
+        child: Column(
+          children: [
+            Text(
+              'ให้ AI ปรับแผน',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Expanded(
+              child: PlanChatPanel(
+                tripId: widget.tripId,
+                onTripChanged: (id) => router.replace(AppRoutes.tripPlan(id)),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -332,7 +362,10 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
         ],
       ),
       body: SafeArea(child: body),
-      bottomNavigationBar: _BottomActions(view: widget.view),
+      bottomNavigationBar: _BottomActions(
+        view: widget.view,
+        onAskAi: _openChat,
+      ),
     );
   }
 }
@@ -480,11 +513,12 @@ class _TripMenu extends ConsumerWidget {
   }
 }
 
-/// Saving the plan (#43) and AI edits, which come next (#46).
+/// Saving the plan (#43) and editing it with the AI chat (#46).
 class _BottomActions extends ConsumerStatefulWidget {
-  const _BottomActions({required this.view});
+  const _BottomActions({required this.view, required this.onAskAi});
 
   final TripPlanView view;
+  final VoidCallback onAskAi;
 
   @override
   ConsumerState<_BottomActions> createState() => _BottomActionsState();
@@ -561,8 +595,7 @@ class _BottomActionsState extends ConsumerState<_BottomActions> {
                         backgroundColor: colors.tertiary,
                         foregroundColor: colors.onTertiary,
                       ),
-                      onPressed: () =>
-                          showComingSoon(context, 'ให้ AI ปรับแผน', issue: 46),
+                      onPressed: widget.onAskAi,
                       icon: const Icon(Icons.auto_awesome),
                       label: const Text('ให้ AI ปรับแผน'),
                     ),
