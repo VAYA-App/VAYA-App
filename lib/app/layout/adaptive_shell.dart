@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../shared/widgets/motion.dart';
 import '../router.dart';
 import 'window_size_class.dart';
 
@@ -47,6 +48,7 @@ class AdaptiveShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final sizeClass = context.windowSizeClass;
     final branch = navigationShell.currentIndex;
+    final body = FadeThrough(switchKey: branch, child: navigationShell);
 
     if (sizeClass == WindowSizeClass.compact) {
       NavigationDestination tab(_Tab t) => NavigationDestination(
@@ -55,7 +57,7 @@ class AdaptiveShell extends StatelessWidget {
         label: t.label,
       );
       return Scaffold(
-        body: navigationShell,
+        body: body,
         bottomNavigationBar: NavigationBar(
           selectedIndex: branch < _createIndex ? branch : branch + 1,
           onDestinationSelected: (index) {
@@ -113,7 +115,7 @@ class AdaptiveShell extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(child: navigationShell),
+          Expanded(child: body),
         ],
       ),
     );
