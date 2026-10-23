@@ -10,6 +10,7 @@ import '../../planner/plan_editor.dart';
 import '../../shared/formatters.dart';
 import '../assistant/plan_chat_panel.dart';
 import 'trip_plan_view_provider.dart';
+import 'trip_calendar_export.dart';
 import 'trip_summary.dart';
 import 'widgets/budget_advice_list.dart';
 import 'widgets/cost_summary_card.dart';
@@ -175,15 +176,21 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
     }
   }
 
+  Rect? _originOf(BuildContext context) {
+    final box = context.findRenderObject() as RenderBox?;
+    return box == null ? null : box.localToGlobal(Offset.zero) & box.size;
+  }
+
+  /// Every Stop as a calendar event, through the share sheet (#47).
+  Future<void> _exportCalendar(BuildContext context, WidgetRef ref) => ref.read(
+    shareCalendarProvider,
+  )(tripCalendarIcs(widget.view), origin: _originOf(context));
+
   /// Shares the plan as text; [context] is the button's, for the iPad
   /// popover (#48).
-  Future<void> _share(BuildContext context, WidgetRef ref) {
-    final box = context.findRenderObject() as RenderBox?;
-    return ref.read(shareTextProvider)(
-      tripSummaryText(widget.view),
-      origin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
-    );
-  }
+  Future<void> _share(BuildContext context, WidgetRef ref) => ref.read(
+    shareTextProvider,
+  )(tripSummaryText(widget.view), origin: _originOf(context));
 
   Widget _timeline() => StopTimeline(
     day: _dayPlan,
@@ -351,10 +358,25 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
         title: const Text('แผนการเดินทาง'),
         actions: [
           Consumer(
-            builder: (context, ref, _) => IconButton(
-              icon: const Icon(Icons.ios_share_outlined),
-              tooltip: 'แชร์แผน',
-              onPressed: () => _share(context, ref),
+            builder: (context, ref, _) => MenuAnchor(
+              menuChildren: [
+                MenuItemButton(
+                  leadingIcon: const Icon(Icons.notes_outlined),
+                  onPressed: () => _share(context, ref),
+                  child: const Text('แชร์เป็นข้อความ'),
+                ),
+                MenuItemButton(
+                  leadingIcon: const Icon(Icons.event_available_outlined),
+                  onPressed: () => _exportCalendar(context, ref),
+                  child: const Text('เพิ่มลงปฏิทิน'),
+                ),
+              ],
+              builder: (context, controller, _) => IconButton(
+                icon: const Icon(Icons.ios_share_outlined),
+                tooltip: 'แชร์แผน',
+                onPressed: () =>
+                    controller.isOpen ? controller.close() : controller.open(),
+              ),
             ),
           ),
           if (widget.view.savedTrip case final trip?) _TripMenu(trip: trip),

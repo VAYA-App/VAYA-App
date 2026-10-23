@@ -69,6 +69,8 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byTooltip('แชร์แผน'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('แชร์เป็นข้อความ'));
     await tester.pump();
 
     expect(shared, hasLength(1));
