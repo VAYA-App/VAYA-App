@@ -60,6 +60,8 @@ void main() {
         ),
       ),
     );
+    // Let the totals finish counting up (#85).
+    await tester.pumpAndSettle();
   }
 
   double barValue(WidgetTester tester) => tester
@@ -221,7 +223,8 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    // Long enough for the totals to finish counting up (#85).
+    await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(CostSummaryCard), findsOneWidget);
     expect(find.textContaining('฿6,582'), findsOneWidget);

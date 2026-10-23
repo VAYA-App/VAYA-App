@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/domain.dart';
 import '../../../shared/formatters.dart';
+import '../../../shared/widgets/motion.dart';
 import 'cost_breakdown_sheet.dart';
 
 /// The Cost Estimate against the Budget, with the share already spent.
@@ -18,6 +19,17 @@ class CostSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Totals count up and the bar fills when the card first appears (#85).
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Motion.of(context, Motion.long),
+      curve: Curves.easeOutCubic,
+      builder: (context, t, _) => _build(context, t),
+    );
+  }
+
+  /// The card with totals and the bar at fraction [t] of their values.
+  Widget _build(BuildContext context, double t) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
     final muted = theme.textTheme.bodySmall?.copyWith(
@@ -57,7 +69,7 @@ class CostSummaryCard extends StatelessWidget {
                 TextSpan(
                   children: [
                     TextSpan(
-                      text: formatBaht(cost.total),
+                      text: formatBaht((cost.total * t).round()),
                       style: theme.textTheme.headlineMedium?.copyWith(
                         color: over ? colors.error : colors.primary,
                       ),
@@ -75,7 +87,7 @@ class CostSummaryCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: LinearProgressIndicator(
-                        value: spent.clamp(0, 1).toDouble(),
+                        value: spent.clamp(0, 1).toDouble() * t,
                         color: over ? colors.error : colors.primary,
                         backgroundColor: colors.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(999),
@@ -113,7 +125,7 @@ class CostSummaryCard extends StatelessWidget {
                             style: muted,
                           ),
                           TextSpan(
-                            text: formatBaht(cost.perPerson),
+                            text: formatBaht((cost.perPerson * t).round()),
                             style: theme.textTheme.titleMedium?.copyWith(
                               color: colors.tertiary,
                             ),

@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/layout/window_size_class.dart';
 import '../../app/router.dart';
 import '../../shared/widgets/mascot_view.dart';
+import '../../shared/widgets/motion.dart';
 import 'trip_request_form_notifier.dart';
 import 'widgets/budget_step.dart';
 import 'widgets/dates_step.dart';
@@ -23,6 +24,10 @@ class TripRequestScreen extends ConsumerStatefulWidget {
 class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
   /// Errors appear only after the user tries to continue.
   var _showError = false;
+
+  /// Direction of the last step change, for the shared-axis transition.
+  var _forward = true;
+  TripRequestStep? _lastStep;
 
   TripRequestFormNotifier get _form =>
       ref.read(tripRequestFormProvider.notifier);
@@ -53,6 +58,10 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
   @override
   Widget build(BuildContext context) {
     final form = ref.watch(tripRequestFormProvider);
+    if (_lastStep != null && _lastStep != form.step) {
+      _forward = form.step.index > _lastStep!.index;
+    }
+    _lastStep = form.step;
 
     return PopScope(
       canPop: form.isFirstStep,
@@ -83,7 +92,15 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
               Expanded(
                 child: Column(
                   children: [
-                    Expanded(child: _StepPage(step: form.step)),
+                    Expanded(
+                      child: SharedAxisSwitcher(
+                        forward: _forward,
+                        child: _StepPage(
+                          key: ValueKey(form.step),
+                          step: form.step,
+                        ),
+                      ),
+                    ),
                     _BottomBar(
                       error: _showError ? _form.currentError : null,
                       isFirstStep: form.isFirstStep,
@@ -271,7 +288,7 @@ class _ProgressHeader extends StatelessWidget {
 }
 
 class _StepPage extends StatelessWidget {
-  const _StepPage({required this.step});
+  const _StepPage({super.key, required this.step});
 
   final TripRequestStep step;
 
