@@ -19,11 +19,18 @@ final class TripPlanView {
     required this.plan,
     required this.request,
     required this.catalog,
+    this.savedTrip,
   });
 
   final TripPlan plan;
   final TripRequest request;
   final PlaceCatalog catalog;
+
+  /// The saved trip this plan was opened from; `null` for drafts and mocks,
+  /// which can still be saved (#43).
+  final Trip? savedTrip;
+
+  bool get isSaved => savedTrip != null;
 
   Province get destination => catalog.province(plan.destinationId);
 }
@@ -57,14 +64,17 @@ class DraftTripsNotifier extends Notifier<Map<String, DraftTrip>> {
   }
 }
 
-/// The mock plan or a draft from [draftTripsProvider]; saved trips are
-/// opened by id in #43.
+/// The mock plan, a draft from [draftTripsProvider], or a trip saved in
+/// the trip repository (#43).
 final tripPlanViewProvider = FutureProvider.family<TripPlanView?, String>((
   ref,
   tripId,
 ) async {
+  // Watched before any await so the dependency is registered up front.
+  final catalog = ref.watch(placeCatalogProvider.future);
   final TripPlan plan;
   final TripRequest request;
+  Trip? saved;
   if (tripId == mockTripId) {
     plan = await ref.watch(mockTripPlanProvider.future);
     request = await ref.watch(mockTripRequestProvider.future);
@@ -93,13 +103,19 @@ final tripPlanViewProvider = FutureProvider.family<TripPlanView?, String>((
       case final draft?) {
     plan = draft.plan;
     request = draft.request;
+  } else if (await ref.watch(tripRepositoryProvider).getTrip(tripId)
+      case final trip?) {
+    saved = trip;
+    plan = trip.plan;
+    request = trip.request;
   } else {
     return null;
   }
   return TripPlanView(
     plan: plan,
     request: request,
-    catalog: await ref.watch(placeCatalogProvider.future),
+    catalog: await catalog,
+    savedTrip: saved,
   );
 });
 
