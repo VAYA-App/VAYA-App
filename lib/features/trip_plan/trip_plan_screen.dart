@@ -8,7 +8,6 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../planner/plan_editor.dart';
 import '../../shared/formatters.dart';
-import '../../shared/widgets/coming_soon.dart';
 import '../assistant/plan_chat_panel.dart';
 import 'trip_plan_view_provider.dart';
 import 'trip_summary.dart';
