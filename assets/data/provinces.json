@@ -11,7 +11,7 @@
       "intercity": {
         "chonburi": {
           "bus": { "durationMin": 150, "farePerPerson": 131 },
-          "train": { "durationMin": 173, "farePerPerson": 23 },
+          "train": { "durationMin": 240, "farePerPerson": 31 },
           "car": { "durationMin": 120, "distanceKm": 150, "toll": 120 }
         }
       }
