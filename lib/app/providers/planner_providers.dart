@@ -9,6 +9,7 @@ import '../../planner/destination_suggester.dart';
 import '../../planner/gemini_destination_suggester.dart';
 import '../../planner/over_budget_advisor.dart';
 import '../../planner/place_selector.dart';
+import '../../planner/plan_editor.dart';
 import '../../planner/planner_service.dart';
 import 'ai_providers.dart';
 import 'data_providers.dart';
@@ -30,6 +31,16 @@ final budgetRescuerProvider = FutureProvider<DefaultOverBudgetAdvisor>(
 final overBudgetAdvisorProvider = FutureProvider<OverBudgetAdvisor>(
   (ref) => ref.watch(budgetRescuerProvider.future),
 );
+
+/// Edits a plan with the same pricing and advice as the pipeline (#45).
+final planEditorProvider = FutureProvider<PlanEditor>((ref) async {
+  final costCalculator = ref.watch(costCalculatorProvider.future);
+  final overBudgetAdvisor = ref.watch(overBudgetAdvisorProvider.future);
+  return PlanEditor(
+    costCalculator: await costCalculator,
+    overBudgetAdvisor: await overBudgetAdvisor,
+  );
+});
 
 /// Pipeline ②–③ (#24, #25). Without Gemini (#26) it ranks the provinces
 /// that fit by their minimum cost.
