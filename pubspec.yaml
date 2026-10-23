@@ -38,6 +38,8 @@ dependencies:
   flutter_map: ^8.3.2
   http: ^1.6.0
   latlong2: ^0.10.1
+  hive_ce: ^2.22.0
+  hive_ce_flutter: ^2.5.0
 
 dev_dependencies:
   flutter_test:
