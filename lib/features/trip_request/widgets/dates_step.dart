@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
@@ -39,6 +40,11 @@ class DatesStep extends ConsumerWidget {
     <= 4 => 'กลุ่มเล็ก',
     _ => 'กลุ่มใหญ่',
   };
+
+  void _setCount(TripRequestFormNotifier notifier, int count) {
+    HapticFeedback.selectionClick();
+    notifier.setTravellerCount(count);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -109,7 +115,7 @@ class DatesStep extends ConsumerWidget {
               ),
               IconButton.outlined(
                 onPressed: count > 1
-                    ? () => notifier.setTravellerCount(count - 1)
+                    ? () => _setCount(notifier, count - 1)
                     : null,
                 icon: const Icon(Icons.remove),
                 tooltip: 'ลดจำนวนผู้เดินทาง',
@@ -117,7 +123,7 @@ class DatesStep extends ConsumerWidget {
               const SizedBox(width: 8),
               IconButton.filled(
                 onPressed: count < TripRequestFormState.maxTravellers
-                    ? () => notifier.setTravellerCount(count + 1)
+                    ? () => _setCount(notifier, count + 1)
                     : null,
                 icon: const Icon(Icons.add),
                 tooltip: 'เพิ่มจำนวนผู้เดินทาง',
