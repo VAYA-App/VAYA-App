@@ -57,8 +57,15 @@ void main() {
     await next(tester);
     await next(tester);
     await tapText(tester, 'คาเฟ่');
-    await tapText(tester, 'ให้ AI วางแผนให้');
+    await tester.tap(find.text('ให้ AI วางแผนให้'));
+    // The suggestions resolve outside the fake clock.
+    await tester.pump();
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pumpAndSettle();
 
     expect(location(c), AppRoutes.suggestions);
+    expect(find.text('เลือกจังหวัดนี้'), findsWidgets);
   });
 }
