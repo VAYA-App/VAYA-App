@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Saved trips at trips/{tripId} (#41). Each trip belongs to the user in
+// ownerUid; nobody else can see, change or delete it (#145). Everything
+// else is closed.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function ownedByCaller(data) {
+      return signedIn() && data.ownerUid == request.auth.uid;
+    }
+
+    // The shape of Trip.toJson(), with the limits of the trip request form.
+    function isValidTrip(data) {
+      return data.keys().hasAll(['ownerUid', 'createdAt', 'updatedAt', 'request', 'plan'])
+        && data.keys().hasOnly(['ownerUid', 'createdAt', 'updatedAt', 'request', 'plan'])
+        && data.ownerUid is string
+        && data.createdAt is string
+        && data.updatedAt is string
+        && data.plan is map
+        && data.request is map
+        && data.request.travellerCount is int
+        && data.request.travellerCount >= 1
+        && data.request.travellerCount <= 10
+        && data.request.budget is int
+        && data.request.budget > 0
+        && data.request.budget <= 1000000
+        && (!('note' in data.request) || (data.request.note is string && data.request.note.size() <= 500));
+    }
+
+    match /trips/{tripId} {
+      // Queries must filter on ownerUid == the caller's uid to pass.
+      allow read, delete: if ownedByCaller(resource.data);
+      allow create: if ownedByCaller(request.resource.data)
+        && isValidTrip(request.resource.data);
+      allow update: if ownedByCaller(resource.data)
+        && ownedByCaller(request.resource.data)
+        && isValidTrip(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
