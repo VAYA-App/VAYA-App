@@ -9,6 +9,7 @@ import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/coming_soon.dart';
 import 'trip_plan_view_provider.dart';
+import 'trip_summary.dart';
 import 'widgets/budget_advice_list.dart';
 import 'widgets/cost_summary_card.dart';
 import 'widgets/day_weather.dart';
@@ -88,6 +89,16 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
       stop: stop,
       place: widget.view.catalog.place(stop.placeId),
       date: _dayPlan.date,
+    );
+  }
+
+  /// Shares the plan as text; [context] is the button's, for the iPad
+  /// popover (#48).
+  Future<void> _share(BuildContext context, WidgetRef ref) {
+    final box = context.findRenderObject() as RenderBox?;
+    return ref.read(shareTextProvider)(
+      tripSummaryText(widget.view),
+      origin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
     );
   }
 
@@ -256,10 +267,12 @@ class _TripPlanBodyState extends State<_TripPlanBody> {
               ),
         title: const Text('แผนการเดินทาง'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.ios_share_outlined),
-            tooltip: 'แชร์แผน',
-            onPressed: () => showComingSoon(context, 'แชร์แผน', issue: 48),
+          Consumer(
+            builder: (context, ref, _) => IconButton(
+              icon: const Icon(Icons.ios_share_outlined),
+              tooltip: 'แชร์แผน',
+              onPressed: () => _share(context, ref),
+            ),
           ),
           if (widget.view.savedTrip case final trip?) _TripMenu(trip: trip),
         ],
