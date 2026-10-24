@@ -194,6 +194,27 @@ void main() {
       ]);
     });
 
+    test('unknown opening hours still checks the assumed 17:00 close', () {
+      final island = place('x', 100.01, dwell: 360, hours: null);
+      expect(warningsFor(island, dayStart: const ClockTime.hm(13, 0)), [
+        'ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน',
+        'อาจปิดก่อนเที่ยวเสร็จ (ปิด 17:00)',
+      ]);
+    });
+
+    test('unknown opening hours still checks the assumed 09:00 open', () {
+      expect(
+        warningsFor(
+          place('x', 100.01, hours: null),
+          dayStart: const ClockTime.hm(7, 0),
+        ),
+        [
+          'ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน',
+          'ไปถึงก่อนเวลาเปิด (09:00)',
+        ],
+      );
+    });
+
     test('closed on that weekday', () {
       final weekendOnly = place(
         'x',
