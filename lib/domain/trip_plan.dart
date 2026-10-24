@@ -143,7 +143,11 @@ final class NightStay {
 
 /// The ordered Stops of one day.
 final class DayPlan {
-  const DayPlan({required this.date, required this.stops});
+  const DayPlan({
+    required this.date,
+    required this.stops,
+    this.warnings = const [],
+  });
 
   factory DayPlan.fromJson(Map<String, Object?> json) => DayPlan(
     date: dateFromJson(json['date'] as String),
@@ -151,17 +155,25 @@ final class DayPlan {
       for (final s in json['stops'] as List)
         Stop.fromJson(s as Map<String, Object?>),
     ],
+    warnings: [
+      for (final w in json['warnings'] as List? ?? const []) w as String,
+    ],
   );
 
   final DateTime date;
   final List<Stop> stops;
 
+  /// Thai warnings about the whole day, such as a Stop that was dropped
+  /// because its Place was closed (PROJECT-PLAN §10.3).
+  final List<String> warnings;
+
   DayPlan copyWith({List<Stop>? stops}) =>
-      DayPlan(date: date, stops: stops ?? this.stops);
+      DayPlan(date: date, stops: stops ?? this.stops, warnings: warnings);
 
   Map<String, Object?> toJson() => {
     'date': dateToJson(date),
     'stops': [for (final s in stops) s.toJson()],
+    if (warnings.isNotEmpty) 'warnings': warnings,
   };
 }
 

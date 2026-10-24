@@ -66,8 +66,10 @@ class RouteOrderer {
   /// must leave (the last day's departure). Costs are left at 0 for the
   /// cost calculator (#34).
   ///
-  /// Problems such as a Place being closed only add Thai warnings to the
-  /// Stop; the order never changes because of them.
+  /// A sight that is closed that day or cannot finish before closing is
+  /// moved earlier in the day; if no move helps it is dropped with a day
+  /// warning (PROJECT-PLAN §10.3). Other problems, and any problem with a
+  /// meal or evening Stop, only add Thai warnings to the Stop.
   DayPlan orderDay({
     required DateTime date,
     required List<SlotPick> picks,
@@ -76,13 +78,6 @@ class RouteOrderer {
     required PlaceCatalog catalog,
     ClockTime? dayEnd,
   }) {
-    final day = _DayBuilder(
-      date: date,
-      start: start,
-      time: dayStart,
-      dayEnd: dayEnd,
-      catalog: catalog,
-    );
     SlotPick? lunch, dinner;
     final sights = <SlotPick>[], evening = <SlotPick>[];
     for (final pick in picks) {
@@ -98,7 +93,90 @@ class RouteOrderer {
       }
     }
 
-    for (final sight in nearestNeighbor(start, sights, catalog)) {
+    List<Stop> schedule(List<SlotPick> order) => _schedule(
+      order,
+      lunch: lunch,
+      dinner: dinner,
+      evening: evening,
+      date: date,
+      start: start,
+      dayStart: dayStart,
+      dayEnd: dayEnd,
+      catalog: catalog,
+    );
+    List<Stop> misfits(List<Stop> stops) => [
+      for (final stop in stops)
+        if (stop.slot case Slot.morning || Slot.afternoon
+            when _closingProblem(stop, date, catalog) != null)
+          stop,
+    ];
+
+    var order = nearestNeighbor(start, sights, catalog);
+    final warnings = <String>[];
+    while (true) {
+      final stops = schedule(order);
+      final bad = misfits(stops);
+      if (bad.isEmpty) {
+        return DayPlan(date: date, stops: stops, warnings: warnings);
+      }
+      final first = bad.first;
+      final from = order.indexWhere((p) => p.placeId == first.placeId);
+      final moved = [
+        for (var to = 0; to < from; to++)
+          [...order]
+            ..removeAt(from)
+            ..insert(to, order[from]),
+      ].where((o) => misfits(schedule(o)).length < bad.length).firstOrNull;
+      if (moved != null) {
+        order = moved;
+      } else {
+        final place = catalog.place(first.placeId);
+        warnings.add(
+          'ตัด ${place.name} ออก เพราะ${_closingProblem(first, date, catalog)}',
+        );
+        order = [...order]..removeAt(from);
+      }
+    }
+  }
+
+  /// Why [stop] does not fit its Place's opening hours, or null when it
+  /// does. Arriving before opening is not counted: the Stop keeps its
+  /// warning instead.
+  static String? _closingProblem(
+    Stop stop,
+    DateTime date,
+    PlaceCatalog catalog,
+  ) {
+    final place = catalog.place(stop.placeId);
+    final hours = place.hasKnownOpeningHours
+        ? place.hoursOn(date)
+        : assumedHours;
+    if (hours == null) return 'ปิดในวันนี้';
+    if (stop.end.isAfter(hours.close)) {
+      return 'เที่ยวไม่ทันก่อนเวลาปิด (${hours.close})';
+    }
+    return null;
+  }
+
+  List<Stop> _schedule(
+    List<SlotPick> sights, {
+    required SlotPick? lunch,
+    required SlotPick? dinner,
+    required List<SlotPick> evening,
+    required DateTime date,
+    required GeoPoint start,
+    required ClockTime dayStart,
+    required ClockTime? dayEnd,
+    required PlaceCatalog catalog,
+  }) {
+    final day = _DayBuilder(
+      date: date,
+      start: start,
+      time: dayStart,
+      dayEnd: dayEnd,
+      catalog: catalog,
+    );
+    for (final sight in sights) {
       if (lunch != null && day.mealIsDue(lunchWindow, before: sight)) {
         day.visit(lunch, notBefore: lunchWindow.open);
         lunch = null;
@@ -114,7 +192,7 @@ class RouteOrderer {
     for (final night in nearestNeighbor(day.here, evening, catalog)) {
       day.visit(night);
     }
-    return DayPlan(date: date, stops: day.stops);
+    return day.stops;
   }
 }
 

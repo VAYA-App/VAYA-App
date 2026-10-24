@@ -173,13 +173,16 @@ void main() {
   });
 
   group('warnings', () {
+    // Sights that do not fit their hours are moved or dropped instead (see
+    // 'closing hours'), so those cases use an evening Stop.
     List<String> warningsFor(
       Place p, {
+      Slot slot = Slot.morning,
       ClockTime dayStart = const ClockTime.hm(9, 0),
       ClockTime? dayEnd,
     }) => order(
       [p],
-      [pick(Slot.morning, p.id)],
+      [pick(slot, p.id)],
       dayStart: dayStart,
       dayEnd: dayEnd,
     ).stops.single.warnings;
@@ -205,7 +208,9 @@ void main() {
           ),
         },
       );
-      expect(warningsFor(weekendOnly), ['สถานที่ปิดในวันนี้']);
+      expect(warningsFor(weekendOnly, slot: Slot.evening), [
+        'สถานที่ปิดในวันนี้',
+      ]);
     });
 
     test('arrives before opening', () {
@@ -233,13 +238,99 @@ void main() {
           ),
         },
       );
-      expect(warningsFor(early), ['อาจปิดก่อนเที่ยวเสร็จ (ปิด 10:00)']);
+      expect(warningsFor(early, slot: Slot.evening), [
+        'อาจปิดก่อนเที่ยวเสร็จ (ปิด 10:00)',
+      ]);
     });
 
     test('runs past the departure time', () {
       expect(warningsFor(a, dayEnd: const ClockTime.hm(10, 0)), [
         'เลยเวลาที่ควรออกเดินทางกลับ (10:00)',
       ]);
+    });
+  });
+
+  group('closing hours (PROJECT-PLAN §10.3)', () {
+    Map<int, OpeningPeriod> mondayOnly(int open, int close) => {
+      DateTime.monday: OpeningPeriod(
+        ClockTime.hm(open, 0),
+        ClockTime.hm(close, 0),
+      ),
+    };
+
+    test('moves a sight that would close first to earlier in the day', () {
+      final closesEarly = place('early', 100.02, hours: mondayOnly(8, 11));
+      final day = order(
+        [a, closesEarly],
+        [pick(Slot.morning, 'a'), pick(Slot.morning, 'early')],
+      );
+
+      expect(ids(day), ['early', 'a']);
+      expect(day.stops.expand((s) => s.warnings), isEmpty);
+      expect(day.warnings, isEmpty);
+    });
+
+    test('drops a sight that is closed that day', () {
+      final weekendOnly = place(
+        'weekend',
+        100.02,
+        hours: {
+          DateTime.saturday: const OpeningPeriod(
+            ClockTime.hm(9, 0),
+            ClockTime.hm(18, 0),
+          ),
+        },
+      );
+      final day = order(
+        [a, weekendOnly],
+        [pick(Slot.morning, 'a'), pick(Slot.afternoon, 'weekend')],
+      );
+
+      expect(ids(day), ['a']);
+      expect(day.warnings, ['ตัด weekend ออก เพราะปิดในวันนี้']);
+    });
+
+    test('drops a sight that cannot finish before closing anywhere', () {
+      final island = place('island', 100.01, dwell: 600, hours: null);
+      final day = order(
+        [island, b],
+        [pick(Slot.morning, 'island'), pick(Slot.afternoon, 'b')],
+      );
+
+      expect(ids(day), ['b']);
+      expect(day.warnings, [
+        'ตัด island ออก เพราะเที่ยวไม่ทันก่อนเวลาปิด (17:00)',
+      ]);
+    });
+
+    test('checks sights without hours against the assumed 17:00', () {
+      final island = place('island', 100.03, dwell: 360, hours: null);
+      final day = order(
+        [a, b, island],
+        [
+          pick(Slot.morning, 'a'),
+          pick(Slot.morning, 'b'),
+          pick(Slot.afternoon, 'island'),
+        ],
+      );
+
+      expect(ids(day).first, 'island');
+      expect(day.stops.first.end.isAfter(const ClockTime.hm(17, 0)), isFalse);
+      expect(day.warnings, isEmpty);
+    });
+
+    test('keeps a restaurant that closes early, with a warning', () {
+      final shut = place(
+        'shut',
+        100.01,
+        category: PlaceCategory.restaurant,
+        hours: mondayOnly(8, 10),
+      );
+      final day = order([shut], [pick(Slot.lunch, 'shut')]);
+
+      expect(ids(day), ['shut']);
+      expect(day.stops.single.warnings, isNotEmpty);
+      expect(day.warnings, isEmpty);
     });
   });
 
