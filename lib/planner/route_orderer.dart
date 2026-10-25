@@ -182,8 +182,8 @@ class _DayBuilder {
         : RouteOrderer.assumedHours;
     return [
       if (!place.hasKnownOpeningHours)
-        'ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน'
-      else if (hours == null)
+        'ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน',
+      if (hours == null)
         'สถานที่ปิดในวันนี้'
       else if (start.isBefore(hours.open))
         'ไปถึงก่อนเวลาเปิด (${hours.open})'

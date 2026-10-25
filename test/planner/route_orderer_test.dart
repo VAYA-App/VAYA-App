@@ -194,6 +194,34 @@ void main() {
       ]);
     });
 
+    test('unknown opening hours still checks the assumed 17:00 close', () {
+      // An evening Stop, so that a planner which moves or drops sights that
+      // run past closing (PROJECT-PLAN §10.3) still keeps it.
+      final bar = place('x', 100.01, dwell: 360, hours: null);
+      final day = order(
+        [bar],
+        [pick(Slot.evening, 'x')],
+        dayStart: const ClockTime.hm(13, 0),
+      );
+      expect(day.stops.single.warnings, [
+        'ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน',
+        'อาจปิดก่อนเที่ยวเสร็จ (ปิด 17:00)',
+      ]);
+    });
+
+    test('unknown opening hours still checks the assumed 09:00 open', () {
+      expect(
+        warningsFor(
+          place('x', 100.01, hours: null),
+          dayStart: const ClockTime.hm(7, 0),
+        ),
+        [
+          'ไม่มีข้อมูลเวลาเปิด-ปิด ใช้ 09:00–17:00 แทน',
+          'ไปถึงก่อนเวลาเปิด (09:00)',
+        ],
+      );
+    });
+
     test('closed on that weekday', () {
       final weekendOnly = place(
         'x',
