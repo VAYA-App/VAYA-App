@@ -11,6 +11,7 @@ import '../features/auth/login_screen.dart';
 import '../features/explore/explore_screen.dart';
 import '../features/generating/generating_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/profile/photo_credits_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/suggestion/suggestion_screen.dart';
 import '../features/trip_plan/trip_plan_screen.dart';
@@ -29,6 +30,7 @@ abstract final class AppRoutes {
   static const suggestions = '/new-trip/suggestions';
   static const generating = '/new-trip/generating';
   static const tripCalendar = '/calendar';
+  static const photoCredits = '/photo-credits';
   static String tripPlan(String tripId) => '/trips/$tripId';
 }
 
@@ -136,6 +138,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.tripCalendar,
         builder: (context, state) => const TripCalendarScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.photoCredits,
+        builder: (context, state) => const PhotoCreditsScreen(),
       ),
       GoRoute(
         path: '/trips/:tripId',

@@ -44,6 +44,16 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 16),
                 const _ThemeCard(),
                 const _TasteCard(),
+                const SizedBox(height: 16),
+                Card(
+                  clipBehavior: Clip.antiAlias,
+                  child: ListTile(
+                    leading: const Icon(Icons.photo_library_outlined),
+                    title: const Text('เครดิตภาพ'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push(AppRoutes.photoCredits),
+                  ),
+                ),
                 if (user.value != null) ...[
                   const SizedBox(height: 16),
                   const _SignOutCard(),
