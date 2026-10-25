@@ -1,8 +1,8 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../shared/formatters.dart';
+import '../../../shared/widgets/motion.dart';
 import '../trip_request_form_notifier.dart';
 import 'form_section.dart';
 
@@ -42,7 +42,7 @@ class DatesStep extends ConsumerWidget {
   };
 
   void _setCount(TripRequestFormNotifier notifier, int count) {
-    HapticFeedback.selectionClick();
+    Haptics.select();
     notifier.setTravellerCount(count);
   }
 

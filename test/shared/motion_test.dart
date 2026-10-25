@@ -126,6 +126,57 @@ void main() {
     });
   });
 
+  group('CountUp', () {
+    testWidgets('counts up to the value and reads it out whole', (
+      tester,
+    ) async {
+      await tester.pumpWidget(host(const CountUp(value: 3920, format: _baht)));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.text('฿3920'), findsNothing);
+      expect(find.bySemanticsLabel('฿3920'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+      expect(find.text('฿3920'), findsOneWidget);
+    });
+
+    testWidgets('shows the value at once when animations are off', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          const CountUp(value: 3920, format: _baht),
+          disableAnimations: true,
+        ),
+      );
+      await tester.pump();
+      expect(find.text('฿3920'), findsOneWidget);
+    });
+  });
+
+  group('Skeleton', () {
+    testWidgets('pulses while loading', (tester) async {
+      await tester.pumpWidget(host(const Skeleton(height: 40)));
+      final fade = tester.widget<FadeTransition>(
+        find.descendant(
+          of: find.byType(Skeleton),
+          matching: find.byType(FadeTransition),
+        ),
+      );
+      final before = fade.opacity.value;
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(fade.opacity.value, isNot(before));
+    });
+
+    testWidgets('stays still when animations are off', (tester) async {
+      await tester.pumpWidget(
+        host(const Skeleton(height: 40), disableAnimations: true),
+      );
+      // Nothing is scheduled, so settling finishes at once.
+      await tester.pumpAndSettle();
+      expect(find.byType(Skeleton), findsOneWidget);
+    });
+  });
+
   testWidgets('traveller +/- gives a selection click', (tester) async {
     final calls = <String?>[];
     tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
@@ -156,3 +207,5 @@ void main() {
     ]);
   });
 }
+
+String _baht(int v) => '฿$v';
