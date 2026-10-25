@@ -1,8 +1,8 @@
 # กติกาการออกแบบ: Material 3 เท่านั้น
 
-> **แนวภาพ:** ใช้งานออกแบบจาก Stitch (ธีม "Siam Wanderlust") ในแบบมินิมอล ได้แก่ พื้นครีมอุ่น การ์ดสีขาวขอบบาง สีหลักเขียวมรกต สีเน้นส้มพระอาทิตย์ตก ฟอนต์ Prompt และพื้นที่ว่างเยอะ ทั้งหมดทำผ่าน theme ของ Material 3 ไม่สร้าง component ใหม่
+> **แนวภาพ "Emerald Field Guide":** เขียวทั้งแอป รูปถ่ายสถานที่จริงเป็นจุดเด่น การ์ดสีขาวขอบบางบนพื้นขาวอมเขียว ฟอนต์ Prompt พื้นที่ว่างเยอะ และมีช้างน้อยเป็นเพื่อนร่วมทาง ดู mockup ที่อนุมัติแล้วได้ที่ [VAYA Redesign Mockup](https://claude.ai/artifact/B1aPsqgXEx4tLHbvbZKREz)
 
-> แหล่งอ้างอิงเดียวที่ใช้คือ **https://m3.material.io/** ทุกหน้าจอต้องใช้ component, token และ layout ของ Material 3 ทั้งบน Android และ iOS **ห้ามใช้ Cupertino widget** และห้ามสร้าง component เองถ้า M3 มีให้ใช้อยู่แล้ว
+> ฐานของทุกหน้าคือ **https://m3.material.io/** ทุกหน้าจอใช้ component, token และ layout ของ Material 3 ทั้งบน Android และ iOS **ห้ามใช้ Cupertino widget** ถ้า M3 มี component ที่ใช้ได้อยู่แล้วให้ใช้ตัวนั้น ส่วนสิ่งที่ M3 ไม่มี เช่น hero ที่มีรูปถ่าย การ์ดที่มีรูป หรือ empty state ที่มีภาพประกอบ ให้ประกอบขึ้นจาก widget ของ M3 (`Card`, `Stack`, `Image`, `InkWell`) โดยยังใช้สีและตัวอักษรจาก theme เท่านั้น ถ้าส่วนไหนใช้ซ้ำหลายหน้า ให้แยกเป็น widget ไว้ใน `lib/shared/widgets/`
 >
 > **Import:** ใช้ `import 'package:material_ui/material_ui.dart';` เท่านั้น ห้ามใช้ `package:flutter/material.dart` และ `package:flutter/cupertino.dart` เพราะตั้งแต่ Flutter 3.44 Material แยกออกมาเป็นแพ็กเกจ [`material_ui`](https://pub.dev/packages/material_ui) แล้ว และแพ็กเกจที่เราใช้ (เช่น `go_router`) ก็ใช้ตัวนี้ ถ้าปนกันจะได้ `ThemeData`/`ColorScheme` คนละ type ส่วน widget พื้นฐานที่ไม่ใช่ Material ให้ import `package:flutter/widgets.dart`
 >
@@ -20,16 +20,18 @@
 - ใช้สีจาก `Theme.of(context).colorScheme` เท่านั้น เช่น `primary`, `onPrimary`, `primaryContainer`, `surfaceContainerHigh`, `error` และ `outlineVariant`
 - **ห้ามใช้ `Colors.xxx` หรือ `Color(0x...)` ในหน้าจอ** สีแบรนด์มีที่เดียวคือ seed color ใน `lib/app/theme/app_theme.dart`
 - **สีแบรนด์คงที่ (ไม่ใช้ dynamic color):** ถ้าใช้สีจาก wallpaper จะแทนที่สีมรกตของแบรนด์
+- **เขียวอย่างเดียว:** สีเน้นทุก role อยู่ในตระกูลเขียว (`test/app/app_theme_test.dart` ตรวจไว้) มีชุดสีเดียว ไม่มีตัวเลือกชุดสี ยกเว้นสี `error` ที่ยังเป็นแดงเพื่อให้ Over Budget เห็นชัด
 
-| Role | ใช้ทำอะไร | Light |
-|---|---|---|
-| `primary` | ปุ่มหลัก, เลขลำดับบนไทม์ไลน์/หมุด, ไอคอนเด่น | `#006948` มรกต |
-| `secondaryContainer` / `onSecondaryContainer` | สถานะที่เลือก (ชิป, segmented, navigation), การ์ดเด่น | `#D5F0E3` / `#005137` |
-| `tertiary` / `tertiaryContainer` | สีเน้นส้ม: ยอดต่อคน, ป้ายร้านอาหาร, เกร็ดความรู้, ปุ่ม AI | `#A73A00` / `#FFDBCE` |
-| `surface` | พื้นหลังทั้งแอป | `#FFF8F5` ครีม |
-| `surfaceContainerLowest` | การ์ด, ช่องกรอก, แถบด้านล่าง | `#FFFFFF` |
-| `surfaceContainerLow` | กล่องรอง เช่น AI note | `#FCF2EB` |
-| `outlineVariant` | ขอบบาง | `#BCCAC0` |
+| Role | ใช้ทำอะไร | Light | Dark |
+|---|---|---|---|
+| `primary` | ปุ่มหลัก, เลขลำดับบนไทม์ไลน์/หมุด, ไอคอนเด่น | `#006948` มรกต | `#6FDBA8` |
+| `primaryContainer` | พื้นวงกลมตกแต่ง, พื้นของภาพประกอบ | `#9CF2C6` | `#005236` |
+| `secondaryContainer` / `onSecondaryContainer` | สถานะที่เลือก (ชิป, segmented, navigation), การ์ดเด่น | `#D5F0E3` / `#0E3B28` | `#2A4A3A` / `#C2EED7` |
+| `tertiary` / `tertiaryContainer` | สีเน้นเขียวมะนาว: ยอดต่อคน, อยู่ในงบ, นับถอยหลัง, เกร็ดความรู้ | `#3D6A00` / `#C6F08E` | `#A9D475` / `#2C5000` |
+| `surface` | พื้นหลังทั้งแอป | `#F6FBF7` ขาวอมเขียว | `#0E1511` |
+| `surfaceContainerLowest` | การ์ด, ช่องกรอก, แถบด้านล่าง | `#FFFFFF` | `#09100C` |
+| `surfaceContainerLow` | กล่องรอง เช่น AI note, Draft Plan | `#EEF5F0` | `#161D19` |
+| `outlineVariant` | ขอบบาง | `#BFC9C2` | `#3F4944` |
 - **Light + Dark:** ทุกหน้าต้องดูในทั้งสองโหมดก่อนเปิด PR ถ้ามีข้อความวางบนพื้นสี ต้องใช้คู่ `on*` เช่น `onPrimaryContainer` บน `primaryContainer`
 - สีสถานะ:
   - **Over Budget:** `errorContainer` / `onErrorContainer`
@@ -65,6 +67,7 @@
 | Chip | ทรงแคปซูล ถ้าเลือกแล้วพื้นเป็น `secondaryContainer` |
 | `TextField` | พื้นขาว มุมโค้ง 12dp และขอบเป็น primary เมื่อโฟกัส |
 | `NavigationBar` | พื้นขาว ปุ่มตรงกลางเป็น "สร้างทริป" (วงกลม primary) |
+| Hero ที่มีรูปถ่าย / bottom sheet | มุมโค้ง 28dp (ประกอบเองตามข้อ 6) |
 
 ## 5. Component ที่ใช้ในโปรเจกต์ (ใช้ตามนี้ก่อนคิดสร้างเอง)
 
@@ -88,7 +91,31 @@
 | Badge / ตัวเลข | `Badge` |
 | ไอคอน | `Icons.*` ใช้ชุดเดียวกันทั้งแอป (แนะนำแบบ outlined สำหรับสถานะปกติ) |
 
-## 6. Accessibility (ต้องผ่านก่อน merge)
+## 6. รูปถ่าย
+
+- รูปของ Place และ Destination อยู่ใน `assets/` เท่านั้น ห้ามใช้รูปจาก URL ภายนอก ([ADR 0006](adr/0006-bundle-place-photos-with-license-manifest.md))
+- ครอปเป็นสัดส่วนคงที่ก่อนนำเข้า: การ์ด 4:3 และ hero 16:9 **ไม่รีทัชและไม่ย้อมสี** รูป ความเป็นโทนเขียวมาจาก UI รอบรูป
+- ถ้ามีข้อความวางบนรูป ให้ใส่ gradient มืดจากล่างขึ้นบนในโค้ด และใช้ตัวอักษรสีขาว อย่าวางข้อความบนรูปโดยไม่มี gradient
+- รูปเดียวกันที่อยู่ทั้งในการ์ดและในหน้าถัดไปให้ห่อด้วย `Hero` เพื่อให้รูปลอยตามไป
+- ทุกรูปต้องมี `semanticLabel` เป็นชื่อสถานที่ และต้องมีเครดิตตาม manifest ในหน้า "เครดิตภาพ"
+
+## 7. Motion และ haptics
+
+ใช้ helper ใน `lib/shared/widgets/motion.dart` ซึ่งแสดงผลลัพธ์สุดท้ายทันทีเมื่อผู้ใช้ปิดอนิเมชันในเครื่อง (`MediaQuery.disableAnimationsOf`) ห้ามเขียน `AnimationController` เองในหน้าจอถ้ามี helper ที่ใช้ได้
+
+| สิ่งที่ต้องการ | ใช้ | ระยะเวลา |
+|---|---|---|
+| สลับแท็บหลัก | `FadeThrough` | 300ms |
+| ขั้นของฟอร์ม | `SharedAxisSwitcher` | 300ms |
+| รายการที่โหลดเสร็จ | `StaggeredEntrance` | 300ms + 60ms ต่อแถว (สูงสุด 8 แถว) |
+| ยอดเงินและตัวเลขสำคัญ | `CountUp` | 600ms |
+| กำลังโหลด | `Skeleton` ในรูปทรงของเนื้อหาจริง (ใช้แทนวงกลมหมุนเมื่อรู้รูปทรงของเนื้อหา) | กระพริบ 900ms |
+| รูปจากการ์ดไปหน้าถัดไป | `Hero` | ตาม route |
+| ช้างน้อย | `MascotView` ลอยขึ้นลงไม่เกิน 5 วินาทีแล้วหยุด (WCAG 2.2.2) | 1.2 วินาทีต่อรอบ |
+
+Haptics ใช้ผ่าน `Haptics` เท่านั้น และมีแค่ 2 แบบ: `Haptics.select()` ตอนเลือกชิป วัน หรือจำนวน และ `Haptics.confirm()` ตอนบันทึกทริปหรือแผนเสร็จ ห้ามสั่นทุกครั้งที่กด
+
+## 8. Accessibility (ต้องผ่านก่อน merge)
 
 - พื้นที่กดไม่น้อยกว่า **48×48dp**
 - ตัวอักษรขยายถึง **200%** แล้วต้องไม่ล้นหรือถูกตัด (ทดสอบด้วย Settings → Font size หรือ `MediaQuery.textScalerOf`)
@@ -96,13 +123,13 @@
 - ห้ามสื่อความหมายด้วยสีอย่างเดียว เช่น สถานะ Over Budget ต้องมีไอคอนและข้อความด้วย
 - หมุดบนแผนที่ต้องมี label ลำดับเลขให้ screen reader อ่านได้
 
-## 7. ภาษาและข้อความ
+## 9. ภาษาและข้อความ
 
 - ข้อความในแอปเป็น**ภาษาไทยทั้งหมด** และใช้คำตาม [CONTEXT.md](../CONTEXT.md) เช่น "แผนการเดินทาง" ไม่ใช้ "Itinerary"
 - ราคาทุกจุดต้องมีป้าย "ราคาโดยประมาณ"
 - ทุกหน้าต้องมี **empty state** และ **error state** ที่บอกว่าเกิดอะไรขึ้นและผู้ใช้ทำอะไรต่อได้
 
-## 8. Checklist ก่อนเปิด PR ที่มี UI
+## 10. Checklist ก่อนเปิด PR ที่มี UI
 
 - [ ] import `package:material_ui/material_ui.dart` เท่านั้น (`grep -rn "flutter/material.dart\|flutter/cupertino.dart" lib` ต้องไม่เจอ)
 - [ ] ใช้สีและตัวอักษรจาก theme ทั้งหมด (`grep -n "Colors\.\|fontSize" <ไฟล์ที่แก้>` ต้องไม่เจอ)
