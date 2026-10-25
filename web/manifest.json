@@ -3,9 +3,9 @@
     "short_name": "VAYA",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#006A6A",
-    "theme_color": "#006A6A",
-    "description": "VAYA: วางแผนเที่ยวด้วย AI (preview สำหรับพัฒนา)",
+    "background_color": "#F6FBF7",
+    "theme_color": "#006948",
+    "description": "VAYA: วางแผนเที่ยวด้วย AI",
     "orientation": "any",
     "prefer_related_applications": false,
     "icons": [

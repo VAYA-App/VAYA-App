@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 
 import 'app/app.dart';
 import 'app/providers/data_providers.dart';
+import 'app/theme/theme_mode_provider.dart';
 import 'data/hive_trip_repository.dart';
 
 Future<void> main() async {
@@ -12,11 +13,13 @@ Future<void> main() async {
   await Hive.initFlutter();
   final trips = await HiveTripRepository.open();
   final feedback = await Hive.openBox<String>(TasteProfileNotifier.boxName);
+  final settings = await Hive.openBox<String>(ThemeModeNotifier.boxName);
   runApp(
     ProviderScope(
       overrides: [
         tripRepositoryProvider.overrideWithValue(trips),
         placeFeedbackBoxProvider.overrideWithValue(feedback),
+        settingsBoxProvider.overrideWithValue(settings),
       ],
       child: const VayaApp(),
     ),

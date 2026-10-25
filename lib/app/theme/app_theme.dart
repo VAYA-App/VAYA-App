@@ -1,89 +1,84 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'theme_palette.dart';
-
-/// Material 3 theme for the whole app, styled after the team's Stitch
-/// design ("Siam Wanderlust"): emerald primary, warm stone surfaces, white
-/// cards and a sunset accent mapped to the tertiary role.
+/// Material 3 theme for the whole app, "Emerald Field Guide": one green
+/// family for every accent role, mint-tinted surfaces and white cards. Only
+/// the error roles leave the green family, so Over Budget still stands out.
 ///
 /// Screens must read colours and text styles from `Theme.of(context)` only.
 /// See docs/DESIGN.md.
 abstract final class AppTheme {
   /// Andaman emerald, the brand colour.
-  static Color get seedColor => ThemePalette.emerald.seed;
+  static const Color seedColor = Color(0xFF006948);
 
   /// Bundled Prompt font, covering both Thai and Latin.
   static const String fontFamily = 'Prompt';
 
-  static ThemeData light([ThemePalette palette = ThemePalette.emerald]) =>
-      _build(_scheme(palette, Brightness.light));
+  static ThemeData light() => _build(_light);
 
-  static ThemeData dark([ThemePalette palette = ThemePalette.emerald]) =>
-      _build(_scheme(palette, Brightness.dark));
+  static ThemeData dark() => _build(_dark);
 
-  /// Every palette shares the warm stone surfaces; only the accent roles
-  /// come from its seed. Emerald gets the exact Stitch brand accents.
-  static ColorScheme _scheme(ThemePalette palette, Brightness brightness) {
-    final seeded = ColorScheme.fromSeed(
-      seedColor: palette.seed,
-      brightness: brightness,
-    );
-    final light = brightness == Brightness.light;
-    final scheme = light ? _lightSurfaces(seeded) : _darkSurfaces(seeded);
-    if (palette != ThemePalette.emerald) return scheme;
-    return light ? _emeraldLight(scheme) : _emeraldDark(scheme);
-  }
+  static final ColorScheme _light = ColorScheme.fromSeed(seedColor: seedColor)
+      .copyWith(
+        primary: seedColor,
+        onPrimary: const Color(0xFFFFFFFF),
+        primaryContainer: const Color(0xFF9CF2C6),
+        onPrimaryContainer: const Color(0xFF002114),
+        inversePrimary: const Color(0xFF6FDBA8),
+        // Selection highlights (chips, segmented buttons, navigation).
+        secondaryContainer: const Color(0xFFD5F0E3),
+        onSecondaryContainer: const Color(0xFF0E3B28),
+        // Lime accent for per-person cost, in-budget and tips.
+        tertiary: const Color(0xFF3D6A00),
+        onTertiary: const Color(0xFFFFFFFF),
+        tertiaryContainer: const Color(0xFFC6F08E),
+        onTertiaryContainer: const Color(0xFF0F2000),
+        surface: const Color(0xFFF6FBF7),
+        onSurface: const Color(0xFF161D19),
+        onSurfaceVariant: const Color(0xFF3F4944),
+        surfaceDim: const Color(0xFFD6DBD7),
+        surfaceBright: const Color(0xFFF6FBF7),
+        surfaceContainerLowest: const Color(0xFFFFFFFF),
+        surfaceContainerLow: const Color(0xFFEEF5F0),
+        surfaceContainer: const Color(0xFFE8F0EA),
+        surfaceContainerHigh: const Color(0xFFE2EBE4),
+        surfaceContainerHighest: const Color(0xFFDCE5DE),
+        outline: const Color(0xFF6F7973),
+        outlineVariant: const Color(0xFFBFC9C2),
+        inverseSurface: const Color(0xFF2B322E),
+        onInverseSurface: const Color(0xFFECF2ED),
+      );
 
-  static ColorScheme _lightSurfaces(ColorScheme c) => c.copyWith(
-    surface: const Color(0xFFFFF8F5),
-    onSurface: const Color(0xFF1F1B17),
-    onSurfaceVariant: const Color(0xFF3D4A42),
-    surfaceDim: const Color(0xFFE2D8D2),
-    surfaceBright: const Color(0xFFFFF8F5),
-    surfaceContainerLowest: const Color(0xFFFFFFFF),
-    surfaceContainerLow: const Color(0xFFFCF2EB),
-    surfaceContainer: const Color(0xFFF6ECE6),
-    surfaceContainerHigh: const Color(0xFFF0E6E0),
-    surfaceContainerHighest: const Color(0xFFEAE1DA),
-    outline: const Color(0xFF6D7A72),
-    outlineVariant: const Color(0xFFBCCAC0),
-    inverseSurface: const Color(0xFF342F2B),
-    onInverseSurface: const Color(0xFFF9EFE8),
-  );
-
-  static ColorScheme _darkSurfaces(ColorScheme c) => c.copyWith(
-    surface: const Color(0xFF16120F),
-    onSurface: const Color(0xFFEAE1DA),
-    onSurfaceVariant: const Color(0xFFBCCAC0),
-    surfaceContainerLowest: const Color(0xFF110D0A),
-    surfaceContainerLow: const Color(0xFF1F1B17),
-    surfaceContainer: const Color(0xFF231F1B),
-    surfaceContainerHigh: const Color(0xFF2E2925),
-    surfaceContainerHighest: const Color(0xFF393430),
-    outline: const Color(0xFF87948B),
-    outlineVariant: const Color(0xFF3D4A42),
-  );
-
-  static ColorScheme _emeraldLight(ColorScheme c) => c.copyWith(
-    primary: ThemePalette.emerald.seed,
-    onPrimary: const Color(0xFFFFFFFF),
-    // Selection highlights (chips, segmented buttons, navigation) use a
-    // soft emerald tint instead of a second hue.
-    secondaryContainer: const Color(0xFFD5F0E3),
-    onSecondaryContainer: const Color(0xFF005137),
-    // Sunset accent for per-person cost, alerts and highlights.
-    tertiary: const Color(0xFFA73A00),
-    onTertiary: const Color(0xFFFFFFFF),
-    tertiaryContainer: const Color(0xFFFFDBCE),
-    onTertiaryContainer: const Color(0xFF370E00),
-  );
-
-  static ColorScheme _emeraldDark(ColorScheme c) => c.copyWith(
-    tertiary: const Color(0xFFFFB599),
-    onTertiary: const Color(0xFF5A1B00),
-    tertiaryContainer: const Color(0xFF7F2B00),
-    onTertiaryContainer: const Color(0xFFFFDBCE),
-  );
+  static final ColorScheme _dark =
+      ColorScheme.fromSeed(
+        seedColor: seedColor,
+        brightness: Brightness.dark,
+      ).copyWith(
+        primary: const Color(0xFF6FDBA8),
+        onPrimary: const Color(0xFF003824),
+        primaryContainer: const Color(0xFF005236),
+        onPrimaryContainer: const Color(0xFF8BF8C3),
+        inversePrimary: seedColor,
+        secondaryContainer: const Color(0xFF2A4A3A),
+        onSecondaryContainer: const Color(0xFFC2EED7),
+        tertiary: const Color(0xFFA9D475),
+        onTertiary: const Color(0xFF1D3700),
+        tertiaryContainer: const Color(0xFF2C5000),
+        onTertiaryContainer: const Color(0xFFC6F08E),
+        surface: const Color(0xFF0E1511),
+        onSurface: const Color(0xFFDDE4DE),
+        onSurfaceVariant: const Color(0xFFBFC9C2),
+        surfaceDim: const Color(0xFF0E1511),
+        surfaceBright: const Color(0xFF343B37),
+        surfaceContainerLowest: const Color(0xFF09100C),
+        surfaceContainerLow: const Color(0xFF161D19),
+        surfaceContainer: const Color(0xFF1A211D),
+        surfaceContainerHigh: const Color(0xFF242C27),
+        surfaceContainerHighest: const Color(0xFF2F3732),
+        outline: const Color(0xFF89938C),
+        outlineVariant: const Color(0xFF3F4944),
+        inverseSurface: const Color(0xFFDDE4DE),
+        onInverseSurface: const Color(0xFF2B322E),
+      );
 
   static ThemeData _build(ColorScheme c) {
     final base = ThemeData(
