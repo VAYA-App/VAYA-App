@@ -2,7 +2,7 @@
 
 Run from the repo root (standard library only):
 
-    python3 tool/photos/search_commons.py candidates.json
+    python3 tool/photos/search_commons.py candidates.json [id,id,...]
 
 For each Place it searches Commons by name (plus any extra query in
 tool/photos/queries.json) and keeps only photos whose licence allows use in
@@ -80,14 +80,18 @@ def targets() -> list[dict]:
                 "name": place["name"],
                 "province": p["name"],
             })
+    for category in ("attraction", "restaurant", "accommodation"):
+        items.append({"id": f"category-{category}", "kind": "category", "name": ""})
     return items
 
 
-def main(out: Path) -> None:
+def main(out: Path, only: set[str] | None) -> None:
     extra = json.loads(QUERIES.read_text()) if QUERIES.exists() else {}
     result = {}
     for item in targets():
-        queries = [item["name"], *extra.get(item["id"], [])]
+        if only and item["id"] not in only:
+            continue
+        queries = [q for q in [item["name"], *extra.get(item["id"], [])] if q]
         seen, found = set(), []
         for q in queries:
             for c in search(q):
@@ -101,4 +105,4 @@ def main(out: Path) -> None:
 
 
 if __name__ == "__main__":
-    main(Path(sys.argv[1]))
+    main(Path(sys.argv[1]), set(sys.argv[2].split(",")) if len(sys.argv) > 2 else None)
