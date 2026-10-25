@@ -6,9 +6,9 @@ import '../../../shared/widgets/motion.dart';
 import '../trip_request_form_notifier.dart';
 import 'form_section.dart';
 
-/// Step ①: travel dates and Traveller Count.
-class DatesStep extends ConsumerWidget {
-  const DatesStep({super.key});
+/// Travel dates and Traveller Count, on step ① of the form.
+class DatesSection extends ConsumerWidget {
+  const DatesSection({super.key});
 
   Future<void> _pickDates(BuildContext context, WidgetRef ref) async {
     final form = ref.read(tripRequestFormProvider);

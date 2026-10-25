@@ -196,6 +196,8 @@ void main() {
     );
 
     await pumpForm(tester);
+    await tester.ensureVisible(find.byTooltip('เพิ่มจำนวนผู้เดินทาง'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('เพิ่มจำนวนผู้เดินทาง'));
     await tester.pump();
     await tester.tap(find.byTooltip('ลดจำนวนผู้เดินทาง'));

@@ -6,10 +6,10 @@ import '../trip_request_form_notifier.dart';
 import 'form_section.dart';
 import 'option_card.dart';
 
-/// Step ③: Intercity Transport (hidden for same-province trips) and Local
-/// Transport Mode.
-class TransportStep extends ConsumerWidget {
-  const TransportStep({super.key});
+/// Intercity Transport (hidden for same-province trips) and Local
+/// Transport Mode, on step ② of the form.
+class TransportSection extends ConsumerWidget {
+  const TransportSection({super.key});
 
   static const _intercity = {
     IntercityMode.bus: (Icons.directions_bus_outlined, 'สะดวก ราคาประหยัด'),

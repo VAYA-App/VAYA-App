@@ -4,26 +4,19 @@ import 'package:material_ui/material_ui.dart';
 import '../../../domain/domain.dart';
 import '../trip_request_form_notifier.dart';
 import 'form_section.dart';
-import 'option_card.dart';
 
-/// Step ④: Pace, Preference Tags and the Free-text Note.
-class PreferencesStep extends ConsumerStatefulWidget {
-  const PreferencesStep({super.key});
+/// Preference Tags and the Free-text Note, on step ③ of the form.
+class StyleSection extends ConsumerStatefulWidget {
+  const StyleSection({super.key});
 
   @override
-  ConsumerState<PreferencesStep> createState() => _PreferencesStepState();
+  ConsumerState<StyleSection> createState() => _StyleSectionState();
 }
 
-class _PreferencesStepState extends ConsumerState<PreferencesStep> {
+class _StyleSectionState extends ConsumerState<StyleSection> {
   late final _note = TextEditingController(
     text: ref.read(tripRequestFormProvider).note,
   );
-
-  static const _paces = {
-    Pace.chill: (Icons.spa_outlined, '2 ที่ / วัน'),
-    Pace.normal: (Icons.directions_walk, '3 ที่ / วัน'),
-    Pace.packed: (Icons.bolt_outlined, '4–5 ที่ / วัน'),
-  };
 
   static const _tagIcons = {
     PreferenceTag.nature: Icons.forest_outlined,
@@ -55,25 +48,6 @@ class _PreferencesStepState extends ConsumerState<PreferencesStep> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FormSection(
-          icon: Icons.speed_outlined,
-          title: 'จังหวะการเที่ยว',
-          child: OptionGrid(
-            columns: 3,
-            children: [
-              for (final MapEntry(key: pace, value: (icon, caption))
-                  in _paces.entries)
-                OptionCard(
-                  vertical: true,
-                  icon: icon,
-                  label: pace.label,
-                  caption: caption,
-                  selected: form.pace == pace,
-                  onTap: () => notifier.setPace(pace),
-                ),
-            ],
-          ),
-        ),
         FormSection(
           icon: Icons.favorite_border,
           title: 'สไตล์ที่ชอบ',
