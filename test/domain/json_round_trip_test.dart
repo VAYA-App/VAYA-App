@@ -39,6 +39,16 @@ void main() {
     expect(copy.toJson(), equals(trip.toJson()));
   });
 
+  test('day warnings survive a JSON round trip', () {
+    final day = DayPlan(
+      date: DateTime(2026, 11, 14),
+      stops: const [],
+      warnings: const ['ตัด เกาะล้าน ออก เพราะปิดในวันนี้'],
+    );
+
+    expect(DayPlan.fromJson(day.toJson()).warnings, day.warnings);
+  });
+
   test('mock trip plan costs add up', () {
     final plan = TripPlan.fromJson(planJson);
     final request = TripRequest.fromJson(requestJson);

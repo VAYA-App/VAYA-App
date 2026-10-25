@@ -241,6 +241,12 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
       end: widget.view.request.endDate,
       date: _dayPlan.date,
     );
+    final dayWarnings = [
+      for (final warning in _dayPlan.warnings) ...[
+        const SizedBox(height: 8),
+        _DayWarning(warning),
+      ],
+    ];
 
     final Widget body;
     if (sizeClass.isAtLeast(WindowSizeClass.expanded)) {
@@ -258,6 +264,7 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
                 dayHeader,
                 const SizedBox(height: 8),
                 weather,
+                ...dayWarnings,
                 const SizedBox(height: 16),
                 _timeline(),
               ],
@@ -340,6 +347,7 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
                 dayHeader,
                 const SizedBox(height: 8),
                 weather,
+                ...dayWarnings,
                 const SizedBox(height: 16),
                 _timeline(),
               ],
@@ -853,6 +861,33 @@ class _DayHeader extends StatelessWidget {
           'จังหวะ: ${pace.label}',
           style: theme.textTheme.bodySmall?.copyWith(
             color: colors.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A warning about the whole day, such as a dropped Stop (§10.3); styled
+/// like the warnings on a Stop.
+class _DayWarning extends StatelessWidget {
+  const _DayWarning(this.warning);
+
+  final String warning;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.warning_amber_outlined, size: 16, color: colors.error),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            warning,
+            style: theme.textTheme.bodySmall?.copyWith(color: colors.error),
           ),
         ),
       ],
