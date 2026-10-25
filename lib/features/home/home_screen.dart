@@ -8,7 +8,6 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/mascot_view.dart';
-import '../../shared/widgets/theme_picker_sheet.dart';
 import '../explore/trip_ideas.dart';
 import '../explore/widgets/trip_idea_card.dart';
 import 'greeting.dart';
@@ -113,11 +112,6 @@ class _Brand extends StatelessWidget {
               Text('VAYA', style: theme.textTheme.titleLarge),
             ],
           ),
-        ),
-        IconButton(
-          icon: const Icon(Icons.palette_outlined),
-          tooltip: 'เปลี่ยนธีม',
-          onPressed: () => showThemePicker(context),
         ),
       ],
     );
