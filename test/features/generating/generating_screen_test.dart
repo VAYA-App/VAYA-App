@@ -170,6 +170,6 @@ void main() {
 
     await tester.tap(find.text('กลับไปแก้คำขอ'));
     await tester.pumpAndSettle();
-    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 3'), findsOneWidget);
   });
 }

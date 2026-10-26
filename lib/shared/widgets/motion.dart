@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// M3 motion helpers (#85). Each one shows its child at rest right away when
@@ -184,4 +185,108 @@ class _StaggeredEntranceState extends State<StaggeredEntrance>
       ),
     );
   }
+}
+
+/// Shows [value] counting up from zero the first time it appears, then
+/// from the old value whenever it changes. [format] turns the number into
+/// text, e.g. `formatBaht`.
+class CountUp extends StatelessWidget {
+  const CountUp({
+    super.key,
+    required this.value,
+    required this.format,
+    this.style,
+  });
+
+  final int value;
+  final String Function(int value) format;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: value.toDouble()),
+      duration: Motion.of(context, Motion.long),
+      curve: Curves.easeOutCubic,
+      // Screen readers hear the final value, never the moving one.
+      builder: (context, v, _) => Semantics(
+        label: format(value),
+        excludeSemantics: true,
+        child: Text(format(v.round()), style: style),
+      ),
+    );
+  }
+}
+
+/// Placeholder in the shape of content that is still loading. It pulses
+/// gently for under five seconds, then rests (WCAG 2.2.2, which also lets
+/// `pumpAndSettle` finish in tests); it stays still when the user turns
+/// animations off.
+class Skeleton extends StatefulWidget {
+  const Skeleton({
+    super.key,
+    this.width,
+    required this.height,
+    this.radius = 12,
+  });
+
+  final double? width;
+  final double height;
+  final double radius;
+
+  @override
+  State<Skeleton> createState() => _SkeletonState();
+}
+
+class _SkeletonState extends State<Skeleton>
+    with SingleTickerProviderStateMixin {
+  late final _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+    value: 1,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _pulse
+        ..stop()
+        ..value = 1;
+    } else if (!_pulse.isAnimating && _pulse.value == 1) {
+      _pulse.repeat(reverse: true, count: 4);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ExcludeSemantics(
+      child: FadeTransition(
+        opacity: Tween(begin: 0.45, end: 1.0).animate(_pulse),
+        child: Container(
+          width: widget.width,
+          height: widget.height,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(widget.radius),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The only haptics the app plays (docs/DESIGN.md): a tick when picking a
+/// chip, day or count, and a firmer tap when a trip is saved or a plan is
+/// ready.
+abstract final class Haptics {
+  static Future<void> select() => HapticFeedback.selectionClick();
+
+  static Future<void> confirm() => HapticFeedback.mediumImpact();
 }

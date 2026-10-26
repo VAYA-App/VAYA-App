@@ -20,16 +20,12 @@ class AdaptiveShell extends StatelessWidget {
 
   /// In branch order (see `router.dart`).
   static const List<_Tab> _tabs = [
+    (icon: Icons.home_outlined, selectedIcon: Icons.home, label: 'หน้าแรก'),
     (icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: 'สำรวจ'),
     (
       icon: Icons.luggage_outlined,
       selectedIcon: Icons.luggage,
       label: 'ทริปของฉัน',
-    ),
-    (
-      icon: Icons.auto_awesome_outlined,
-      selectedIcon: Icons.auto_awesome,
-      label: 'AI ช่วยคิด',
     ),
     (icon: Icons.person_outline, selectedIcon: Icons.person, label: 'โปรไฟล์'),
   ];
@@ -46,6 +42,18 @@ class AdaptiveShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Android back on another tab returns to หน้าแรก instead of closing the
+    // app; only หน้าแรก lets the system handle it (#180).
+    return PopScope(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goTo(0);
+      },
+      child: _scaffold(context),
+    );
+  }
+
+  Widget _scaffold(BuildContext context) {
     final sizeClass = context.windowSizeClass;
     final branch = navigationShell.currentIndex;
     final body = FadeThrough(switchKey: branch, child: navigationShell);

@@ -46,13 +46,13 @@ void main() {
 
     await tester.tap(find.byTooltip('สร้างทริป'));
     await tester.pumpAndSettle();
-    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 3'), findsOneWidget);
   });
 
   testWidgets('bottom bar opens every tab', (tester) async {
     await pumpApp(tester, const Size(400, 800));
 
-    for (final tab in ['สำรวจ', 'AI ช่วยคิด', 'โปรไฟล์', 'ทริปของฉัน']) {
+    for (final tab in ['สำรวจ', 'ทริปของฉัน', 'โปรไฟล์', 'หน้าแรก']) {
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),
@@ -71,7 +71,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('วางแผนทริปใหม่'), findsWidgets);
-    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 3'), findsOneWidget);
   });
 
   test('window size classes follow the M3 breakpoints', () {

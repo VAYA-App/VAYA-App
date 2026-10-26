@@ -56,11 +56,16 @@ void main() {
     return router;
   }
 
-  List<LatLng> drawn(WidgetTester tester) => tester
-      .widget<PolylineLayer>(find.byType(PolylineLayer))
-      .polylines
-      .single
-      .points;
+  /// Every leg's points, joined where one leg ends and the next begins.
+  List<LatLng> drawn(WidgetTester tester) {
+    final legs = tester
+        .widget<PolylineLayer<int>>(find.byType(PolylineLayer<int>))
+        .polylines;
+    return [
+      for (final (i, leg) in legs.indexed)
+        ...i == 0 ? leg.points : leg.points.skip(1),
+    ];
+  }
 
   testWidgets('asks for the road through the stops, then the night stay', (
     tester,
@@ -82,13 +87,23 @@ void main() {
     ];
     await pumpMap(tester, path);
 
-    expect(drawn(tester), [for (final p in path) LatLng(p.lat, p.lng)]);
+    final road = [for (final p in path) LatLng(p.lat, p.lng)];
+    final points = drawn(tester);
+    expect(points.first, road.first);
+    expect(points.last, road.last);
+    expect(points.every(road.contains), isTrue);
   });
 
   testWidgets('offline: straight lines between the pins', (tester) async {
     await pumpMap(tester, null);
 
-    // Four stops plus the night stay.
+    // Four stops plus the night stay, one straight leg between each pair.
     expect(drawn(tester), hasLength(plan.days.first.stops.length + 1));
+    expect(
+      tester
+          .widget<PolylineLayer<int>>(find.byType(PolylineLayer<int>))
+          .polylines,
+      hasLength(plan.days.first.stops.length),
+    );
   });
 }

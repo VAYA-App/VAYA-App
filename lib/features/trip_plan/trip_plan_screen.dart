@@ -8,11 +8,13 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../planner/plan_editor.dart';
 import '../../shared/formatters.dart';
+import '../../shared/widgets/place_photo.dart';
 import '../assistant/plan_chat_panel.dart';
 import 'trip_plan_view_provider.dart';
 import 'trip_calendar_export.dart';
 import 'trip_summary.dart';
 import 'widgets/budget_advice_list.dart';
+import 'widgets/cost_breakdown_sheet.dart';
 import 'widgets/cost_summary_card.dart';
 import 'widgets/day_weather.dart';
 import 'widgets/over_budget_banner.dart';
@@ -59,9 +61,6 @@ class _TripPlanBody extends ConsumerStatefulWidget {
 
 class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
   var _day = 0;
-
-  /// Compact windows show either the timeline or the map.
-  var _showMap = false;
 
   /// Highlighted Stop of the selected day, shared by timeline and map.
   int? _selectedStop;
@@ -128,21 +127,32 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (context) => FractionallySizedBox(
-        heightFactor: 0.85,
-        child: Column(
-          children: [
-            Text(
-              'ให้ AI ปรับแผน',
-              style: Theme.of(context).textTheme.titleMedium,
+      // Lift the sheet above the keyboard and keep the input clear of the
+      // system navigation bar, or the typed text hides behind them (#180).
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: FractionallySizedBox(
+          heightFactor: 0.85,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Text(
+                  'ให้ AI ปรับแผน',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Expanded(
+                  child: PlanChatPanel(
+                    tripId: widget.tripId,
+                    onTripChanged: (id) =>
+                        router.replace(AppRoutes.tripPlan(id)),
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: PlanChatPanel(
-                tripId: widget.tripId,
-                onTripChanged: (id) => router.replace(AppRoutes.tripPlan(id)),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );
@@ -202,45 +212,65 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
     onSelect: _selectStop,
   );
 
-  Widget _map() => TripMap(
+  /// Tapping a pin picks its Stop and glides there; the timeline opens
+  /// the Stop's details.
+  Widget _map({EdgeInsets padding = EdgeInsets.zero}) => TripMap(
     day: _dayPlan,
     catalog: widget.view.catalog,
     nightStay: _nightStay,
     selectedIndex: _selectedStop,
-    onSelect: _selectStop,
+    onSelect: (i) => setState(() => _selectedStop = i),
+    transport: widget.view.request.localTransportMode,
+    padding: padding,
   );
 
   Widget _dayChips() =>
       _DayChips(days: _plan.days, selected: _day, onSelected: _selectDay);
 
-  @override
-  Widget build(BuildContext context) {
-    final sizeClass = context.windowSizeClass;
-    final margin = sizeClass.pageMargin;
+  /// Everything about the trip and the selected day, in reading order:
+  /// the cost at a glance, any Over Budget help, the day's timeline, then
+  /// the full trip overview.
+  List<Widget> _details() {
     final over = _plan.cost.isOverBudget;
-    final summary = [
+    return [
+      _CostHeader(view: widget.view),
       if (over) ...[
+        const SizedBox(height: 12),
         OverBudgetBanner(
           cost: _plan.cost,
           hasAdvice: _plan.overBudgetAdvice.isNotEmpty,
           canShorten: _plan.days.length > 1,
         ),
-        const SizedBox(height: 12),
+        _OverBudgetHelp(tripId: widget.tripId, plan: _plan),
       ],
+      const SizedBox(height: 20),
+      _DayHeader(
+        dayIndex: _day,
+        date: _dayPlan.date,
+        pace: widget.view.request.pace,
+      ),
+      const SizedBox(height: 8),
+      DayWeatherRow(
+        place: widget.view.destination.center,
+        start: widget.view.request.startDate,
+        end: widget.view.request.endDate,
+        date: _dayPlan.date,
+      ),
+      for (final warning in _dayPlan.warnings) ...[
+        const SizedBox(height: 8),
+        _DayWarning(warning),
+      ],
+      const SizedBox(height: 16),
+      _timeline(),
+      const SizedBox(height: 24),
       _TripSummaryCard(view: widget.view),
-      if (over) _OverBudgetHelp(tripId: widget.tripId, plan: _plan),
     ];
-    final dayHeader = _DayHeader(
-      dayIndex: _day,
-      date: _dayPlan.date,
-      pace: widget.view.request.pace,
-    );
-    final weather = DayWeatherRow(
-      place: widget.view.destination.center,
-      start: widget.view.request.startDate,
-      end: widget.view.request.endDate,
-      date: _dayPlan.date,
-    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sizeClass = context.windowSizeClass;
+    final margin = sizeClass.pageMargin;
 
     final Widget body;
     if (sizeClass.isAtLeast(WindowSizeClass.expanded)) {
@@ -248,19 +278,16 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
         children: [
           Expanded(
             flex: 5,
-            child: ListView(
+            child: SingleChildScrollView(
               padding: EdgeInsets.all(margin),
-              children: [
-                ...summary,
-                const SizedBox(height: 20),
-                _dayChips(),
-                const SizedBox(height: 20),
-                dayHeader,
-                const SizedBox(height: 8),
-                weather,
-                const SizedBox(height: 16),
-                _timeline(),
-              ],
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _dayChips(),
+                  const SizedBox(height: 16),
+                  ..._details(),
+                ],
+              ),
             ),
           ),
           Expanded(
@@ -276,74 +303,43 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
         ],
       );
     } else {
-      final toggle = SizedBox(
-        width: double.infinity,
-        child: SegmentedButton<bool>(
-          segments: const [
-            ButtonSegment(
-              value: false,
-              icon: Icon(Icons.view_timeline_outlined),
-              label: Text('ไทม์ไลน์'),
-            ),
-            ButtonSegment(
-              value: true,
-              icon: Icon(Icons.map_outlined),
-              label: Text('แผนที่'),
-            ),
-          ],
-          selected: {_showMap},
-          showSelectedIcon: false,
-          onSelectionChanged: (s) => setState(() => _showMap = s.single),
-        ),
+      // Map first: the plan rides in a sheet the traveller drags up to read
+      // and down to see more of the map (#182).
+      body = LayoutBuilder(
+        builder: (context, constraints) {
+          const initial = 0.45;
+          return Stack(
+            children: [
+              Positioned.fill(
+                child: _map(
+                  padding: EdgeInsets.only(
+                    top: 56,
+                    bottom: constraints.maxHeight * initial,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: margin,
+                right: margin,
+                top: 8,
+                child: _dayChips(),
+              ),
+              DraggableScrollableSheet(
+                initialChildSize: initial,
+                minChildSize: 0.16,
+                maxChildSize: 1,
+                snap: true,
+                snapSizes: const [0.16, initial, 1],
+                builder: (context, scroll) => _PlanSheet(
+                  controller: scroll,
+                  padding: EdgeInsets.fromLTRB(margin, 0, margin, margin),
+                  children: _details(),
+                ),
+              ),
+            ],
+          );
+        },
       );
-      body = _showMap
-          ? Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.fromLTRB(margin, 8, margin, 12),
-                  child: Column(
-                    children: [toggle, const SizedBox(height: 12), _dayChips()],
-                  ),
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(margin, 0, margin, margin),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(24),
-                      child: _map(),
-                    ),
-                  ),
-                ),
-              ],
-            )
-          : ListView(
-              padding: EdgeInsets.fromLTRB(margin, 8, margin, margin),
-              children: [
-                ...summary,
-                const SizedBox(height: 20),
-                toggle,
-                const SizedBox(height: 12),
-                _dayChips(),
-                const SizedBox(height: 16),
-                _MapPreview(
-                  day: _dayPlan,
-                  dayIndex: _day,
-                  map: TripMap(
-                    day: _dayPlan,
-                    catalog: widget.view.catalog,
-                    nightStay: _nightStay,
-                    interactive: false,
-                  ),
-                  onOpen: () => setState(() => _showMap = true),
-                ),
-                const SizedBox(height: 24),
-                dayHeader,
-                const SizedBox(height: 8),
-                weather,
-                const SizedBox(height: 16),
-                _timeline(),
-              ],
-            );
     }
 
     return Scaffold(
@@ -393,85 +389,6 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
 }
 
 /// A small, non-interactive map of the selected day; tap to open the map.
-class _MapPreview extends StatelessWidget {
-  const _MapPreview({
-    required this.day,
-    required this.dayIndex,
-    required this.map,
-    required this.onOpen,
-  });
-
-  final DayPlan day;
-  final int dayIndex;
-  final Widget map;
-  final VoidCallback onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final km = day.stops.fold<double>(0, (sum, s) => sum + s.travelFromPrevKm);
-
-    return Semantics(
-      button: true,
-      label: 'เปิดแผนที่วันที่ ${dayIndex + 1}',
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: SizedBox(
-          height: 200,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              ExcludeSemantics(child: map),
-              Positioned(
-                left: 12,
-                bottom: 12,
-                right: 12,
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainerLowest.withValues(
-                        alpha: 0.92,
-                      ),
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.route, size: 16, color: colors.primary),
-                          const SizedBox(width: 6),
-                          Flexible(
-                            child: Text(
-                              'วันที่ ${dayIndex + 1}: ${day.stops.length} จุด '
-                              '· รวม ~${km.round()} กม.',
-                              style: theme.textTheme.labelMedium,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Material(
-                type: MaterialType.transparency,
-                child: InkWell(onTap: onOpen),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// More actions on a saved trip: delete it after confirming (#43).
 class _TripMenu extends ConsumerWidget {
   const _TripMenu({required this.trip});
 
@@ -506,7 +423,9 @@ class _TripMenu extends ConsumerWidget {
     final messenger = ScaffoldMessenger.of(context);
     try {
       await ref.read(tripRepositoryProvider).deleteTrip(trip.id!);
-      messenger.showSnackBar(const SnackBar(content: Text('ลบทริปแล้ว')));
+      messenger
+        ..clearSnackBars()
+        ..showSnackBar(const SnackBar(content: Text('ลบทริปแล้ว')));
       if (context.mounted) context.go(AppRoutes.home);
     } catch (_) {
       messenger.showSnackBar(
@@ -684,65 +603,103 @@ class _TripSummaryCard extends StatelessWidget {
     final stay = plan.nightStays.isEmpty ? null : plan.nightStays.first;
     final days = plan.days.length;
 
+    final savedId = view.savedTrip?.id;
+
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // The Destination's photo, flying in from the trip card when the
+          // plan opens from home or ทริปของฉัน.
+          Stack(
+            children: [
+              Positioned.fill(
+                child: PlacePhoto(
+                  id: plan.destinationId,
+                  label: view.destination.name,
+                  heroTag: savedId == null ? null : 'trip-$savedId',
+                ),
+              ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 200),
+                child: PhotoScrim(
+                  child: Container(
+                    alignment: Alignment.bottomLeft,
+                    padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
+                    child: Builder(
+                      builder: (context) {
+                        final text = Theme.of(context).textTheme;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              request.preferenceTags
+                                  .map((t) => t.label)
+                                  .join(' & '),
+                              style: text.labelMedium,
+                            ),
+                            Text(
+                              '${view.destination.name} '
+                              '${days == 1 ? '1 วัน' : '$days วัน ${days - 1} คืน'}',
+                              style: text.headlineSmall,
+                            ),
+                            Text(
+                              '${formatDateRange(request.startDate, request.endDate)}'
+                              ' · ${request.travellerCount} คน',
+                              style: text.bodyMedium,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              // Over Budget is the banner's to say, once.
+              if (!cost.isOverBudget)
+                const Positioned(
+                  left: 16,
+                  top: 16,
+                  child: _WithinBudgetBadge(),
+                ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                CostSummaryCard(
+                  cost: cost,
+                  travellerCount: request.travellerCount,
+                ),
+                if (stay != null) ...[
+                  const SizedBox(height: 12),
+                  Row(
                     children: [
-                      Text(
-                        request.preferenceTags.map((t) => t.label).join(' & '),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colors.primary,
-                        ),
+                      Icon(
+                        Icons.bed_outlined,
+                        size: 18,
+                        color: colors.onSurfaceVariant,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${view.destination.name} '
-                        '${days == 1 ? '1 วัน' : '$days วัน ${days - 1} คืน'}',
-                        style: theme.textTheme.headlineSmall,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'ที่พัก ${view.catalog.place(stay.placeId).name} '
+                          '(${formatBaht(stay.cost)} × ${plan.nightStays.length} คืน)',
+                          style: muted,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                // Over Budget is the banner's to say, once.
-                if (!cost.isOverBudget) ...[
-                  const SizedBox(width: 8),
-                  const _WithinBudgetBadge(),
                 ],
               ],
             ),
-            const SizedBox(height: 16),
-            CostSummaryCard(cost: cost, travellerCount: request.travellerCount),
-            if (stay != null) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.bed_outlined,
-                    size: 18,
-                    color: colors.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'ที่พัก ${view.catalog.place(stay.placeId).name} '
-                      '(${formatBaht(stay.cost)} × ${plan.nightStays.length} คืน)',
-                      style: muted,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -755,11 +712,11 @@ class _WithinBudgetBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final fg = colors.onSecondaryContainer;
+    final fg = colors.onTertiaryContainer;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.secondaryContainer,
+        color: colors.tertiaryContainer,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Padding(
@@ -860,6 +817,33 @@ class _DayHeader extends StatelessWidget {
   }
 }
 
+/// A warning about the whole day, such as a dropped Stop (§10.3); styled
+/// like the warnings on a Stop.
+class _DayWarning extends StatelessWidget {
+  const _DayWarning(this.warning);
+
+  final String warning;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(Icons.warning_amber_outlined, size: 16, color: colors.error),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            warning,
+            style: theme.textTheme.bodySmall?.copyWith(color: colors.error),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _MessageScaffold extends StatelessWidget {
   const _MessageScaffold({required this.icon, required this.message});
 
@@ -883,6 +867,123 @@ class _MessageScaffold extends StatelessWidget {
               onPressed: () => context.go(AppRoutes.home),
               child: const Text('กลับหน้าแรก'),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The draggable sheet over the map on phones: a drag handle, then the
+/// plan's details in one scroll.
+class _PlanSheet extends StatelessWidget {
+  const _PlanSheet({
+    required this.controller,
+    required this.padding,
+    required this.children,
+  });
+
+  final ScrollController controller;
+  final EdgeInsets padding;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Material(
+      color: colors.surface,
+      elevation: 8,
+      shadowColor: colors.shadow,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+      clipBehavior: Clip.antiAlias,
+      // One day's plan is short enough to build at once, which keeps every
+      // Stop reachable for screen readers.
+      child: SingleChildScrollView(
+        controller: controller,
+        padding: padding,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: colors.outlineVariant,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// The trip and its Cost Estimate at a glance; tap for the breakdown.
+class _CostHeader extends StatelessWidget {
+  const _CostHeader({required this.view});
+
+  final TripPlanView view;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final request = view.request;
+    final cost = view.plan.cost;
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () => showCostBreakdownSheet(
+        context,
+        cost: cost,
+        travellerCount: request.travellerCount,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${view.destination.name} '
+                    '${formatTripLength(request.startDate, request.endDate)}',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  Text(
+                    '${formatDateRange(request.startDate, request.endDate)}'
+                    ' · ${request.travellerCount} คน',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colors.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  formatBaht(cost.total),
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: cost.isOverBudget ? colors.error : colors.primary,
+                  ),
+                ),
+                Text(
+                  '${formatBaht(cost.perPerson)} / คน',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            Icon(Icons.chevron_right, color: colors.onSurfaceVariant),
           ],
         ),
       ),

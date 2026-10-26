@@ -7,10 +7,13 @@ import '../../app/router.dart';
 import '../../shared/widgets/mascot_view.dart';
 import '../../shared/widgets/motion.dart';
 import 'trip_request_form_notifier.dart';
-import 'widgets/budget_step.dart';
-import 'widgets/dates_step.dart';
-import 'widgets/preferences_step.dart';
-import 'widgets/transport_step.dart';
+import 'widgets/budget_section.dart';
+import 'widgets/dates_section.dart';
+import 'widgets/pace_section.dart';
+import 'widgets/request_summary.dart';
+import 'widgets/route_section.dart';
+import 'widgets/style_section.dart';
+import 'widgets/transport_section.dart';
 
 /// Multi-step Trip Request form (#18). State lives in
 /// [tripRequestFormProvider] (#17).
@@ -50,6 +53,11 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
     });
   }
 
+  void _goBackTo(TripRequestStep step) {
+    setState(() => _showError = false);
+    _form.goBackTo(step);
+  }
+
   void _back() {
     setState(() => _showError = false);
     _form.back();
@@ -82,13 +90,7 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (context.windowSizeClass.isAtLeast(WindowSizeClass.expanded))
-                _StepList(
-                  current: form.step,
-                  onSelect: (step) {
-                    setState(() => _showError = false);
-                    _form.goBackTo(step);
-                  },
-                ),
+                _StepList(current: form.step, onSelect: _goBackTo),
               Expanded(
                 child: Column(
                   children: [
@@ -98,6 +100,7 @@ class _TripRequestScreenState extends ConsumerState<TripRequestScreen> {
                         child: _StepPage(
                           key: ValueKey(form.step),
                           step: form.step,
+                          onEdit: _goBackTo,
                         ),
                       ),
                     ),
@@ -172,7 +175,7 @@ class _StepList extends StatelessWidget {
   }
 }
 
-/// Four-segment progress bar with the question for the current step, and
+/// Segmented progress bar with the question for the current step, and
 /// the mascot acting it out (#81).
 class _ProgressHeader extends StatelessWidget {
   const _ProgressHeader({required this.step});
@@ -180,29 +183,24 @@ class _ProgressHeader extends StatelessWidget {
   final TripRequestStep step;
 
   static const _questions = {
-    TripRequestStep.datesAndTravellers: (
-      'ไปวันไหน กี่คน?',
-      'เลือกช่วงวันเดินทางและจำนวนผู้ร่วมทริป',
+    TripRequestStep.routeAndDates: (
+      'ไปไหน เมื่อไร กี่คน?',
+      'ยังไม่รู้จะไปไหนก็ได้ ให้ AI ช่วยเลือกจังหวัด',
     ),
-    TripRequestStep.budgetAndPlaces: (
-      'งบเท่าไร ไปที่ไหนดี?',
-      'บอกงบรวม แล้วให้ AI ช่วยเลือกจังหวัดก็ได้',
+    TripRequestStep.budgetAndPace: (
+      'งบเท่าไร เที่ยวแบบไหน?',
+      'ใช้ประมาณค่าใช้จ่าย จำนวนที่เที่ยว และค่าเดินทางในแผน',
     ),
-    TripRequestStep.transport: (
-      'เดินทางแบบไหน?',
-      'ใช้ประมาณค่าเดินทางและเวลาในแผน',
-    ),
-    TripRequestStep.preferences: (
+    TripRequestStep.style: (
       'ชอบเที่ยวแบบไหน?',
       'AI จะเลือกสถานที่ให้ตรงกับสไตล์ของคุณ',
     ),
   };
 
   static const _poses = {
-    TripRequestStep.datesAndTravellers: MascotPose.calendar,
-    TripRequestStep.budgetAndPlaces: MascotPose.budget,
-    TripRequestStep.transport: MascotPose.map,
-    TripRequestStep.preferences: MascotPose.wave,
+    TripRequestStep.routeAndDates: MascotPose.calendar,
+    TripRequestStep.budgetAndPace: MascotPose.budget,
+    TripRequestStep.style: MascotPose.wave,
   };
 
   @override
@@ -288,9 +286,12 @@ class _ProgressHeader extends StatelessWidget {
 }
 
 class _StepPage extends StatelessWidget {
-  const _StepPage({super.key, required this.step});
+  const _StepPage({super.key, required this.step, required this.onEdit});
 
   final TripRequestStep step;
+
+  /// Goes back to a step from the summary on the last one.
+  final ValueChanged<TripRequestStep> onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -301,17 +302,28 @@ class _StepPage extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
         child: SingleChildScrollView(
+          // Dragging the form puts the keyboard away (#180).
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: EdgeInsets.fromLTRB(margin, 24, margin, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _ProgressHeader(step: step),
               const SizedBox(height: 24),
-              switch (step) {
-                TripRequestStep.datesAndTravellers => const DatesStep(),
-                TripRequestStep.budgetAndPlaces => const BudgetStep(),
-                TripRequestStep.transport => const TransportStep(),
-                TripRequestStep.preferences => const PreferencesStep(),
+              ...switch (step) {
+                TripRequestStep.routeAndDates => const [
+                  RouteSection(),
+                  DatesSection(),
+                ],
+                TripRequestStep.budgetAndPace => const [
+                  BudgetSection(),
+                  PaceSection(),
+                  TransportSection(),
+                ],
+                TripRequestStep.style => [
+                  const StyleSection(),
+                  RequestSummary(onEdit: onEdit),
+                ],
               },
             ],
           ),

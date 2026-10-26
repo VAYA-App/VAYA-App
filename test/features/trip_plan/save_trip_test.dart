@@ -99,22 +99,24 @@ void main() {
     expect(trips.single.plan.destinationId, 'chonburi');
   });
 
-  testWidgets('a saved trip opens from home with the same plan', (
+  testWidgets('a saved trip opens from my trips with the same plan', (
     tester,
   ) async {
     await openMockPlan(tester);
     await save(tester);
 
-    container.read(routerProvider).go(AppRoutes.home);
+    // Let the "บันทึกแล้ว" SnackBar go before checking the saved state.
+    await tester.pump(const Duration(seconds: 5));
+    container.read(routerProvider).go(AppRoutes.myTrips);
     await tester.pumpAndSettle();
-    final card = find.widgetWithText(ListTile, 'ชลบุรี');
+    final card = find.text('ชลบุรี 2 วัน 1 คืน');
     await tester.ensureVisible(card);
     await tester.pumpAndSettle();
     await tester.tap(card);
     await settle(tester);
 
     expect(find.byType(TripPlanScreen), findsOneWidget);
-    expect(find.textContaining('ชลบุรี 2 วัน 1 คืน'), findsOneWidget);
+    expect(find.textContaining('ชลบุรี 2 วัน 1 คืน'), findsWidgets);
     expect(find.text('บันทึกแล้ว'), findsOneWidget);
   });
 
@@ -139,7 +141,10 @@ void main() {
 
     await openDelete();
     await tester.tap(find.widgetWithText(FilledButton, 'ลบ'));
-    await tester.pumpAndSettle();
+    // Check before settling: the SnackBar lasts four seconds, less than the
+    // home screen's loading animations take to settle.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(location(), AppRoutes.home);
     expect(find.text('ลบทริปแล้ว'), findsOneWidget);

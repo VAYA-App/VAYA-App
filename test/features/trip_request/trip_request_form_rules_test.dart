@@ -11,10 +11,8 @@ void main() {
     tester,
   ) async {
     final c = await pumpForm(tester);
-    await pickDates(tester);
-    await next(tester);
-    await tester.enterText(find.byType(TextField), '1500');
     await chooseDestination(tester, 'กรุงเทพมหานคร');
+    await pickDates(tester);
     await next(tester);
 
     expect(find.text('เที่ยวในจังหวัดเดียวกับจุดเริ่มต้น'), findsOneWidget);
@@ -27,13 +25,13 @@ void main() {
 
     await next(tester);
     expect(find.text('เลือกวันไปและวันกลับ'), findsOneWidget);
-    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 3'), findsOneWidget);
 
     await pickDates(tester);
     await next(tester);
     await next(tester);
     expect(find.text('กรอกงบรวมของทริป'), findsOneWidget);
-    expect(find.text('ขั้นที่ 2 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 2 จาก 3'), findsOneWidget);
   });
 
   testWidgets('going back keeps what was typed', (tester) async {
@@ -58,9 +56,9 @@ void main() {
     await pickDates(tester);
     await next(tester);
 
-    expect(find.text('ขั้นที่ 2 จาก 4'), findsOneWidget);
-    await tester.tap(find.text('วันที่และจำนวนคน'));
+    expect(find.text('ขั้นที่ 2 จาก 3'), findsOneWidget);
+    await tester.tap(find.text('ไปไหน เมื่อไร กี่คน'));
     await tester.pumpAndSettle();
-    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 3'), findsOneWidget);
   });
 }

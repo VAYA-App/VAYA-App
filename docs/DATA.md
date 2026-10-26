@@ -13,7 +13,8 @@ assets/mock/               # ข้อมูลจำลองให้ทำ UI
 ## เพิ่มจังหวัดใหม่ (ไม่ต้องแก้โค้ด)
 1. เพิ่ม object ใน `provinces.json` และเพิ่มค่าเดินทางใน `intercity` ของจังหวัดต้นทางทุกจังหวัดที่เกี่ยวข้องทั้งสองทิศ
 2. สร้าง `places/<id>.json`
-3. รัน `flutter test` (เทสต์ตรวจความถูกต้องของข้อมูล)
+3. ใส่รูปของจังหวัดและสถานที่ตามหัวข้อ [รูปถ่าย](#รูปถ่าย-assetsphotos)
+4. รัน `flutter test` (เทสต์ตรวจความถูกต้องของข้อมูล)
 
 ## `provinces.json`
 
@@ -102,6 +103,18 @@ assets/mock/               # ข้อมูลจำลองให้ทำ UI
   "bufferRate": 0.1                    // เงินสำรอง 10%
 }
 ```
+
+## รูปถ่าย (`assets/photos/`)
+
+รูปของ Destination (hero 16:9) และ Place (การ์ด 4:3) เป็น WebP ชื่อตาม id เช่น `chonburi.webp` และ `chonburi-attraction-koh-larn.webp` ส่วน Place ที่ไม่มีรูปของตัวเองใช้ภาพประจำหมวด `category-attraction`, `category-restaurant` หรือ `category-accommodation` แทน ([ADR 0006](adr/0006-bundle-place-photos-with-license-manifest.md))
+
+`credits.json` เก็บชื่อภาพ ผู้ถ่าย license และลิงก์ต้นฉบับของทุกรูป แอปอ่านไฟล์นี้ไปแสดงในหน้า "เครดิตภาพ" ห้ามแก้ไฟล์นี้หรือใส่รูปเองด้วยมือ ให้ใช้สคริปต์ (ต้องมี Pillow):
+
+1. `python3 tool/photos/search_commons.py candidates.json [id,id]` ค้นรูปจาก Wikimedia Commons ตามชื่อสถานที่ และใช้คำค้นเพิ่มเติมจาก `tool/photos/queries.json` เก็บไว้เฉพาะ license ที่ใช้ในแอปได้ (CC0, Public domain, CC BY, CC BY-SA)
+2. เลือกรูปเองหนึ่งรูปต่อ id แล้วใส่ชื่อไฟล์ใน `tool/photos/picks.json` (ใส่ `focus` ได้ถ้าครอปตรงกลางแล้วตัดส่วนสำคัญออก)
+3. `python3 tool/photos/fetch_photos.py` ดาวน์โหลด ครอป บีบอัด และเขียน `credits.json` ใหม่ทั้งหมด
+
+เทสต์ใน `test/data/photo_catalog_test.dart` ตรวจว่าทุกรูปมีเครดิต ทุกเครดิตมีไฟล์ license ใช้ได้ และทุกจังหวัดกับทุกหมวดมีรูป
 
 ## ข้อมูลจำลอง (`assets/mock/`)
 

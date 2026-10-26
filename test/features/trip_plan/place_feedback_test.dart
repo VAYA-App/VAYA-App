@@ -12,6 +12,8 @@ import 'package:vaya_app/features/trip_plan/trip_plan_screen.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
 import 'package:vaya_app/planner/taste_profile.dart';
 
+import 'plan_sheet_helper.dart';
+
 const _sanctuary = 'chonburi-attraction-sanctuary-of-truth';
 const _viewpoint = 'chonburi-attraction-pattaya-viewpoint';
 
@@ -48,9 +50,9 @@ void main() {
       ),
     );
     await tester.pump();
+    await openPlanSheet(tester);
+    // The open sheet already shows the first stop.
     final stop = find.text('ปราสาทสัจธรรม').first;
-    await tester.ensureVisible(stop);
-    await tester.pumpAndSettle();
     await tester.tap(stop);
     await tester.pumpAndSettle();
     PlaceFeedback? feedback() =>

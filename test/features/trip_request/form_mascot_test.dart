@@ -13,9 +13,8 @@ void main() {
     expect(shownPose(tester), MascotPose.calendar);
 
     for (final (step, pose) in [
-      (TripRequestStep.budgetAndPlaces, MascotPose.budget),
-      (TripRequestStep.transport, MascotPose.map),
-      (TripRequestStep.preferences, MascotPose.wave),
+      (TripRequestStep.budgetAndPace, MascotPose.budget),
+      (TripRequestStep.style, MascotPose.wave),
     ]) {
       // Jump straight to the step; filling every field is covered elsewhere.
       container.read(tripRequestFormProvider.notifier).state = container

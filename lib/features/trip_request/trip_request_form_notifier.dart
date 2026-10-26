@@ -2,12 +2,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../domain/domain.dart';
 
-/// The four steps of the trip request form (#18).
+/// The three steps of the trip request form (#18, #170).
 enum TripRequestStep {
-  datesAndTravellers('วันที่และจำนวนคน'),
-  budgetAndPlaces('งบและจุดหมาย'),
-  transport('การเดินทาง'),
-  preferences('สไตล์การเที่ยว');
+  routeAndDates('ไปไหน เมื่อไร กี่คน'),
+  budgetAndPace('งบและจังหวะ'),
+  style('สไตล์การเที่ยว');
 
   const TripRequestStep(this.label);
   final String label;
@@ -18,7 +17,7 @@ enum TripRequestStep {
 /// valid [TripRequest].
 final class TripRequestFormState {
   const TripRequestFormState({
-    this.step = TripRequestStep.datesAndTravellers,
+    this.step = TripRequestStep.routeAndDates,
     this.startDate,
     this.endDate,
     this.travellerCount = 2,
@@ -64,7 +63,7 @@ final class TripRequestFormState {
   /// step is complete.
   String? errorFor(TripRequestStep step, {required DateTime today}) {
     switch (step) {
-      case TripRequestStep.datesAndTravellers:
+      case TripRequestStep.routeAndDates:
         final start = startDate, end = endDate;
         if (start == null || end == null) return 'เลือกวันไปและวันกลับ';
         if (start.isBefore(today)) return 'วันไปต้องไม่ใช่วันที่ผ่านมาแล้ว';
@@ -75,13 +74,11 @@ final class TripRequestFormState {
         if (travellerCount < 1 || travellerCount > maxTravellers) {
           return 'จำนวนผู้เดินทาง 1–$maxTravellers คน';
         }
-      case TripRequestStep.budgetAndPlaces:
+      case TripRequestStep.budgetAndPace:
         final b = budget;
         if (b == null || b <= 0) return 'กรอกงบรวมของทริป';
         if (b > maxBudget) return 'งบรวมต้องไม่เกิน ฿1,000,000';
-      case TripRequestStep.transport:
-        break;
-      case TripRequestStep.preferences:
+      case TripRequestStep.style:
         if (preferenceTags.isEmpty) {
           return 'เลือกสไตล์การเที่ยวอย่างน้อย 1 อย่าง';
         }
