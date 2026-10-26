@@ -58,3 +58,47 @@ class PlacePhoto extends ConsumerWidget {
     return SizedBox.expand(child: photo);
   }
 }
+
+/// Text laid over a photo (docs/DESIGN.md §6): a dark gradient rising from
+/// the bottom and white text, the same in light and dark mode. The one place
+/// in the app where photo text gets its fixed colour.
+class PhotoScrim extends StatelessWidget {
+  const PhotoScrim({super.key, required this.child});
+
+  /// Drawn over the gradient; lay it out at the bottom of the photo and
+  /// read text styles from `Theme.of` inside it.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scrim = theme.colorScheme.scrim;
+    const onPhoto = Colors.white;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            scrim.withValues(alpha: 0.15),
+            scrim.withValues(alpha: 0),
+            scrim.withValues(alpha: 0.72),
+          ],
+          stops: const [0, 0.35, 1],
+        ),
+      ),
+      // Text styles from the theme carry their own colour, so the child
+      // gets a theme whose text and icons are white.
+      child: Theme(
+        data: theme.copyWith(
+          textTheme: theme.textTheme.apply(
+            bodyColor: onPhoto,
+            displayColor: onPhoto,
+          ),
+          iconTheme: theme.iconTheme.copyWith(color: onPhoto),
+        ),
+        child: child,
+      ),
+    );
+  }
+}

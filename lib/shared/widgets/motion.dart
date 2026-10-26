@@ -219,7 +219,9 @@ class CountUp extends StatelessWidget {
 }
 
 /// Placeholder in the shape of content that is still loading. It pulses
-/// gently, or stays still when the user turns animations off.
+/// gently for under five seconds, then rests (WCAG 2.2.2, which also lets
+/// `pumpAndSettle` finish in tests); it stays still when the user turns
+/// animations off.
 class Skeleton extends StatefulWidget {
   const Skeleton({
     super.key,
@@ -251,8 +253,8 @@ class _SkeletonState extends State<Skeleton>
       _pulse
         ..stop()
         ..value = 1;
-    } else if (!_pulse.isAnimating) {
-      _pulse.repeat(reverse: true);
+    } else if (!_pulse.isAnimating && _pulse.value == 1) {
+      _pulse.repeat(reverse: true, count: 4);
     }
   }
 

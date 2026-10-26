@@ -35,7 +35,7 @@ void main() {
   for (final route in [
     AppRoutes.home,
     AppRoutes.explore,
-    AppRoutes.assistant,
+    AppRoutes.myTrips,
     AppRoutes.profile,
     AppRoutes.newTrip,
     AppRoutes.suggestions,
