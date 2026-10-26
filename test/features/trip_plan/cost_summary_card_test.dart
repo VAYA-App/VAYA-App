@@ -227,8 +227,17 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(CostSummaryCard), findsOneWidget);
-    expect(find.textContaining('฿6,582'), findsOneWidget);
+    // The sheet header shows the total too (#182); look inside the card.
+    expect(
+      find.descendant(
+        of: find.byType(CostSummaryCard),
+        matching: find.textContaining('฿6,582'),
+      ),
+      findsOneWidget,
+    );
 
+    await tester.ensureVisible(find.text('ดูรายละเอียด'));
+    await tester.pump(const Duration(milliseconds: 500));
     await tester.tap(find.text('ดูรายละเอียด'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));

@@ -10,3 +10,7 @@ status: accepted (แทนส่วนเส้นทางและ tile ข�
 
 - ตั้งเซิร์ฟเวอร์ OSRM และ tile server เอง: ตัดทิ้งเพราะต้องมีเครื่องและต้องดูแลเอง
 - Google Maps Platform: ตัดทิ้งด้วยเหตุผลเดิมใน ADR 0003 (ต้องผูกบัตรเครดิต)
+
+## หมายเหตุ (#182)
+
+ระหว่างที่ยังไม่มี key ของ MapTiler แผนที่ใช้ tile ของ CARTO (Voyager สำหรับโหมดสว่าง, Dark Matter สำหรับโหมดมืด) ซึ่งไม่ต้องใช้ key แต่ต้องแสดงเครดิต "© OpenStreetMap © CARTO" ไว้บนแผนที่ พอได้ key ของ MapTiler แล้ว ให้เปลี่ยน `urlTemplate` ใน `lib/features/trip_plan/widgets/trip_map.dart` ไปใช้ MapTiler ตาม ADR นี้
