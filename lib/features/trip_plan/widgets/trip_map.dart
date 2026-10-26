@@ -11,8 +11,8 @@ import '../../../domain/domain.dart';
 import '../../../planner/geo.dart';
 import '../../../shared/widgets/motion.dart';
 
-/// Where map tiles come from. `null` uses CARTO over the network; tests
-/// override it so they never hit the network.
+/// Where map tiles come from. `null` uses OpenStreetMap over the network;
+/// tests override it so they never hit the network.
 final mapTileProviderProvider = Provider<TileProvider?>((ref) => null);
 
 /// Road paths for the route line; tests override it so they never hit the
@@ -29,7 +29,7 @@ final roadRouteProvider = FutureProvider.family<List<GeoPoint>?, RoutePoints>(
   (ref, points) => ref.watch(roadRouterProvider).route(points.points),
 );
 
-/// The map of one Day Plan (ADR-0003, #182): a light CARTO base map, the
+/// The map of one Day Plan (ADR-0003, #182): a soft, green-tinted base map, the
 /// route split into legs between Stops that can be tapped for directions,
 /// numbered pins, and a camera that glides to whatever is picked.
 ///
@@ -214,13 +214,10 @@ class _TripMapState extends ConsumerState<TripMap>
           ),
           children: [
             TileLayer(
-              urlTemplate: dark
-                  ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-                  : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-              subdomains: const ['a', 'b', 'c', 'd'],
-              retinaMode: RetinaMode.isHighDensity(context),
+              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
               userAgentPackageName: 'app.vaya.vaya_app',
               tileProvider: ref.watch(mapTileProviderProvider),
+              tileBuilder: dark ? darkModeTileBuilder : _softTiles,
             ),
             AnimatedBuilder(
               animation: _draw,
@@ -263,7 +260,7 @@ class _TripMapState extends ConsumerState<TripMap>
               padding: EdgeInsets.only(bottom: widget.padding.bottom),
               child: SimpleAttributionWidget(
                 source: Text(
-                  '© OpenStreetMap © CARTO',
+                  'OpenStreetMap contributors',
                   style: TextStyle(color: colors.onSurface),
                 ),
                 backgroundColor: colors.surface.withValues(alpha: 0.85),
@@ -515,3 +512,17 @@ class _StayMarker extends StatelessWidget {
     );
   }
 }
+
+/// OpenStreetMap tiles washed out and nudged toward the app's green, so the
+/// route and pins stand out on a calm base map (#182).
+Widget _softTiles(BuildContext context, Widget tile, TileImage image) =>
+    ColorFiltered(colorFilter: _soft, child: tile);
+
+/// Keeps 45% of the colour, lifts everything toward white and adds a little
+/// green, as a 5×4 colour matrix.
+const _soft = ColorFilter.matrix([
+  0.55, 0.30, 0.05, 0, 30, //
+  0.20, 0.65, 0.05, 0, 40, //
+  0.20, 0.30, 0.40, 0, 30, //
+  0, 0, 0, 1, 0, //
+]);

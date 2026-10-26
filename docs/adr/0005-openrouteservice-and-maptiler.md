@@ -13,4 +13,4 @@ status: accepted (แทนส่วนเส้นทางและ tile ข�
 
 ## หมายเหตุ (#182)
 
-ระหว่างที่ยังไม่มี key ของ MapTiler แผนที่ใช้ tile ของ CARTO (Voyager สำหรับโหมดสว่าง, Dark Matter สำหรับโหมดมืด) ซึ่งไม่ต้องใช้ key แต่ต้องแสดงเครดิต "© OpenStreetMap © CARTO" ไว้บนแผนที่ พอได้ key ของ MapTiler แล้ว ให้เปลี่ยน `urlTemplate` ใน `lib/features/trip_plan/widgets/trip_map.dart` ไปใช้ MapTiler ตาม ADR นี้
+ระหว่างที่ยังไม่มี key ของ MapTiler แผนที่ยังใช้ tile ของ OpenStreetMap ตาม ADR 0003 แต่ผ่าน color filter ที่ลดความสดของสีและอมเขียวเล็กน้อย ให้เส้นทางกับหมุดเด่นขึ้น (ลอง CARTO แล้ว ตอนนี้ CARTO ต้องใช้ API key เหมือนกัน) พอได้ key ของ MapTiler ให้เปลี่ยน `urlTemplate` ใน `lib/features/trip_plan/widgets/trip_map.dart` และเอา filter ออกตาม ADR นี้
