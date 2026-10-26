@@ -6,20 +6,16 @@ import 'package:flutter/foundation.dart'
 ///
 /// Generated for project: vaya-app26
 class DefaultFirebaseOptions {
+  /// Only Android is registered in Firebase so far. Web and iOS throw, so
+  /// `main.dart` skips Firebase there and the app keeps the mock sign-in
+  /// instead of starting Firebase with an app id that does not exist.
   static FirebaseOptions get currentPlatform {
-    if (kIsWeb) {
-      return web;
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      throw UnsupportedError(
+        'DefaultFirebaseOptions are not supported for this platform.',
+      );
     }
-    switch (defaultTargetPlatform) {
-      case TargetPlatform.android:
-        return android;
-      case TargetPlatform.iOS:
-        return ios;
-      default:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions are not supported for this platform.',
-        );
-    }
+    return android;
   }
 
   static const FirebaseOptions android = FirebaseOptions(
@@ -28,22 +24,5 @@ class DefaultFirebaseOptions {
     messagingSenderId: '694490566732',
     projectId: 'vaya-app26',
     storageBucket: 'vaya-app26.firebasestorage.app',
-  );
-
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCM1VpaSJec9N8OFmjmvVm3_0us057y8ls',
-    appId: '1:694490566732:web:placeholder',
-    messagingSenderId: '694490566732',
-    projectId: 'vaya-app26',
-    storageBucket: 'vaya-app26.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCM1VpaSJec9N8OFmjmvVm3_0us057y8ls',
-    appId: '1:694490566732:ios:placeholder',
-    messagingSenderId: '694490566732',
-    projectId: 'vaya-app26',
-    storageBucket: 'vaya-app26.firebasestorage.app',
-    iosBundleId: 'com.vaya.vayaApp',
   );
 }

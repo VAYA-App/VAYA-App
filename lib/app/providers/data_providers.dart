@@ -1,9 +1,7 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
-
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../data/asset_place_catalog.dart';
 import '../../data/asset_pricing_table.dart';
@@ -30,17 +28,10 @@ final pricingTableProvider = FutureProvider<PricingTable>(
   (ref) => loadPricingTable(rootBundle),
 );
 
-/// Uses Firebase Auth on mobile devices when Firebase is initialized (#14);
-/// falls back to MockAuthRepository on web preview or tests to prevent
-/// Google OAuth 401 invalid_client popup when web client ID is not configured.
+/// Firebase Auth where `main.dart` started Firebase (Android, #14); the mock
+/// everywhere else (web, iOS and tests) until those apps are registered.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  if (!kIsWeb && Firebase.apps.isNotEmpty) {
-    try {
-      return FirebaseAuthRepository();
-    } catch (_) {
-      // Fallback gracefully to mock repository if initialization fails
-    }
-  }
+  if (Firebase.apps.isNotEmpty) return FirebaseAuthRepository();
   final repository = MockAuthRepository();
   ref.onDispose(repository.dispose);
   return repository;
