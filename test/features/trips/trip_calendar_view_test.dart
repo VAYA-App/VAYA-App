@@ -56,7 +56,9 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(container: container, child: const VayaApp()),
     );
-    container.read(routerProvider).go(AppRoutes.tripCalendar);
+    container.read(routerProvider).go(AppRoutes.myTrips);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('ปฏิทิน'));
     await tester.pumpAndSettle();
   }
 

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/providers/mock_providers.dart';
-import 'package:vaya_app/features/assistant/assistant_screen.dart';
 import 'package:vaya_app/features/assistant/plan_chat_panel.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
 import 'package:vaya_app/shared/widgets/mascot_view.dart';
@@ -21,7 +20,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> pumpChat(WidgetTester tester, {bool withDraft = true}) async {
+  Future<void> pumpChat(WidgetTester tester) async {
     tester.view.physicalSize = const Size(412, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
@@ -30,38 +29,27 @@ void main() {
     await tester.runAsync(() async {
       await container.read(placeCatalogProvider.future);
       await container.read(planChatProvider.future);
-      if (withDraft) {
-        container
-            .read(draftTripsProvider.notifier)
-            .add(
-              await container.read(mockTripPlanProvider.future),
-              await container.read(mockTripRequestProvider.future),
-            );
-      }
+      container
+          .read(draftTripsProvider.notifier)
+          .add(
+            await container.read(mockTripPlanProvider.future),
+            await container.read(mockTripRequestProvider.future),
+          );
     });
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: AssistantScreen()),
+        child: const MaterialApp(
+          home: Scaffold(body: PlanChatPanel(tripId: 'draft-1')),
+        ),
       ),
     );
     await settle(tester);
   }
 
-  testWidgets('without trips it points to planning one', (tester) async {
-    await pumpChat(tester, withDraft: false);
-
-    expect(find.text('ยังไม่มีทริปให้ปรับ'), findsOneWidget);
-    expect(find.text('วางแผนทริปใหม่'), findsOneWidget);
-    expect(find.byType(PlanChatPanel), findsNothing);
-  });
-
-  testWidgets('picks the latest plan and greets with the mascot', (
-    tester,
-  ) async {
+  testWidgets('greets with the mascot', (tester) async {
     await pumpChat(tester);
 
-    expect(find.textContaining('ชลบุรี 14–15 พ.ย.'), findsWidgets);
     expect(find.textContaining('สวัสดี! ฉันช้างน้อย'), findsOneWidget);
     expect(find.byType(MascotAvatar), findsWidgets);
   });

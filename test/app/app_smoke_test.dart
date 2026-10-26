@@ -52,7 +52,7 @@ void main() {
   testWidgets('bottom bar opens every tab', (tester) async {
     await pumpApp(tester, const Size(400, 800));
 
-    for (final tab in ['สำรวจ', 'AI ช่วยคิด', 'โปรไฟล์', 'ทริปของฉัน']) {
+    for (final tab in ['สำรวจ', 'ทริปของฉัน', 'โปรไฟล์', 'หน้าแรก']) {
       await tester.tap(
         find.descendant(
           of: find.byType(NavigationBar),

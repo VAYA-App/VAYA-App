@@ -8,28 +8,25 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
 import '../../shared/widgets/mascot_view.dart';
-import '../explore/trip_ideas.dart';
-import '../explore/widgets/trip_idea_card.dart';
+import '../../shared/widgets/motion.dart';
+import '../../shared/widgets/place_photo.dart';
+import '../trip_request/trip_request_form_notifier.dart';
+import '../trips/trip_groups.dart';
 import 'greeting.dart';
+import 'place_picks.dart';
 
-/// ทริปของฉัน. Layout skeleton in the Stitch style; the saved trips list
-/// and its empty/delete states are built in #42.
+/// หน้าแรก (#172): a greeting, the Upcoming Trip, a way to plan a new one
+/// and attractions that fit the traveller's Taste Profile.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
     final margin = context.windowSizeClass.pageMargin;
     final trips = ref.watch(savedTripsProvider).value ?? const [];
+    final upcoming = TripGroups(trips, ref.watch(todayProvider)).upcoming;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        heroTag: null,
-        onPressed: () => context.push(AppRoutes.newTrip),
-        icon: const Icon(Icons.add),
-        label: const Text('วางแผนทริปใหม่'),
-      ),
       body: SafeArea(
         child: Align(
           alignment: Alignment.topCenter,
@@ -38,82 +35,22 @@ class HomeScreen extends ConsumerWidget {
               maxWidth: WindowSizeClass.maxContentWidth,
             ),
             child: ListView(
-              padding: EdgeInsets.fromLTRB(margin, 16, margin, 96),
+              padding: EdgeInsets.fromLTRB(margin, 16, margin, 32),
               children: [
-                const _Brand(),
-                const SizedBox(height: 24),
                 const _Greeting(),
-                const SizedBox(height: 24),
+                const SizedBox(height: 20),
+                if (upcoming != null) ...[
+                  _UpcomingTrip(trip: upcoming),
+                  const SizedBox(height: 16),
+                ],
                 const _PlannerCard(),
-                const SizedBox(height: 32),
-                const _Inspiration(),
-                const SizedBox(height: 32),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'ทริปที่บันทึกไว้',
-                        style: theme.textTheme.titleLarge,
-                      ),
-                    ),
-                    if (trips.isNotEmpty)
-                      TextButton.icon(
-                        onPressed: () => context.push(AppRoutes.tripCalendar),
-                        icon: const Icon(Icons.calendar_month_outlined),
-                        label: const Text('ปฏิทิน'),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                if (trips.isEmpty)
-                  const _EmptyTrips()
-                else
-                  _SavedTrips(trips: trips),
+                const SizedBox(height: 28),
+                const _Picks(),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _Brand extends StatelessWidget {
-  const _Brand();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    return Row(
-      children: [
-        DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.secondaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: SizedBox.square(
-            dimension: 40,
-            child: Icon(Icons.explore, color: colors.primary),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'AI TRIP PLANNER',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colors.primary,
-                  letterSpacing: 1,
-                ),
-              ),
-              Text('VAYA', style: theme.textTheme.titleLarge),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -158,56 +95,98 @@ class _Greeting extends ConsumerWidget {
   }
 }
 
-class _PlannerCard extends StatelessWidget {
-  const _PlannerCard();
+/// The Upcoming Trip as a photo card with a countdown.
+class _UpcomingTrip extends ConsumerWidget {
+  const _UpcomingTrip({required this.trip});
+
+  final Trip trip;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
+    final request = trip.request;
+    final province =
+        ref
+            .watch(placeCatalogProvider)
+            .value
+            ?.findProvince(trip.plan.destinationId)
+            ?.name ??
+        trip.plan.destinationId;
+
     return Card(
-      color: colors.secondaryContainer,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+      child: InkWell(
+        onTap: trip.id == null
+            ? null
+            : () => context.push(AppRoutes.tripPlan(trip.id!)),
+        // The photo fills the card; the text sets its height, so large
+        // text grows the card instead of overflowing it.
+        child: Stack(
           children: [
-            Row(
-              children: [
-                Icon(Icons.auto_awesome, size: 18, color: colors.primary),
-                const SizedBox(width: 8),
-                Flexible(
+            Positioned.fill(
+              child: PlacePhoto(
+                id: trip.plan.destinationId,
+                label: province,
+                heroTag: 'trip-${trip.id}',
+              ),
+            ),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 220),
+              child: PhotoScrim(
+                child: Container(
+                  alignment: Alignment.bottomLeft,
+                  padding: const EdgeInsets.fromLTRB(20, 64, 20, 18),
+                  child: Builder(
+                    builder: (context) {
+                      final text = Theme.of(context).textTheme;
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('ทริปถัดไป', style: text.labelLarge),
+                          Text(
+                            '$province '
+                            '${formatTripLength(request.startDate, request.endDate)}',
+                            style: text.headlineSmall,
+                          ),
+                          Text(
+                            '${formatDateRange(request.startDate, request.endDate)}'
+                            ' · ${request.travellerCount} คน'
+                            ' · ${formatBaht(trip.plan.cost.total)}',
+                            style: text.bodyMedium,
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 16,
+              top: 16,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.tertiaryContainer,
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   child: Text(
-                    'AI SMART PLANNER',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      color: colors.primary,
-                      letterSpacing: 1,
+                    countdownLabel(trip, ref.watch(todayProvider)),
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colors.onTertiaryContainer,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'วางแผนทริปใหม่ด้วย AI',
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: colors.onSecondaryContainer,
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'บอกแค่งบและเวลา ที่เหลือให้ AI จัดเส้นทางที่ใช่ให้คุณ',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.onSecondaryContainer,
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: () => context.push(AppRoutes.newTrip),
-              icon: const Icon(Icons.arrow_forward),
-              iconAlignment: IconAlignment.end,
-              label: const Text('เริ่มวางแผนทริป'),
             ),
           ],
         ),
@@ -216,23 +195,81 @@ class _PlannerCard extends StatelessWidget {
   }
 }
 
-/// A peek at the trip ideas on Explore (#84).
-class _Inspiration extends ConsumerWidget {
-  const _Inspiration();
+/// The main way into planning, in the brand colour.
+class _PlannerCard extends StatelessWidget {
+  const _PlannerCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    return Card.filled(
+      color: colors.primary,
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () => context.push(AppRoutes.newTrip),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.onPrimary.withValues(alpha: 0.16),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: SizedBox.square(
+                  dimension: 44,
+                  child: Icon(Icons.auto_awesome, color: colors.onPrimary),
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'วางแผนทริปใหม่',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colors.onPrimary,
+                      ),
+                    ),
+                    Text(
+                      'บอกเวลา งบ และสไตล์ ที่เหลือให้ AI',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colors.onPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: colors.onPrimary),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Attractions that fit the Taste Profile; one tap starts a trip there.
+class _Picks extends ConsumerWidget {
+  const _Picks();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final ideas = ref.watch(tripIdeasProvider).value;
-    if (ideas == null || ideas.isEmpty) return const SizedBox.shrink();
     final theme = Theme.of(context);
+    final picks = ref.watch(placePicksProvider);
+    final catalog = ref.watch(placeCatalogProvider).value;
+    final height = 120 + MediaQuery.textScalerOf(context).scale(56);
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
           children: [
             Expanded(
-              child: Text('แรงบันดาลใจ', style: theme.textTheme.titleLarge),
+              child: Text('เข้ากับสไตล์คุณ', style: theme.textTheme.titleLarge),
             ),
             TextButton(
               onPressed: () => context.go(AppRoutes.explore),
@@ -242,237 +279,91 @@ class _Inspiration extends ConsumerWidget {
         ),
         const SizedBox(height: 8),
         SizedBox(
-          height: 150 + MediaQuery.textScalerOf(context).scale(64),
-          child: CarouselView(
-            itemExtent: 240,
-            shrinkExtent: 160,
-            itemSnapping: true,
-            onTap: (i) => openTripIdea(context, ref, ideas[i]),
-            children: [
-              for (final idea in ideas)
-                TripIdeaCard(idea: idea, showSummary: false),
-            ],
-          ),
+          height: height,
+          child: switch (picks) {
+            AsyncData(:final value) => ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: value.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, i) => StaggeredEntrance(
+                index: i,
+                child: _PickCard(
+                  place: value[i],
+                  province: catalog?.findProvince(value[i].provinceId)?.name,
+                ),
+              ),
+            ),
+            AsyncError() => const SizedBox.shrink(),
+            _ => ListView(
+              scrollDirection: Axis.horizontal,
+              children: const [
+                Skeleton(width: 168, height: 168, radius: 20),
+                SizedBox(width: 12),
+                Skeleton(width: 168, height: 168, radius: 20),
+              ],
+            ),
+          },
         ),
       ],
     );
   }
 }
 
-class _EmptyTrips extends StatelessWidget {
-  const _EmptyTrips();
+class _PickCard extends ConsumerWidget {
+  const _PickCard({required this.place, required this.province});
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-        child: Column(
-          children: [
-            Icon(Icons.luggage_outlined, size: 48, color: colors.outline),
-            const SizedBox(height: 12),
-            Text('ยังไม่มีทริป', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 4),
-            Text(
-              'แผนที่คุณบันทึกจะแสดงที่นี่',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: colors.onSurfaceVariant,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: () => context.push(AppRoutes.newTrip),
-              icon: const Icon(Icons.add),
-              label: const Text('เริ่มวางแผนทริปแรก'),
-            ),
-            const SizedBox(height: 4),
-            TextButton.icon(
-              onPressed: () => context.push('/trips/mock'),
-              icon: const Icon(Icons.map_outlined),
-              label: const Text('ดูแผนตัวอย่าง'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SavedTrips extends ConsumerWidget {
-  const _SavedTrips({required this.trips});
-
-  final List<Trip> trips;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final catalog = ref.watch(placeCatalogProvider).value;
-    final windowSize = context.windowSizeClass;
-
-    if (windowSize == WindowSizeClass.compact) {
-      return Column(
-        children: [
-          for (final trip in trips) ...[
-            _TripCard(trip: trip, catalog: catalog),
-            const SizedBox(height: 12),
-          ],
-        ],
-      );
-    }
-
-    final crossAxisCount = windowSize.index >= WindowSizeClass.expanded.index
-        ? 3
-        : 2;
-    final rows = <Widget>[];
-    for (var i = 0; i < trips.length; i += crossAxisCount) {
-      rows.add(
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            for (var col = 0; col < crossAxisCount; col++) ...[
-              if (col > 0) const SizedBox(width: 12),
-              Expanded(
-                child: i + col < trips.length
-                    ? _TripCard(trip: trips[i + col], catalog: catalog)
-                    : const SizedBox.shrink(),
-              ),
-            ],
-          ],
-        ),
-      );
-      rows.add(const SizedBox(height: 12));
-    }
-    return Column(children: rows);
-  }
-}
-
-class _TripCard extends ConsumerWidget {
-  const _TripCard({required this.trip, required this.catalog});
-
-  final Trip trip;
-  final PlaceCatalog? catalog;
+  final Place place;
+  final String? province;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final colors = theme.colorScheme;
-    final tripRepo = ref.read(tripRepositoryProvider);
-    final messenger = ScaffoldMessenger.of(context);
-    final province =
-        catalog?.findProvince(trip.plan.destinationId)?.name ??
-        trip.plan.destinationId;
-    final dateRange = formatDateRange(
-      trip.request.startDate,
-      trip.request.endDate,
-    );
-    final cost = trip.plan.cost;
-
-    return Dismissible(
-      key: ValueKey(trip.id ?? trip.createdAt.toIso8601String()),
-      direction: DismissDirection.endToStart,
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        decoration: BoxDecoration(
-          color: colors.errorContainer,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Icon(Icons.delete_outline, color: colors.onErrorContainer),
-      ),
-      onDismissed: (_) {
-        if (trip.id != null) {
-          tripRepo.deleteTrip(trip.id!);
-        }
-        messenger.clearSnackBars();
-        messenger.showSnackBar(
-          SnackBar(
-            content: Text('ลบทริป$provinceแล้ว'),
-            action: SnackBarAction(
-              label: 'เลิกทำ',
-              onPressed: () {
-                tripRepo.saveTrip(trip);
-              },
-            ),
-          ),
-        );
-      },
-      child: Card.outlined(
+    return SizedBox(
+      width: 168,
+      child: Card(
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
-        child: ListTile(
-          onTap: trip.id != null
-              ? () => context.push(AppRoutes.tripPlan(trip.id!))
-              : null,
-          title: Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
-            spacing: 8,
-            runSpacing: 4,
+        child: InkWell(
+          onTap: () {
+            ref
+                .read(tripRequestFormProvider.notifier)
+                .startWith(
+                  destinationId: place.provinceId,
+                  tags: place.tags.take(2),
+                );
+            context.push(AppRoutes.newTrip);
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                province,
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+              SizedBox(
+                height: 112,
+                child: PlacePhoto(
+                  id: place.id,
+                  label: place.name,
+                  category: place.category,
                 ),
               ),
-              if (cost.isOverBudget)
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: colors.errorContainer,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      place.name,
+                      style: theme.textTheme.titleSmall,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.warning_amber_outlined,
-                          size: 14,
-                          color: colors.onErrorContainer,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'เกินงบ',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: colors.onErrorContainer,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    Text(
+                      [?province, ?place.tags.firstOrNull?.label].join(' · '),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ),
-            ],
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 4),
-              Text(
-                '$dateRange · ${trip.request.travellerCount} คน',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                formatBaht(cost.total),
-                style: theme.textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: cost.isOverBudget ? colors.error : colors.primary,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                'ราคาโดยประมาณ',
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: colors.onSurfaceVariant,
+                  ],
                 ),
               ),
             ],

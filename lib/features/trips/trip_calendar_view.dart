@@ -25,16 +25,17 @@ const _months = [
   'ธันวาคม',
 ];
 
-/// Every saved trip on a monthly calendar (#50). Opens on the month of the
-/// next trip, or this month when none is ahead.
-class TripCalendarScreen extends ConsumerStatefulWidget {
-  const TripCalendarScreen({super.key});
+/// Every saved trip on a monthly calendar (#50), the calendar view of
+/// ทริปของฉัน (#172). Opens on the month of the next trip, or this month
+/// when none is ahead.
+class TripCalendarView extends ConsumerStatefulWidget {
+  const TripCalendarView({super.key});
 
   @override
-  ConsumerState<TripCalendarScreen> createState() => _TripCalendarScreenState();
+  ConsumerState<TripCalendarView> createState() => _TripCalendarViewState();
 }
 
-class _TripCalendarScreenState extends ConsumerState<TripCalendarScreen> {
+class _TripCalendarViewState extends ConsumerState<TripCalendarView> {
   /// First day of the month shown; set once the trips are known.
   DateTime? _month;
 
@@ -56,85 +57,78 @@ class _TripCalendarScreenState extends ConsumerState<TripCalendarScreen> {
     final catalog = ref.watch(placeCatalogProvider).value;
     final today = ref.watch(todayProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: const Text('ปฏิทินทริป')),
-      body: SafeArea(
-        child: trips == null
-            ? const Center(child: CircularProgressIndicator())
-            : Builder(
-                builder: (context) {
-                  final month = _month ??= _initialMonth(trips, today);
-                  String name(Trip t) =>
-                      catalog?.findProvince(t.plan.destinationId)?.name ??
-                      t.plan.destinationId;
-                  final inMonth =
-                      [
-                        for (final t in trips)
-                          if (_overlaps(t, month)) t,
-                      ]..sort(
-                        (a, b) =>
-                            a.request.startDate.compareTo(b.request.startDate),
-                      );
-                  return Align(
-                    alignment: Alignment.topCenter,
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 600),
-                      child: ListView(
-                        padding: EdgeInsets.all(
-                          context.windowSizeClass.pageMargin,
-                        ),
-                        children: [
-                          _MonthHeader(
-                            month: month,
-                            onPrevious: () => _move(-1),
-                            onNext: () => _move(1),
-                          ),
-                          const SizedBox(height: 8),
-                          _MonthGrid(
-                            month: month,
-                            today: today,
-                            trips: trips,
-                            nameOf: name,
-                          ),
-                          const SizedBox(height: 24),
-                          if (inMonth.isEmpty)
-                            Text(
-                              'ไม่มีทริปในเดือนนี้',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                              textAlign: TextAlign.center,
-                            )
-                          else
-                            for (final trip in inMonth)
-                              Card.outlined(
-                                clipBehavior: Clip.antiAlias,
-                                child: ListTile(
-                                  leading: const Icon(Icons.luggage_outlined),
-                                  title: Text(name(trip)),
-                                  subtitle: Text(
-                                    '${formatDateRange(trip.request.startDate, trip.request.endDate)}'
-                                    ' · ${trip.request.travellerCount} คน',
-                                  ),
-                                  trailing: const Icon(Icons.chevron_right),
-                                  onTap: trip.id == null
-                                      ? null
-                                      : () => context.push(
-                                          AppRoutes.tripPlan(trip.id!),
-                                        ),
-                                ),
-                              ),
-                        ],
-                      ),
-                    ),
+    return trips == null
+        ? const Center(child: CircularProgressIndicator())
+        : Builder(
+            builder: (context) {
+              final month = _month ??= _initialMonth(trips, today);
+              String name(Trip t) =>
+                  catalog?.findProvince(t.plan.destinationId)?.name ??
+                  t.plan.destinationId;
+              final inMonth =
+                  [
+                    for (final t in trips)
+                      if (_overlaps(t, month)) t,
+                  ]..sort(
+                    (a, b) =>
+                        a.request.startDate.compareTo(b.request.startDate),
                   );
-                },
-              ),
-      ),
-    );
+              return Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: ListView(
+                    padding: EdgeInsets.all(context.windowSizeClass.pageMargin),
+                    children: [
+                      _MonthHeader(
+                        month: month,
+                        onPrevious: () => _move(-1),
+                        onNext: () => _move(1),
+                      ),
+                      const SizedBox(height: 8),
+                      _MonthGrid(
+                        month: month,
+                        today: today,
+                        trips: trips,
+                        nameOf: name,
+                      ),
+                      const SizedBox(height: 24),
+                      if (inMonth.isEmpty)
+                        Text(
+                          'ไม่มีทริปในเดือนนี้',
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
+                          textAlign: TextAlign.center,
+                        )
+                      else
+                        for (final trip in inMonth)
+                          Card.outlined(
+                            clipBehavior: Clip.antiAlias,
+                            child: ListTile(
+                              leading: const Icon(Icons.luggage_outlined),
+                              title: Text(name(trip)),
+                              subtitle: Text(
+                                '${formatDateRange(trip.request.startDate, trip.request.endDate)}'
+                                ' · ${trip.request.travellerCount} คน',
+                              ),
+                              trailing: const Icon(Icons.chevron_right),
+                              onTap: trip.id == null
+                                  ? null
+                                  : () => context.push(
+                                      AppRoutes.tripPlan(trip.id!),
+                                    ),
+                            ),
+                          ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
   }
 
   static bool _overlaps(Trip trip, DateTime month) {
