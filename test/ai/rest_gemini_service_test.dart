@@ -23,8 +23,27 @@ String _answer(Object json) => jsonEncode({
 });
 
 void main() {
-  RestGeminiService service(MockClientHandler handler) =>
-      RestGeminiService(MockClient(handler), apiKey: 'test-key');
+  RestGeminiService service(
+    MockClientHandler handler, {
+    DateTime Function()? now,
+    Duration deadline = const Duration(seconds: 45),
+  }) => RestGeminiService(
+    MockClient(handler),
+    apiKey: 'test-key',
+    retryDelay: Duration.zero,
+    deadline: deadline,
+    now: now,
+  );
+
+  http.Response ok([Object json = const {'provinces': <Object>[]}]) =>
+      http.Response(
+        _answer(json),
+        200,
+        headers: {'content-type': 'application/json; charset=utf-8'},
+      );
+
+  String modelOf(http.Request r) =>
+      r.url.pathSegments.last.replaceAll(':generateContent', '');
 
   Future<Map<String, Object?>> ask(RestGeminiService gemini) =>
       gemini.generateJson(
@@ -113,6 +132,7 @@ void main() {
         ),
         apiKey: 'k',
         timeout: const Duration(milliseconds: 10),
+        retryDelay: Duration.zero,
       ).generateJson(
         systemInstruction: '',
         prompt: '',
@@ -120,5 +140,235 @@ void main() {
       ),
       throwsA(isA<GeminiException>()),
     );
+  });
+
+  group('when Gemini has a bad day', () {
+    test('asks the same model again after a 503, then succeeds', () async {
+      final asked = <String>[];
+      final json = await ask(
+        service((request) async {
+          asked.add(modelOf(request));
+          return asked.length == 1 ? http.Response('busy', 503) : ok();
+        }),
+      );
+      expect(json, {'provinces': <Object>[]});
+      expect(asked, ['gemini-flash-latest', 'gemini-flash-latest']);
+    });
+
+    test('moves to the next model when one keeps failing', () async {
+      final asked = <String>[];
+      final json = await ask(
+        service((request) async {
+          asked.add(modelOf(request));
+          return modelOf(request) == 'gemini-flash-lite-latest'
+              ? ok()
+              : http.Response('busy', 503);
+        }),
+      );
+      expect(json, {'provinces': <Object>[]});
+      expect(asked, [
+        'gemini-flash-latest',
+        'gemini-flash-latest',
+        'gemini-flash-lite-latest',
+      ]);
+    });
+
+    test('a retired model (404) goes straight to the next one', () async {
+      final asked = <String>[];
+      await ask(
+        service((request) async {
+          asked.add(modelOf(request));
+          return asked.length == 1 ? http.Response('gone', 404) : ok();
+        }),
+      );
+      expect(asked, ['gemini-flash-latest', 'gemini-flash-lite-latest']);
+    });
+
+    test('a rejected key stops at once, not after every model', () async {
+      for (final rejection in [
+        http.Response('{"error":{"status":"PERMISSION_DENIED"}}', 403),
+        http.Response('nope', 401),
+        http.Response(
+          '{"error":{"details":[{"reason":"API_KEY_INVALID"}]}}',
+          400,
+        ),
+      ]) {
+        var calls = 0;
+        await expectLater(
+          ask(
+            service((_) async {
+              calls++;
+              return rejection;
+            }),
+          ),
+          throwsA(isA<GeminiException>()),
+        );
+        expect(calls, 1, reason: '${rejection.statusCode}');
+      }
+    });
+
+    test(
+      'an unusable answer fails that model, the next may do better',
+      () async {
+        final unusable = <String, String>{
+          'blocked prompt': jsonEncode({
+            'promptFeedback': {'blockReason': 'SAFETY'},
+          }),
+          'no candidates': jsonEncode({'candidates': <Object>[]}),
+          'cut off': jsonEncode({
+            'candidates': [
+              {
+                'finishReason': 'MAX_TOKENS',
+                'content': {
+                  'parts': [
+                    {'text': '{"provinces":['},
+                  ],
+                },
+              },
+            ],
+          }),
+          'safety stop, no content': jsonEncode({
+            'candidates': [
+              {'finishReason': 'SAFETY'},
+            ],
+          }),
+          'empty parts': jsonEncode({
+            'candidates': [
+              {
+                'content': {'parts': <Object>[]},
+              },
+            ],
+          }),
+          'text is not json': jsonEncode({
+            'candidates': [
+              {
+                'content': {
+                  'parts': [
+                    {'text': 'sorry, I cannot'},
+                  ],
+                },
+              },
+            ],
+          }),
+          'a list instead of an object': _answer(<Object>[1, 2]),
+          'body is not json': '<html>proxy error</html>',
+          'body is a list': '[]',
+        };
+        for (final entry in unusable.entries) {
+          final asked = <String>[];
+          final json = await ask(
+            service((request) async {
+              asked.add(modelOf(request));
+              return asked.length == 1
+                  ? http.Response(entry.value, 200)
+                  : ok({'second': 'model'});
+            }),
+          );
+          expect(json, {'second': 'model'}, reason: entry.key);
+          expect(asked.length, 2, reason: entry.key);
+        }
+      },
+    );
+
+    test('reads a code-fenced answer and skips thought parts', () async {
+      final json = await ask(
+        service(
+          (_) async => http.Response(
+            jsonEncode({
+              'candidates': [
+                {
+                  'finishReason': 'STOP',
+                  'content': {
+                    'parts': [
+                      {'text': 'let me think', 'thought': true},
+                      {'text': '```json\n{"provinces": []}\n```'},
+                    ],
+                  },
+                },
+              ],
+            }),
+            200,
+          ),
+        ),
+      );
+      expect(json, {'provinces': <Object>[]});
+    });
+
+    test('a dropped connection is retried and then falls back', () async {
+      final asked = <String>[];
+      final json = await ask(
+        service((request) async {
+          asked.add(modelOf(request));
+          if (asked.length < 3) throw http.ClientException('connection reset');
+          return ok();
+        }),
+      );
+      expect(json, {'provinces': <Object>[]});
+      expect(asked.length, 3);
+    });
+
+    test('tries every model, then throws GeminiException', () async {
+      final asked = <String>{};
+      await expectLater(
+        ask(
+          service((request) async {
+            asked.add(modelOf(request));
+            return http.Response('busy', 503);
+          }),
+        ),
+        throwsA(isA<GeminiException>()),
+      );
+      expect(asked, {
+        'gemini-flash-latest',
+        'gemini-3.5-flash',
+        'gemini-flash-lite-latest',
+        'gemini-3.1-flash-lite',
+      });
+    });
+
+    test('gives up within the deadline instead of hanging', () async {
+      final clock = Stopwatch()..start();
+      await expectLater(
+        ask(
+          service(
+            (_) => Future.delayed(
+              const Duration(milliseconds: 200),
+              () => http.Response('busy', 503),
+            ),
+            deadline: const Duration(milliseconds: 250),
+          ),
+        ),
+        throwsA(isA<GeminiException>()),
+      );
+      expect(clock.elapsed, lessThan(const Duration(seconds: 2)));
+    });
+
+    test('stays quiet for a while after a total failure', () async {
+      var time = DateTime(2026, 10, 26, 12);
+      var calls = 0;
+      final gemini = service((_) async {
+        calls++;
+        return http.Response('busy', 503);
+      }, now: () => time);
+
+      await expectLater(ask(gemini), throwsA(isA<GeminiException>()));
+      final first = calls;
+      await expectLater(ask(gemini), throwsA(isA<GeminiException>()));
+      expect(calls, first, reason: 'no new request during the cool-down');
+
+      time = time.add(const Duration(seconds: 31));
+      await expectLater(ask(gemini), throwsA(isA<GeminiException>()));
+      expect(calls, greaterThan(first), reason: 'asks again once it is over');
+    });
+  });
+
+  test('the model list has no blanks or repeats', () {
+    final gemini = RestGeminiService(
+      MockClient((_) async => ok()),
+      apiKey: 'k',
+      model: 'a',
+      fallbackModels: const ['a', ' ', 'b', 'b'],
+    );
+    expect(gemini.models, ['a', 'b']);
   });
 }
