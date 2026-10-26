@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "694490566732",
+    "project_id": "vaya-app26",
+    "storage_bucket": "vaya-app26.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:694490566732:android:8cb8b1bdcdfae53465a4e9",
+        "android_client_info": {
+          "package_name": "com.vaya.vaya_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCM1VpaSJec9N8OFmjmvVm3_0us057y8ls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
@@ -7,9 +8,19 @@ import 'app/app.dart';
 import 'app/providers/data_providers.dart';
 import 'app/theme/theme_mode_provider.dart';
 import 'data/hive_trip_repository.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    // If Firebase is not yet configured (e.g. google-services.json missing),
+    // fallback gracefully to mock repositories.
+    debugPrint('Firebase initialization skipped or failed: $e');
+  }
   // Draw behind transparent system bars and let SafeArea and NavigationBar
   // pad for them, so Android's navigation buttons never cover the app's own
   // buttons (#180).
