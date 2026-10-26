@@ -302,6 +302,8 @@ class _StepPage extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
         child: SingleChildScrollView(
+          // Dragging the form puts the keyboard away (#180).
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           padding: EdgeInsets.fromLTRB(margin, 24, margin, 24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
