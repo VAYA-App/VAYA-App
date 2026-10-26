@@ -9,6 +9,7 @@ import 'providers/data_providers.dart';
 import '../features/assistant/assistant_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/explore/explore_screen.dart';
+import '../features/explore/place_detail_screen.dart';
 import '../features/generating/generating_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/profile/photo_credits_screen.dart';
@@ -32,6 +33,7 @@ abstract final class AppRoutes {
   static const tripCalendar = '/calendar';
   static const photoCredits = '/photo-credits';
   static String tripPlan(String tripId) => '/trips/$tripId';
+  static String place(String placeId) => '/places/$placeId';
 }
 
 class _AuthRefreshNotifier extends ChangeNotifier {
@@ -138,6 +140,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.tripCalendar,
         builder: (context, state) => const TripCalendarScreen(),
+      ),
+      GoRoute(
+        path: '/places/:placeId',
+        builder: (context, state) =>
+            PlaceDetailScreen(placeId: state.pathParameters['placeId']!),
       ),
       GoRoute(
         path: AppRoutes.photoCredits,
