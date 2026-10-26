@@ -31,9 +31,6 @@ class DatesSection extends ConsumerWidget {
     }
   }
 
-  static String _durationLabel(int days) =>
-      days == 1 ? 'ไปเช้าเย็นกลับ' : '$days วัน ${days - 1} คืน';
-
   static String _groupLabel(int count) => switch (count) {
     1 => 'เที่ยวคนเดียว',
     2 => 'คู่รัก / เพื่อน',
@@ -78,10 +75,7 @@ class DatesSection extends ConsumerWidget {
                               '${formatThaiShortDate(start)} – ${formatThaiShortDate(end)}',
                               style: theme.textTheme.titleLarge,
                             ),
-                            Text(
-                              _durationLabel(end.difference(start).inDays + 1),
-                              style: muted,
-                            ),
+                            Text(formatTripLength(start, end), style: muted),
                           ],
                         ),
                       ),

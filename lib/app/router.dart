@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../data/auth_repository.dart';
 import 'providers/data_providers.dart';
-import '../features/assistant/assistant_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/explore/explore_screen.dart';
 import '../features/explore/place_detail_screen.dart';
@@ -17,7 +16,7 @@ import '../features/profile/profile_screen.dart';
 import '../features/suggestion/suggestion_screen.dart';
 import '../features/trip_plan/trip_plan_screen.dart';
 import '../features/trip_request/trip_request_screen.dart';
-import '../features/trips/trip_calendar_screen.dart';
+import '../features/trips/my_trips_screen.dart';
 import 'layout/adaptive_shell.dart';
 
 /// Every location in the app. Use these instead of string literals.
@@ -25,12 +24,11 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const home = '/';
   static const explore = '/explore';
-  static const assistant = '/assistant';
+  static const myTrips = '/trips';
   static const profile = '/profile';
   static const newTrip = '/new-trip';
   static const suggestions = '/new-trip/suggestions';
   static const generating = '/new-trip/generating';
-  static const tripCalendar = '/calendar';
   static const photoCredits = '/photo-credits';
   static String tripPlan(String tripId) => '/trips/$tripId';
   static String place(String placeId) => '/places/$placeId';
@@ -90,14 +88,6 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.explore,
-                builder: (context, state) => const ExploreScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
                 path: AppRoutes.home,
                 builder: (context, state) => const HomeScreen(),
               ),
@@ -106,8 +96,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: AppRoutes.assistant,
-                builder: (context, state) => const AssistantScreen(),
+                path: AppRoutes.explore,
+                builder: (context, state) => const ExploreScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.myTrips,
+                builder: (context, state) => const MyTripsScreen(),
               ),
             ],
           ),
@@ -136,10 +134,6 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ],
-      ),
-      GoRoute(
-        path: AppRoutes.tripCalendar,
-        builder: (context, state) => const TripCalendarScreen(),
       ),
       GoRoute(
         path: '/places/:placeId',

@@ -38,3 +38,9 @@ String formatDateRange(DateTime start, DateTime end) {
   }
   return '${start.day} ${_months[start.month - 1]} – ${end.day} ${_months[end.month - 1]}';
 }
+
+/// `2026-11-14`, `2026-11-15` → `2 วัน 1 คืน`; a single day is a day trip.
+String formatTripLength(DateTime start, DateTime end) {
+  final days = end.difference(start).inDays + 1;
+  return days == 1 ? 'ไปเช้าเย็นกลับ' : '$days วัน ${days - 1} คืน';
+}

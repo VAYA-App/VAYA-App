@@ -20,16 +20,12 @@ class AdaptiveShell extends StatelessWidget {
 
   /// In branch order (see `router.dart`).
   static const List<_Tab> _tabs = [
+    (icon: Icons.home_outlined, selectedIcon: Icons.home, label: 'หน้าแรก'),
     (icon: Icons.explore_outlined, selectedIcon: Icons.explore, label: 'สำรวจ'),
     (
       icon: Icons.luggage_outlined,
       selectedIcon: Icons.luggage,
       label: 'ทริปของฉัน',
-    ),
-    (
-      icon: Icons.auto_awesome_outlined,
-      selectedIcon: Icons.auto_awesome,
-      label: 'AI ช่วยคิด',
     ),
     (icon: Icons.person_outline, selectedIcon: Icons.person, label: 'โปรไฟล์'),
   ];
