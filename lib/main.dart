@@ -6,11 +6,14 @@ import 'package:material_ui/material_ui.dart';
 import 'app/app.dart';
 import 'app/providers/data_providers.dart';
 import 'data/hive_trip_repository.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
-    await Firebase.initializeApp();
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     // If Firebase is not yet configured (e.g. google-services.json missing),
     // fallback gracefully to mock repositories.
