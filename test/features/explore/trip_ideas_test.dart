@@ -1,14 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_ui/material_ui.dart';
-import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
-import 'package:vaya_app/app/router.dart';
-import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/explore/trip_ideas.dart';
 import 'package:vaya_app/features/trip_request/trip_request_form_notifier.dart';
-import 'package:vaya_app/features/trip_request/trip_request_screen.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
