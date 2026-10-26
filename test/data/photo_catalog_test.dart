@@ -55,9 +55,19 @@ void main() {
       places = await loadPlaceCatalog(rootBundle);
     });
 
-    test('every credit has a file and a licence the app may use', () {
+    test('every credit has a file and a source', () {
       for (final c in photos.credits.values) {
         expect(File(photoAsset(c.id)).existsSync(), isTrue, reason: c.id);
+        expect(Uri.parse(c.source).isAbsolute, isTrue, reason: c.id);
+      }
+    });
+
+    test('Commons photos carry a licence the app may use', () {
+      final commons = photos.credits.values.where(
+        (c) => c.source.startsWith('https://commons.wikimedia.org/'),
+      );
+      expect(commons, isNotEmpty);
+      for (final c in commons) {
         expect(
           c.licence,
           anyOf(startsWith('CC0'), startsWith('CC BY'), startsWith('Public')),
@@ -65,7 +75,6 @@ void main() {
         );
         expect(c.licence, isNot(contains('NC')), reason: c.id);
         expect(c.licence, isNot(contains('ND')), reason: c.id);
-        expect(c.source, startsWith('https://commons.wikimedia.org/'));
       }
     });
 
@@ -85,6 +94,12 @@ void main() {
             places.findProvince(id) != null ||
             PlaceCategory.values.any((c) => PhotoCatalog.categoryId(c) == id);
         expect(known, isTrue, reason: id);
+      }
+    });
+
+    test('every place has a photo of its own', () {
+      for (final place in places.places) {
+        expect(photos.hasOwnPhoto(place.id), isTrue, reason: place.id);
       }
     });
 

@@ -106,15 +106,15 @@ assets/mock/               # ข้อมูลจำลองให้ทำ UI
 
 ## รูปถ่าย (`assets/photos/`)
 
-รูปของ Destination (hero 16:9) และ Place (การ์ด 4:3) เป็น WebP ชื่อตาม id เช่น `chonburi.webp` และ `chonburi-attraction-koh-larn.webp` ส่วน Place ที่ไม่มีรูปของตัวเองใช้ภาพประจำหมวด `category-attraction`, `category-restaurant` หรือ `category-accommodation` แทน ([ADR 0006](adr/0006-bundle-place-photos-with-license-manifest.md))
+รูปของ Destination (hero 16:9) และ Place (การ์ด 4:3) เป็น WebP ชื่อตาม id เช่น `chonburi.webp` และ `chonburi-attraction-koh-larn.webp` ทุก Place ต้องมีรูปของตัวเอง ภาพประจำหมวด `category-attraction`, `category-restaurant` และ `category-accommodation` มีไว้สำหรับสถานที่ใหม่ที่ยังไม่ได้ใส่รูปเท่านั้น ([ADR 0006](adr/0006-bundle-place-photos-with-license-manifest.md))
 
 `credits.json` เก็บชื่อภาพ ผู้ถ่าย license และลิงก์ต้นฉบับของทุกรูป แอปอ่านไฟล์นี้ไปแสดงในหน้า "เครดิตภาพ" ห้ามแก้ไฟล์นี้หรือใส่รูปเองด้วยมือ ให้ใช้สคริปต์ (ต้องมี Pillow):
 
 1. `python3 tool/photos/search_commons.py candidates.json [id,id]` ค้นรูปจาก Wikimedia Commons ตามชื่อสถานที่ และใช้คำค้นเพิ่มเติมจาก `tool/photos/queries.json` เก็บไว้เฉพาะ license ที่ใช้ในแอปได้ (CC0, Public domain, CC BY, CC BY-SA)
-2. เลือกรูปเองหนึ่งรูปต่อ id แล้วใส่ชื่อไฟล์ใน `tool/photos/picks.json` (ใส่ `focus` ได้ถ้าครอปตรงกลางแล้วตัดส่วนสำคัญออก)
+2. เลือกรูปเองหนึ่งรูปต่อ id แล้วใส่ชื่อไฟล์ใน `tool/photos/picks.json` (ใส่ `focus` ได้ถ้าครอปตรงกลางแล้วตัดส่วนสำคัญออก) ถ้า Commons ไม่มีรูปที่เป็นสถานที่นั้นจริง ให้ใช้รูปจากเว็บแทนเป็น `{"url": "<ลิงก์รูป>", "source": "<หน้าเว็บที่มีรูปนั้น>"}` เลือกรูปที่เห็นแล้วรู้ว่าเป็นที่ไหน เช่น หน้าร้านที่มีป้าย และเลี่ยงลิงก์จาก Facebook (`lookaside.fbsbx.com`) เพราะสคริปต์โหลดไม่ได้
 3. `python3 tool/photos/fetch_photos.py` ดาวน์โหลด ครอป บีบอัด และเขียน `credits.json` ใหม่ทั้งหมด
 
-เทสต์ใน `test/data/photo_catalog_test.dart` ตรวจว่าทุกรูปมีเครดิต ทุกเครดิตมีไฟล์ license ใช้ได้ และทุกจังหวัดกับทุกหมวดมีรูป
+เทสต์ใน `test/data/photo_catalog_test.dart` ตรวจว่าทุกรูปมีเครดิต ทุกเครดิตมีไฟล์และที่มา รูปจาก Commons มี license ที่ใช้ได้ และทุก Place ทุกจังหวัดกับทุกหมวดมีรูป
 
 ## ข้อมูลจำลอง (`assets/mock/`)
 
