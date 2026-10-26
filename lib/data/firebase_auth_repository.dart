@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart' as fb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'auth_repository.dart';
@@ -11,7 +12,10 @@ class FirebaseAuthRepository implements AuthRepository {
     fb.FirebaseAuth? auth,
     GoogleSignIn? googleSignIn,
   })  : _auth = auth ?? fb.FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ?? GoogleSignIn();
+        _googleSignIn = googleSignIn ??
+            (kIsWeb
+                ? GoogleSignIn(clientId: '694490566732.apps.googleusercontent.com')
+                : GoogleSignIn());
 
   final fb.FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;

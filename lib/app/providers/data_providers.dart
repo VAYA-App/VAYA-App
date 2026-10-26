@@ -27,7 +27,11 @@ final pricingTableProvider = FutureProvider<PricingTable>(
 /// to MockAuthRepository (in tests or local preview without Firebase setup).
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   if (Firebase.apps.isNotEmpty) {
-    return FirebaseAuthRepository();
+    try {
+      return FirebaseAuthRepository();
+    } catch (_) {
+      // Fallback gracefully to mock repository if initialization fails
+    }
   }
   final repository = MockAuthRepository();
   ref.onDispose(repository.dispose);
