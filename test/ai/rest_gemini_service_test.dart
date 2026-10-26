@@ -186,7 +186,15 @@ void main() {
 
     test('a rejected key stops at once, not after every model', () async {
       for (final rejection in [
-        http.Response('{"error":{"status":"PERMISSION_DENIED"}}', 403),
+        http.Response(
+          '{"error":{"status":"PERMISSION_DENIED",'
+          '"details":[{"reason":"SERVICE_DISABLED"}]}}',
+          403,
+        ),
+        http.Response(
+          '{"error":{"details":[{"reason":"API_KEY_ANDROID_APP_BLOCKED"}]}}',
+          403,
+        ),
         http.Response('nope', 401),
         http.Response(
           '{"error":{"details":[{"reason":"API_KEY_INVALID"}]}}',
@@ -205,6 +213,113 @@ void main() {
         );
         expect(calls, 1, reason: '${rejection.statusCode}');
       }
+    });
+
+    test('a 403 for one model only moves on to the next model', () async {
+      final asked = <String>[];
+      final json = await ask(
+        service((request) async {
+          asked.add(modelOf(request));
+          return asked.length == 1
+              ? http.Response('{"error":{"status":"PERMISSION_DENIED"}}', 403)
+              : ok();
+        }),
+      );
+      expect(json, {'provinces': <Object>[]});
+      expect(asked, ['gemini-flash-latest', 'gemini-flash-lite-latest']);
+    });
+
+    test(
+      'out of quota (429) moves on without asking that model again',
+      () async {
+        final asked = <String>[];
+        final json = await ask(
+          service((request) async {
+            asked.add(modelOf(request));
+            return asked.length == 1 ? http.Response('quota', 429) : ok();
+          }),
+        );
+        expect(json, {'provinces': <Object>[]});
+        expect(asked, ['gemini-flash-latest', 'gemini-flash-lite-latest']);
+      },
+    );
+
+    test('an answer of an unexpected shape is a GeminiException', () async {
+      for (final body in [
+        {
+          'candidates': [
+            {'content': 'not a map'},
+          ],
+        },
+        {
+          'candidates': [
+            {
+              'content': {'parts': 'not a list'},
+            },
+          ],
+        },
+        {'promptFeedback': 'not a map'},
+        {
+          'candidates': [
+            {
+              'content': {
+                'parts': [
+                  {'text': '{"provinces":[]}'},
+                ],
+              },
+            },
+          ],
+          'promptFeedback': <Object>[],
+        },
+      ]) {
+        final result = ask(
+          service((_) async => http.Response(jsonEncode(body), 200)),
+        );
+        if (body.containsKey('candidates') && body['promptFeedback'] is List) {
+          // Odd feedback alone does not spoil a good answer.
+          expect(await result, {'provinces': <Object>[]});
+        } else {
+          await expectLater(result, throwsA(isA<GeminiException>()));
+        }
+      }
+    });
+
+    test('bad answers to one prompt do not silence the others', () async {
+      var time = DateTime(2026, 10, 26, 12);
+      var answerWell = false;
+      final gemini = service((_) async {
+        return answerWell
+            ? ok()
+            : http.Response(
+                jsonEncode({
+                  'promptFeedback': {'blockReason': 'SAFETY'},
+                }),
+                200,
+              );
+      }, now: () => time);
+
+      await expectLater(ask(gemini), throwsA(isA<GeminiException>()));
+      answerWell = true;
+      // No time passes: an outage would still be in its cool-down here.
+      expect(await ask(gemini), {'provinces': <Object>[]});
+    });
+
+    test('waiting to retry never runs past the deadline', () async {
+      final clock = Stopwatch()..start();
+      await expectLater(
+        RestGeminiService(
+          MockClient((_) async => http.Response('busy', 503)),
+          apiKey: 'k',
+          deadline: const Duration(milliseconds: 100),
+          retryDelay: const Duration(seconds: 10),
+        ).generateJson(
+          systemInstruction: '',
+          prompt: '',
+          responseSchema: const {},
+        ),
+        throwsA(isA<GeminiException>()),
+      );
+      expect(clock.elapsed, lessThan(const Duration(seconds: 2)));
     });
 
     test(
