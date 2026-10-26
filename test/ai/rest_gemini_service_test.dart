@@ -160,7 +160,7 @@ void main() {
       final json = await ask(
         service((request) async {
           asked.add(modelOf(request));
-          return modelOf(request) == 'gemini-flash-lite-latest'
+          return modelOf(request) == 'gemini-3.5-flash'
               ? ok()
               : http.Response('busy', 503);
         }),
@@ -169,7 +169,7 @@ void main() {
       expect(asked, [
         'gemini-flash-latest',
         'gemini-flash-latest',
-        'gemini-flash-lite-latest',
+        'gemini-3.5-flash',
       ]);
     });
 
@@ -181,7 +181,7 @@ void main() {
           return asked.length == 1 ? http.Response('gone', 404) : ok();
         }),
       );
-      expect(asked, ['gemini-flash-latest', 'gemini-flash-lite-latest']);
+      expect(asked, ['gemini-flash-latest', 'gemini-3.5-flash']);
     });
 
     test('a rejected key stops at once, not after every model', () async {
@@ -226,7 +226,7 @@ void main() {
         }),
       );
       expect(json, {'provinces': <Object>[]});
-      expect(asked, ['gemini-flash-latest', 'gemini-flash-lite-latest']);
+      expect(asked, ['gemini-flash-latest', 'gemini-3.5-flash']);
     });
 
     test(
@@ -240,9 +240,32 @@ void main() {
           }),
         );
         expect(json, {'provinces': <Object>[]});
-        expect(asked, ['gemini-flash-latest', 'gemini-flash-lite-latest']);
+        expect(asked, ['gemini-flash-latest', 'gemini-3.5-flash']);
       },
     );
+
+    test('a model too slow to answer is not asked again', () async {
+      final asked = <String>[];
+      final json =
+          await RestGeminiService(
+            MockClient((request) async {
+              asked.add(modelOf(request));
+              if (asked.length == 1) {
+                await Future<void>.delayed(const Duration(milliseconds: 200));
+              }
+              return ok();
+            }),
+            apiKey: 'k',
+            timeout: const Duration(milliseconds: 50),
+            retryDelay: Duration.zero,
+          ).generateJson(
+            systemInstruction: '',
+            prompt: '',
+            responseSchema: const {},
+          );
+      expect(json, {'provinces': <Object>[]});
+      expect(asked, ['gemini-flash-latest', 'gemini-3.5-flash']);
+    });
 
     test('an answer of an unexpected shape is a GeminiException', () async {
       for (final body in [

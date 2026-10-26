@@ -10,8 +10,8 @@ import 'gemini_service.dart';
 /// key restricted to this API and never commit it.
 ///
 /// Built to survive a bad day at Google: it walks [models] in order, retries
-/// the temporary failures (5xx, timeouts, no network) once per model, moves
-/// on at once from a model out of quota, retired or not allowed, treats
+/// the temporary failures (5xx, no network) once per model, moves on at once
+/// from a model that is too slow, out of quota, retired or not allowed, treats
 /// blocked or cut-off answers as a failure of that model, and gives up within
 /// [deadline] so the caller's fallback runs before the user gives up.
 /// Callers retry a rejected answer once, so one step waits at most about
@@ -23,8 +23,8 @@ class RestGeminiService implements GeminiService {
     required this.apiKey,
     this.model = defaultModel,
     List<String> fallbackModels = defaultFallbackModels,
-    this.timeout = const Duration(seconds: 20),
-    this.deadline = const Duration(seconds: 25),
+    this.timeout = const Duration(seconds: 15),
+    this.deadline = const Duration(seconds: 35),
     this.retryDelay = const Duration(milliseconds: 600),
     this.coolDown = const Duration(seconds: 30),
     Uri? server,
@@ -37,11 +37,13 @@ class RestGeminiService implements GeminiService {
   static const defaultModel = 'gemini-flash-latest';
 
   /// Different model families, so one retired or overloaded model does not
-  /// take the others down with it.
+  /// take the others down with it. Measured on 2026-10-26: 3.5-flash and
+  /// 3.1-flash-lite answered in 2–6 s while flash-lite-latest took 21 s, so
+  /// the slow one goes last.
   static const defaultFallbackModels = [
-    'gemini-flash-lite-latest',
     'gemini-3.5-flash',
     'gemini-3.1-flash-lite',
+    'gemini-flash-lite-latest',
   ];
 
   final http.Client _client;
@@ -173,9 +175,10 @@ class RestGeminiService implements GeminiService {
       }().timeout(limit);
     } on TimeoutException catch (e) {
       if (!abort.isCompleted) abort.complete();
+      // A model this slow is likely slow again; the next may be quick.
       throw _Attempt(
         GeminiException('Gemini took too long ($name)', cause: e),
-        then: _Then.sameModel,
+        then: _Then.nextModel,
         outage: true,
       );
     } on Object catch (e) {
