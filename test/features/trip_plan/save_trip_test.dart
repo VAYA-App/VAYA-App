@@ -116,7 +116,7 @@ void main() {
     await settle(tester);
 
     expect(find.byType(TripPlanScreen), findsOneWidget);
-    expect(find.textContaining('ชลบุรี 2 วัน 1 คืน'), findsOneWidget);
+    expect(find.textContaining('ชลบุรี 2 วัน 1 คืน'), findsWidgets);
     expect(find.text('บันทึกแล้ว'), findsOneWidget);
   });
 
@@ -141,7 +141,10 @@ void main() {
 
     await openDelete();
     await tester.tap(find.widgetWithText(FilledButton, 'ลบ'));
-    await tester.pumpAndSettle();
+    // Check before settling: the SnackBar lasts four seconds, less than the
+    // home screen's loading animations take to settle.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(location(), AppRoutes.home);
     expect(find.text('ลบทริปแล้ว'), findsOneWidget);

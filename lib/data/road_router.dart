@@ -61,3 +61,45 @@ final class RoutePoints {
   @override
   int get hashCode => Object.hashAll(points);
 }
+
+/// Splits [road], the path through [waypoints] in order, into one leg per
+/// pair of neighbouring waypoints (#182). Each leg runs from the road point
+/// nearest its start to the one nearest its end, searching forward so a
+/// road that passes a waypoint twice still splits in order. Without a road
+/// path every leg is the straight line between its two waypoints.
+List<List<GeoPoint>> splitIntoLegs(
+  List<GeoPoint>? road,
+  List<GeoPoint> waypoints,
+) {
+  if (waypoints.length < 2) return const [];
+  if (road == null || road.length < 2) {
+    return [
+      for (var i = 0; i + 1 < waypoints.length; i++)
+        [waypoints[i], waypoints[i + 1]],
+    ];
+  }
+  double distance(GeoPoint a, GeoPoint b) {
+    final dLat = a.lat - b.lat, dLng = a.lng - b.lng;
+    return dLat * dLat + dLng * dLng;
+  }
+
+  final cuts = <int>[0];
+  for (var w = 1; w < waypoints.length; w++) {
+    final from = cuts.last;
+    var best = from;
+    for (var i = from; i < road.length; i++) {
+      if (distance(road[i], waypoints[w]) <
+          distance(road[best], waypoints[w])) {
+        best = i;
+      }
+    }
+    cuts.add(w == waypoints.length - 1 ? road.length - 1 : best);
+  }
+  return [
+    for (var i = 0; i + 1 < cuts.length; i++)
+      // A leg needs two points even when two waypoints share a road point.
+      cuts[i + 1] > cuts[i]
+          ? road.sublist(cuts[i], cuts[i + 1] + 1)
+          : [road[cuts[i]], road[cuts[i]]],
+  ];
+}
