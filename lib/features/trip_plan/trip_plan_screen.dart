@@ -129,21 +129,32 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: true,
-      builder: (context) => FractionallySizedBox(
-        heightFactor: 0.85,
-        child: Column(
-          children: [
-            Text(
-              'ให้ AI ปรับแผน',
-              style: Theme.of(context).textTheme.titleMedium,
+      // Lift the sheet above the keyboard and keep the input clear of the
+      // system navigation bar, or the typed text hides behind them (#180).
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.viewInsetsOf(context).bottom,
+        ),
+        child: FractionallySizedBox(
+          heightFactor: 0.85,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Text(
+                  'ให้ AI ปรับแผน',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                Expanded(
+                  child: PlanChatPanel(
+                    tripId: widget.tripId,
+                    onTripChanged: (id) =>
+                        router.replace(AppRoutes.tripPlan(id)),
+                  ),
+                ),
+              ],
             ),
-            Expanded(
-              child: PlanChatPanel(
-                tripId: widget.tripId,
-                onTripChanged: (id) => router.replace(AppRoutes.tripPlan(id)),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

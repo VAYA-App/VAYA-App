@@ -42,6 +42,18 @@ class AdaptiveShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Android back on another tab returns to หน้าแรก instead of closing the
+    // app; only หน้าแรก lets the system handle it (#180).
+    return PopScope(
+      canPop: navigationShell.currentIndex == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _goTo(0);
+      },
+      child: _scaffold(context),
+    );
+  }
+
+  Widget _scaffold(BuildContext context) {
     final sizeClass = context.windowSizeClass;
     final branch = navigationShell.currentIndex;
     final body = FadeThrough(switchKey: branch, child: navigationShell);
