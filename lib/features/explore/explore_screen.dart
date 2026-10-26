@@ -73,6 +73,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
     final theme = Theme.of(context);
 
     return CustomScrollView(
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       slivers: [
         SliverPadding(
           padding: EdgeInsets.fromLTRB(margin, 4, margin, 0),

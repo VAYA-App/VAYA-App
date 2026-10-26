@@ -143,6 +143,7 @@ class _PlanChatPanelState extends ConsumerState<PlanChatPanel> {
         Expanded(
           child: ListView(
             controller: _scroll,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
             children: [
               for (final line in _lines) ...[
