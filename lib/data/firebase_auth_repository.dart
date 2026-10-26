@@ -8,14 +8,15 @@ import 'auth_repository.dart';
 
 /// การเข้าสู่ระบบจริงด้วย Firebase Authentication ร่วมกับ Google Sign-In (#14)
 class FirebaseAuthRepository implements AuthRepository {
-  FirebaseAuthRepository({
-    fb.FirebaseAuth? auth,
-    GoogleSignIn? googleSignIn,
-  })  : _auth = auth ?? fb.FirebaseAuth.instance,
-        _googleSignIn = googleSignIn ??
-            (kIsWeb
-                ? GoogleSignIn(clientId: '694490566732.apps.googleusercontent.com')
-                : GoogleSignIn());
+  FirebaseAuthRepository({fb.FirebaseAuth? auth, GoogleSignIn? googleSignIn})
+    : _auth = auth ?? fb.FirebaseAuth.instance,
+      _googleSignIn =
+          googleSignIn ??
+          (kIsWeb
+              ? GoogleSignIn(
+                  clientId: '694490566732.apps.googleusercontent.com',
+                )
+              : GoogleSignIn());
 
   final fb.FirebaseAuth _auth;
   final GoogleSignIn _googleSignIn;
@@ -28,9 +29,9 @@ class FirebaseAuthRepository implements AuthRepository {
 
   @override
   Stream<AppUser?> authStateChanges() {
-    return _auth
-        .authStateChanges()
-        .map((user) => user == null ? null : _mapUser(user));
+    return _auth.authStateChanges().map(
+      (user) => user == null ? null : _mapUser(user),
+    );
   }
 
   @override
@@ -39,10 +40,7 @@ class FirebaseAuthRepository implements AuthRepository {
       final googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
         // ผู้ใช้ปิดกล่องเลือกบัญชีหรือไม่เลือกบัญชี
-        throw const AuthException(
-          'ผู้ใช้ยกเลิกการเลือกบัญชี',
-          cancelled: true,
-        );
+        throw const AuthException('ผู้ใช้ยกเลิกการเลือกบัญชี', cancelled: true);
       }
 
       final googleAuth = await googleUser.authentication;
@@ -54,21 +52,21 @@ class FirebaseAuthRepository implements AuthRepository {
       final userCredential = await _auth.signInWithCredential(credential);
       final user = userCredential.user;
       if (user == null) {
-        throw const AuthException('เข้าสู่ระบบไม่สำเร็จ ข้อมูลผู้ใช้ไม่ถูกต้อง');
+        throw const AuthException(
+          'เข้าสู่ระบบไม่สำเร็จ ข้อมูลผู้ใช้ไม่ถูกต้อง',
+        );
       }
 
       return _mapUser(user);
     } on fb.FirebaseAuthException catch (e) {
-      throw AuthException(
-        switch (e.code) {
-          'account-exists-with-different-credential' =>
-            'อีเมลนี้ผูกกับช่องทางการเข้าสู่ระบบอื่นแล้ว',
-          'network-request-failed' =>
-            'เครือข่ายขัดข้อง กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต',
-          'user-disabled' => 'บัญชีนี้ถูกระงับการใช้งาน',
-          _ => 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ (${e.message ?? e.code})',
-        },
-      );
+      throw AuthException(switch (e.code) {
+        'account-exists-with-different-credential' =>
+          'อีเมลนี้ผูกกับช่องทางการเข้าสู่ระบบอื่นแล้ว',
+        'network-request-failed' =>
+          'เครือข่ายขัดข้อง กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต',
+        'user-disabled' => 'บัญชีนี้ถูกระงับการใช้งาน',
+        _ => 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ (${e.message ?? e.code})',
+      });
     } on AuthException {
       rethrow;
     } catch (e) {
@@ -79,10 +77,7 @@ class FirebaseAuthRepository implements AuthRepository {
   @override
   Future<void> signOut() async {
     try {
-      await Future.wait([
-        _googleSignIn.signOut(),
-        _auth.signOut(),
-      ]);
+      await Future.wait([_googleSignIn.signOut(), _auth.signOut()]);
     } catch (_) {
       // พยายาม sign out ทั้งสองส่วน แม้ service ใดตัวหนึ่ง error
       await _auth.signOut();

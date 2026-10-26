@@ -85,7 +85,9 @@ void main() {
         expect(find.text('VAYA'), findsOneWidget);
         expect(find.text('เที่ยวไทยแบบ\nไม่ต้องวางแผนเอง'), findsOneWidget);
         expect(
-          find.text('AI จัดแผนรายวัน ค่าใช้จ่าย และเส้นทางบนแผนที่ให้ในไม่กี่วินาที'),
+          find.text(
+            'AI จัดแผนรายวัน ค่าใช้จ่าย และเส้นทางบนแผนที่ให้ในไม่กี่วินาที',
+          ),
           findsOneWidget,
         );
         expect(find.byType(GoogleLogo), findsOneWidget);
