@@ -127,11 +127,9 @@ class _UpcomingTrip extends ConsumerWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: PlacePhoto(
-                id: trip.plan.destinationId,
-                label: province,
-                heroTag: 'trip-${trip.id}',
-              ),
+              // No Hero: ทริปของฉัน, alive in the same shell route, already
+              // tags this trip's photo.
+              child: PlacePhoto(id: trip.plan.destinationId, label: province),
             ),
             ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 220),
@@ -252,7 +250,7 @@ class _PlannerCard extends StatelessWidget {
   }
 }
 
-/// Attractions that fit the Taste Profile; one tap starts a trip there.
+/// Attractions that fit the Taste Profile; one tap opens the Place.
 class _Picks extends ConsumerWidget {
   const _Picks();
 
@@ -324,15 +322,7 @@ class _PickCard extends ConsumerWidget {
         margin: EdgeInsets.zero,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: () {
-            ref
-                .read(tripRequestFormProvider.notifier)
-                .startWith(
-                  destinationId: place.provinceId,
-                  tags: place.tags.take(2),
-                );
-            context.push(AppRoutes.newTrip);
-          },
+          onTap: () => context.push(AppRoutes.place(place.id)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
