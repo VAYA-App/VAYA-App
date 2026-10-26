@@ -10,3 +10,7 @@ status: accepted (แทนส่วนเส้นทางและ tile ข�
 
 - ตั้งเซิร์ฟเวอร์ OSRM และ tile server เอง: ตัดทิ้งเพราะต้องมีเครื่องและต้องดูแลเอง
 - Google Maps Platform: ตัดทิ้งด้วยเหตุผลเดิมใน ADR 0003 (ต้องผูกบัตรเครดิต)
+
+## หมายเหตุ (#182)
+
+ระหว่างที่ยังไม่มี key ของ MapTiler แผนที่ยังใช้ tile ของ OpenStreetMap ตาม ADR 0003 แต่ผ่าน color filter ที่ลดความสดของสีและอมเขียวเล็กน้อย ให้เส้นทางกับหมุดเด่นขึ้น (ลอง CARTO แล้ว ตอนนี้ CARTO ต้องใช้ API key เหมือนกัน) พอได้ key ของ MapTiler ให้เปลี่ยน `urlTemplate` ใน `lib/features/trip_plan/widgets/trip_map.dart` และเอา filter ออกตาม ADR นี้
