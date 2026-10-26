@@ -11,6 +11,7 @@ import '../features/explore/explore_screen.dart';
 import '../features/explore/place_detail_screen.dart';
 import '../features/generating/generating_screen.dart';
 import '../features/home/home_screen.dart';
+import '../features/onboarding/onboarding_screen.dart';
 import '../features/profile/photo_credits_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/suggestion/suggestion_screen.dart';
@@ -22,6 +23,7 @@ import 'layout/adaptive_shell.dart';
 /// Every location in the app. Use these instead of string literals.
 abstract final class AppRoutes {
   static const login = '/login';
+  static const onboarding = '/onboarding';
   static const home = '/';
   static const explore = '/explore';
   static const myTrips = '/trips';
@@ -60,6 +62,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     initialLocation: AppRoutes.home,
     refreshListenable: refreshNotifier,
     redirect: (context, state) {
+      // The intro screens come before signing in (#178).
+      if (state.matchedLocation == AppRoutes.onboarding) return null;
       final loggedIn = authRepository.currentUser != null;
       final loggingIn = state.matchedLocation == AppRoutes.login;
 
@@ -79,6 +83,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboarding,
+        builder: (context, state) => const OnboardingScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
