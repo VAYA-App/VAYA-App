@@ -8,6 +8,7 @@ import '../../app/router.dart';
 import '../../domain/domain.dart';
 import '../../planner/plan_editor.dart';
 import '../../shared/formatters.dart';
+import '../../shared/widgets/place_photo.dart';
 import '../assistant/plan_chat_panel.dart';
 import 'trip_plan_view_provider.dart';
 import 'trip_calendar_export.dart';
@@ -692,65 +693,103 @@ class _TripSummaryCard extends StatelessWidget {
     final stay = plan.nightStays.isEmpty ? null : plan.nightStays.first;
     final days = plan.days.length;
 
+    final savedId = view.savedTrip?.id;
+
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // The Destination's photo, flying in from the trip card when the
+          // plan opens from home or ทริปของฉัน.
+          Stack(
+            children: [
+              Positioned.fill(
+                child: PlacePhoto(
+                  id: plan.destinationId,
+                  label: view.destination.name,
+                  heroTag: savedId == null ? null : 'trip-$savedId',
+                ),
+              ),
+              ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 200),
+                child: PhotoScrim(
+                  child: Container(
+                    alignment: Alignment.bottomLeft,
+                    padding: const EdgeInsets.fromLTRB(20, 56, 20, 16),
+                    child: Builder(
+                      builder: (context) {
+                        final text = Theme.of(context).textTheme;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              request.preferenceTags
+                                  .map((t) => t.label)
+                                  .join(' & '),
+                              style: text.labelMedium,
+                            ),
+                            Text(
+                              '${view.destination.name} '
+                              '${days == 1 ? '1 วัน' : '$days วัน ${days - 1} คืน'}',
+                              style: text.headlineSmall,
+                            ),
+                            Text(
+                              '${formatDateRange(request.startDate, request.endDate)}'
+                              ' · ${request.travellerCount} คน',
+                              style: text.bodyMedium,
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              // Over Budget is the banner's to say, once.
+              if (!cost.isOverBudget)
+                const Positioned(
+                  left: 16,
+                  top: 16,
+                  child: _WithinBudgetBadge(),
+                ),
+            ],
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                CostSummaryCard(
+                  cost: cost,
+                  travellerCount: request.travellerCount,
+                ),
+                if (stay != null) ...[
+                  const SizedBox(height: 12),
+                  Row(
                     children: [
-                      Text(
-                        request.preferenceTags.map((t) => t.label).join(' & '),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colors.primary,
-                        ),
+                      Icon(
+                        Icons.bed_outlined,
+                        size: 18,
+                        color: colors.onSurfaceVariant,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${view.destination.name} '
-                        '${days == 1 ? '1 วัน' : '$days วัน ${days - 1} คืน'}',
-                        style: theme.textTheme.headlineSmall,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'ที่พัก ${view.catalog.place(stay.placeId).name} '
+                          '(${formatBaht(stay.cost)} × ${plan.nightStays.length} คืน)',
+                          style: muted,
+                        ),
                       ),
                     ],
                   ),
-                ),
-                // Over Budget is the banner's to say, once.
-                if (!cost.isOverBudget) ...[
-                  const SizedBox(width: 8),
-                  const _WithinBudgetBadge(),
                 ],
               ],
             ),
-            const SizedBox(height: 16),
-            CostSummaryCard(cost: cost, travellerCount: request.travellerCount),
-            if (stay != null) ...[
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(
-                    Icons.bed_outlined,
-                    size: 18,
-                    color: colors.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'ที่พัก ${view.catalog.place(stay.placeId).name} '
-                      '(${formatBaht(stay.cost)} × ${plan.nightStays.length} คืน)',
-                      style: muted,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -763,11 +802,11 @@ class _WithinBudgetBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
-    final fg = colors.onSecondaryContainer;
+    final fg = colors.onTertiaryContainer;
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.secondaryContainer,
+        color: colors.tertiaryContainer,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Padding(

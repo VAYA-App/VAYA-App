@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../domain/domain.dart';
 import '../../../shared/formatters.dart';
+import '../../../shared/widgets/place_photo.dart';
 import '../../../shared/widgets/motion.dart';
 
 /// `90` → `1 ชม. 30 นาที`.
@@ -247,14 +248,42 @@ class _StopEntry extends StatelessWidget {
                       CategoryPill(category: place.category),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Text(place.name, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 2),
-                  Text(
-                    [?place.area, place.shortDescription].join(' · '),
-                    style: muted,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+                  const SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: SizedBox(
+                          width: 72,
+                          height: 60,
+                          child: PlacePhoto(
+                            id: place.id,
+                            label: place.name,
+                            category: place.category,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              place.name,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              [?place.area, place.shortDescription].join(' · '),
+                              style: muted,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 8),
                   Text(
