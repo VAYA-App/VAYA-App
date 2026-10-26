@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 import '../../data/asset_place_catalog.dart';
 import '../../data/asset_pricing_table.dart';
@@ -23,10 +24,11 @@ final pricingTableProvider = FutureProvider<PricingTable>(
   (ref) => loadPricingTable(rootBundle),
 );
 
-/// Uses Firebase Auth when Firebase is initialized (#14); otherwise falls back
-/// to MockAuthRepository (in tests or local preview without Firebase setup).
+/// Uses Firebase Auth on mobile devices when Firebase is initialized (#14);
+/// falls back to MockAuthRepository on web preview or tests to prevent
+/// Google OAuth 401 invalid_client popup when web client ID is not configured.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  if (Firebase.apps.isNotEmpty) {
+  if (!kIsWeb && Firebase.apps.isNotEmpty) {
     try {
       return FirebaseAuthRepository();
     } catch (_) {
