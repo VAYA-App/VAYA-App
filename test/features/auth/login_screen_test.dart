@@ -83,11 +83,18 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('VAYA'), findsOneWidget);
-        expect(find.text('วางแผนเที่ยวด้วย AI'), findsOneWidget);
-        expect(find.text('บอกเวลา งบ และสไตล์'), findsOneWidget);
-        expect(find.byIcon(Icons.flight), findsOneWidget);
+        expect(find.text('เที่ยวไทยแบบ\nไม่ต้องวางแผนเอง'), findsOneWidget);
+        expect(
+          find.text('AI จัดแผนรายวัน ค่าใช้จ่าย และเส้นทางบนแผนที่ให้ในไม่กี่วินาที'),
+          findsOneWidget,
+        );
         expect(find.byType(GoogleLogo), findsOneWidget);
-        expect(find.byType(Card), findsOneWidget);
+        expect(
+          find.text('ทริปที่บันทึกจะซิงก์กับบัญชีนี้ทุกเครื่อง'),
+          findsOneWidget,
+        );
+        expect(find.text('ข้อกำหนด'), findsOneWidget);
+        expect(find.text('นโยบายความเป็นส่วนตัว'), findsOneWidget);
 
         final buttonFinder = find.widgetWithText(
           FilledButton,
