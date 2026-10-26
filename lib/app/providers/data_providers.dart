@@ -2,9 +2,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+
 import '../../data/asset_place_catalog.dart';
 import '../../data/asset_pricing_table.dart';
 import '../../data/auth_repository.dart';
+import '../../data/firebase_auth_repository.dart';
 import '../../data/mock/in_memory_trip_repository.dart';
 import '../../data/mock/mock_auth_repository.dart';
 import '../../data/trip_repository.dart';
@@ -20,8 +23,12 @@ final pricingTableProvider = FutureProvider<PricingTable>(
   (ref) => loadPricingTable(rootBundle),
 );
 
-/// Mock for now; the Firebase implementation is deferred (#14).
+/// Uses Firebase Auth when Firebase is initialized (#14); otherwise falls back
+/// to MockAuthRepository (in tests or local preview without Firebase setup).
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
+  if (Firebase.apps.isNotEmpty) {
+    return FirebaseAuthRepository();
+  }
   final repository = MockAuthRepository();
   ref.onDispose(repository.dispose);
   return repository;

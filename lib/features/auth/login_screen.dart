@@ -4,6 +4,7 @@ import 'package:material_ui/material_ui.dart';
 import '../../app/layout/window_size_class.dart';
 import '../../app/providers/data_providers.dart';
 import '../../data/auth_repository.dart';
+import 'google_sign_in_button.dart';
 
 /// หน้าเข้าสู่ระบบตามแนวคิด Material 3 และ Stitch ("Siam Wanderlust").
 class LoginScreen extends ConsumerStatefulWidget {
@@ -165,43 +166,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 32),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton.icon(
-                              onPressed: _isLoading ? null : _signIn,
-                              icon: _isLoading
-                                  ? SizedBox.square(
-                                      dimension: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: colors.onPrimary,
-                                      ),
-                                    )
-                                  : Container(
-                                      width: 24,
-                                      height: 24,
-                                      decoration: BoxDecoration(
-                                        color: colors.surface,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        'G',
-                                        style: theme.textTheme.labelLarge
-                                            ?.copyWith(
-                                              color: colors.primary,
-                                              fontWeight: FontWeight.w700,
-                                            ),
-                                      ),
-                                    ),
-                              label: const Text('เข้าสู่ระบบด้วย Google'),
-                              style: FilledButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
-                                  horizontal: 20,
-                                ),
-                              ),
-                            ),
+                          GoogleSignInButton(
+                            onPressed: _isLoading ? null : _signIn,
+                            isLoading: _isLoading,
                           ),
                           const SizedBox(height: 16),
                           Text(

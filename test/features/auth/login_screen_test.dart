@@ -9,6 +9,7 @@ import 'package:vaya_app/app/router.dart';
 import 'package:vaya_app/app/theme/app_theme.dart';
 import 'package:vaya_app/data/auth_repository.dart';
 import 'package:vaya_app/data/mock/mock_auth_repository.dart';
+import 'package:vaya_app/features/auth/google_logo.dart';
 import 'package:vaya_app/features/auth/login_screen.dart';
 import 'package:vaya_app/features/home/home_screen.dart';
 
@@ -85,7 +86,7 @@ void main() {
         expect(find.text('วางแผนเที่ยวด้วย AI'), findsOneWidget);
         expect(find.text('บอกเวลา งบ และสไตล์'), findsOneWidget);
         expect(find.byIcon(Icons.flight), findsOneWidget);
-        expect(find.text('G'), findsOneWidget);
+        expect(find.byType(GoogleLogo), findsOneWidget);
         expect(find.byType(Card), findsOneWidget);
 
         final buttonFinder = find.widgetWithText(
