@@ -10,7 +10,7 @@ import 'package:vaya_app/app/router.dart';
 import 'package:vaya_app/data/mock/mock_auth_repository.dart';
 import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/trip_request/trip_request_form_notifier.dart';
-import 'package:vaya_app/features/trip_request/widgets/option_card.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:vaya_app/planner/planner_service.dart';
 
 /// Never reports progress, so the generating screen starts no timers.
@@ -65,12 +65,17 @@ Future<void> tapText(WidgetTester tester, String text) async {
   await tester.pumpAndSettle();
 }
 
-/// Taps the destination card, not the origin chip with the same name.
+/// Picks [name] in the destination menu, not the origin one.
 Future<void> chooseDestination(WidgetTester tester, String name) async {
-  final card = find.widgetWithText(OptionCard, name);
-  await tester.ensureVisible(card);
+  final menu = find.byWidgetPredicate(
+    (w) =>
+        w is DropdownMenu<String> && (w.label as Text?)?.data == 'อยากไปที่ไหน',
+  );
+  await tester.ensureVisible(menu);
   await tester.pumpAndSettle();
-  await tester.tap(card);
+  await tester.tap(menu);
+  await tester.pumpAndSettle();
+  await tester.tap(find.widgetWithText(MenuItemButton, name).last);
   await tester.pumpAndSettle();
 }
 

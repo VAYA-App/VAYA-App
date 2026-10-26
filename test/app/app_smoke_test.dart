@@ -46,7 +46,7 @@ void main() {
 
     await tester.tap(find.byTooltip('สร้างทริป'));
     await tester.pumpAndSettle();
-    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 3'), findsOneWidget);
   });
 
   testWidgets('bottom bar opens every tab', (tester) async {
@@ -71,7 +71,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('วางแผนทริปใหม่'), findsWidgets);
-    expect(find.text('ขั้นที่ 1 จาก 4'), findsOneWidget);
+    expect(find.text('ขั้นที่ 1 จาก 3'), findsOneWidget);
   });
 
   test('window size classes follow the M3 breakpoints', () {

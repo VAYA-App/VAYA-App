@@ -70,7 +70,7 @@ void main() {
     await waitFor(tester, find.text('วางแผนทริปใหม่'));
     await scrollTo(tester, find.text('ยังไม่มีทริป'));
 
-    // Step 1: dates and travellers.
+    // Step 1: dates and travellers; the AI picks the province.
     await tapText(tester, 'วางแผนทริปใหม่');
     await tapText(tester, 'เลือกวันไป–กลับ');
     for (final day in ['14', '15']) {
@@ -81,15 +81,12 @@ void main() {
     expect(find.text('2 วัน 1 คืน'), findsOneWidget);
     await tapText(tester, 'ถัดไป');
 
-    // Step 2: a budget, letting the AI choose the province.
+    // Step 2: a budget, default pace and transport.
     await tester.enterText(find.byType(TextField), '6000');
     await tester.pumpAndSettle();
     await tapText(tester, 'ถัดไป');
 
-    // Step 3: default transport.
-    await tapText(tester, 'ถัดไป');
-
-    // Step 4: what they like.
+    // Step 3: what they like.
     await tapText(tester, 'ทะเล');
     await tapText(tester, 'คาเฟ่');
     await tapText(tester, 'ให้ AI วางแผนให้');
