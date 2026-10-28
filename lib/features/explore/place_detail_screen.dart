@@ -8,6 +8,7 @@ import '../../app/router.dart';
 import '../../data/photo_catalog.dart';
 import '../../domain/domain.dart';
 import '../../shared/formatters.dart';
+import '../../shared/widgets/open_in_maps_button.dart';
 import '../../shared/widgets/place_photo.dart';
 import '../trip_request/trip_request_form_notifier.dart';
 
@@ -156,6 +157,8 @@ class _Details extends ConsumerWidget {
           ),
           const SizedBox(height: 16),
           _Facts(place: place),
+          const SizedBox(height: 16),
+          OpenInMapsButton(place: place),
           if (credit != null) ...[
             const SizedBox(height: 16),
             Text(

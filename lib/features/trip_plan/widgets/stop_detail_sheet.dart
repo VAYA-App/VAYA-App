@@ -5,6 +5,7 @@ import '../../../app/providers/data_providers.dart';
 
 import '../../../domain/domain.dart';
 import '../../../shared/formatters.dart';
+import '../../../shared/widgets/open_in_maps_button.dart';
 import '../../../planner/geo.dart';
 import '../../../planner/taste_profile.dart';
 import 'stop_timeline.dart';
@@ -158,6 +159,7 @@ class _StopDetailState extends State<_StopDetail> {
                   ? 'ปิดวันนี้'
                   : 'เปิด ${hours.open.toJson()} – ${hours.close.toJson()}',
             ),
+            OpenInMapsButton(place: place),
             if (stop.note != null) ...[
               const SizedBox(height: 8),
               DecoratedBox(

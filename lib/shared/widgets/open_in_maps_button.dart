@@ -1,0 +1,37 @@
+import 'package:flutter/foundation.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../../domain/domain.dart';
+
+/// Where [place] is in the phone's map app: Apple Maps on iOS, Google Maps
+/// everywhere else. The pin goes on the coordinates, since a name search can
+/// land on another branch with the same name.
+Uri placeMapUri(Place place, {TargetPlatform? platform}) {
+  final at = '${place.location.lat},${place.location.lng}';
+  if ((platform ?? defaultTargetPlatform) == TargetPlatform.iOS) {
+    return Uri.https('maps.apple.com', '/', {'ll': at, 'q': place.name});
+  }
+  return Uri.https('www.google.com', '/maps/search/', {
+    'api': '1',
+    'query': at,
+  });
+}
+
+/// Opens [place] in the map app so the user can see where it is or get
+/// there.
+class OpenInMapsButton extends StatelessWidget {
+  const OpenInMapsButton({super.key, required this.place});
+
+  final Place place;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () =>
+          launchUrl(placeMapUri(place), mode: LaunchMode.externalApplication),
+      icon: const Icon(Icons.map_outlined),
+      label: const Text('ดูบนแผนที่'),
+    );
+  }
+}
