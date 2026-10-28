@@ -106,7 +106,7 @@ assets/mock/               # ข้อมูลจำลองให้ทำ UI
 
 ## รูปถ่าย (`assets/photos/`)
 
-รูปของ Destination (hero 16:9) และ Place (การ์ด 4:3) เป็น WebP ชื่อตาม id เช่น `chonburi.webp` และ `chonburi-attraction-koh-larn.webp` ทุก Place ต้องมีรูปของตัวเอง ภาพประจำหมวด `category-attraction`, `category-restaurant` และ `category-accommodation` มีไว้สำหรับสถานที่ใหม่ที่ยังไม่ได้ใส่รูปเท่านั้น ([ADR 0006](adr/0006-bundle-place-photos-with-license-manifest.md))
+รูปของ Destination (hero 16:9) และ Place (การ์ด 4:3) เป็น WebP ชื่อตาม id เช่น `chonburi.webp` และ `chonburi-attraction-koh-larn.webp` ทุก Place ต้องมีรูปของตัวเอง ถ้าเพิ่ม Place ใหม่ให้ใส่รูปใน PR เดียวกัน ไม่อย่างนั้นเทสต์ไม่ผ่าน ภาพประจำหมวด `category-attraction`, `category-restaurant` และ `category-accommodation` เป็นแค่ภาพสำรองให้แอปยังแสดงผลได้ระหว่างที่ยังไม่ได้ใส่รูป ([ADR 0006](adr/0006-bundle-place-photos-with-license-manifest.md))
 
 `credits.json` เก็บชื่อภาพ ผู้ถ่าย license และลิงก์ต้นฉบับของทุกรูป แอปอ่านไฟล์นี้ไปแสดงในหน้า "เครดิตภาพ" ห้ามแก้ไฟล์นี้หรือใส่รูปเองด้วยมือ ให้ใช้สคริปต์ (ต้องมี Pillow):
 
