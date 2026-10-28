@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/layout/window_size_class.dart';
 import '../../app/providers/data_providers.dart';
 import '../../data/photo_catalog.dart';
 import '../../domain/domain.dart';
+import '../../shared/open_externally.dart';
 import '../../shared/widgets/place_photo.dart';
 
 /// Credits for every bundled photo: title, author, licence and source, as
@@ -105,9 +105,10 @@ class _CreditTile extends StatelessWidget {
         '“${credit.title}” · ${credit.author} · ${credit.licence}',
       ),
       trailing: const Icon(Icons.open_in_new, size: 20),
-      onTap: () => launchUrl(
+      onTap: () => openExternally(
+        context,
         Uri.parse(credit.source),
-        mode: LaunchMode.externalApplication,
+        failure: 'เปิดลิงก์ไม่ได้',
       ),
     );
   }

@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../domain/domain.dart';
+import '../open_externally.dart';
 
 /// Where [place] is in the phone's map app: Apple Maps on iOS, Google Maps
 /// everywhere else. The pin goes on the coordinates, since a name search can
@@ -28,8 +28,11 @@ class OpenInMapsButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlinedButton.icon(
-      onPressed: () =>
-          launchUrl(placeMapUri(place), mode: LaunchMode.externalApplication),
+      onPressed: () => openExternally(
+        context,
+        placeMapUri(place),
+        failure: 'เปิดแผนที่ไม่ได้',
+      ),
       icon: const Icon(Icons.map_outlined),
       label: const Text('ดูบนแผนที่'),
     );
