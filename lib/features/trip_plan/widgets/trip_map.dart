@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../data/road_router.dart';
 import '../../../domain/domain.dart';
 import '../../../planner/geo.dart';
+import '../../../shared/open_externally.dart';
 import '../../../shared/widgets/motion.dart';
 
 /// Where map tiles come from. `null` uses OpenStreetMap over the network;
@@ -415,8 +415,11 @@ class _LegCard extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             FilledButton.tonalIcon(
-              onPressed: () =>
-                  launchUrl(_directions, mode: LaunchMode.externalApplication),
+              onPressed: () => openExternally(
+                context,
+                _directions,
+                failure: 'เปิดแผนที่ไม่ได้',
+              ),
               icon: const Icon(Icons.navigation_outlined),
               label: const Text('นำทาง'),
             ),
