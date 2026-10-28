@@ -137,20 +137,6 @@
       "shortDescription": "ท่าเรือหลักสำหรับข้ามไปเกาะล้าน และจุดชมวิวอ่าวพัทยา"
     },
     {
-      "id": "chonburi-attraction-hello-van-gogh",
-      "category": "attraction",
-      "name": "Hello Van Gogh",
-      "area": "นาเกลือ",
-      "location": { "lat": 12.9804, "lng": 100.9186 },
-      "tags": ["artCulture", "family"],
-      "priceLevel": 2,
-      "rating": 4.5,
-      "openingHours": { "mon": ["09:00", "19:00"], "tue": ["09:00", "19:00"], "wed": ["09:00", "19:00"], "thu": ["09:00", "19:00"], "fri": ["09:00", "19:00"], "sat": ["09:00", "19:00"], "sun": ["09:00", "19:00"] },
-      "dwellMinutes": 120,
-      "entranceFee": 300,
-      "shortDescription": "พิพิธภัณฑ์ศิลปะแสดงผลงานของแวนโก๊ะแบบมีชีวิต"
-    },
-    {
       "id": "chonburi-attraction-mangrove-forest",
       "category": "attraction",
       "name": "ศูนย์ศึกษาธรรมชาติป่าชายเลน",
