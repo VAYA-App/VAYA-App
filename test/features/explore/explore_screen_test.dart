@@ -5,6 +5,7 @@ import 'package:vaya_app/app/app.dart';
 import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/router.dart';
 import 'package:vaya_app/data/mock/mock_auth_repository.dart';
+import 'package:vaya_app/domain/domain.dart';
 import 'package:vaya_app/features/explore/explore_screen.dart';
 import 'package:vaya_app/features/explore/place_detail_screen.dart';
 import 'package:vaya_app/features/trip_request/trip_request_form_notifier.dart';
@@ -39,7 +40,8 @@ void main() {
     tester,
   ) async {
     final c = await pumpExplore(tester);
-    expect(find.text('พบ 120 สถานที่'), findsOneWidget);
+    final places = c.read(placeCatalogProvider).requireValue.places;
+    expect(find.text('พบ ${places.length} สถานที่'), findsOneWidget);
 
     await tester.enterText(find.byType(SearchBar), 'เกาะล้าน');
     await tester.pumpAndSettle();
@@ -57,14 +59,22 @@ void main() {
   });
 
   testWidgets('a province and a category combine', (tester) async {
-    await pumpExplore(tester);
+    final c = await pumpExplore(tester);
+    final chonburi = c
+        .read(placeCatalogProvider)
+        .requireValue
+        .places
+        .where((p) => p.provinceId == 'chonburi');
+    final stays = chonburi.where(
+      (p) => p.category == PlaceCategory.accommodation,
+    );
 
     await tester.tap(find.text('ชลบุรี').first);
     await tester.pumpAndSettle();
-    expect(find.text('พบ 58 สถานที่'), findsOneWidget);
+    expect(find.text('พบ ${chonburi.length} สถานที่'), findsOneWidget);
 
     await tester.tap(find.text('พัก'));
     await tester.pumpAndSettle();
-    expect(find.text('พบ 9 สถานที่'), findsOneWidget);
+    expect(find.text('พบ ${stays.length} สถานที่'), findsOneWidget);
   });
 }

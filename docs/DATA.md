@@ -112,7 +112,7 @@ assets/mock/               # ข้อมูลจำลองให้ทำ UI
 
 1. `python3 tool/photos/search_commons.py candidates.json [id,id]` ค้นรูปจาก Wikimedia Commons ตามชื่อสถานที่ และใช้คำค้นเพิ่มเติมจาก `tool/photos/queries.json` เก็บไว้เฉพาะ license ที่ใช้ในแอปได้ (CC0, Public domain, CC BY, CC BY-SA)
 2. เลือกรูปเองหนึ่งรูปต่อ id แล้วใส่ชื่อไฟล์ใน `tool/photos/picks.json` (ใส่ `focus` ได้ถ้าครอปตรงกลางแล้วตัดส่วนสำคัญออก) ถ้า Commons ไม่มีรูปที่เป็นสถานที่นั้นจริง ให้ใช้รูปจากเว็บแทนเป็น `{"url": "<ลิงก์รูป>", "source": "<หน้าเว็บที่มีรูปนั้น>"}` เลือกรูปที่เห็นแล้วรู้ว่าเป็นที่ไหน เช่น หน้าร้านที่มีป้าย และเลี่ยงลิงก์จาก Facebook (`lookaside.fbsbx.com`) เพราะสคริปต์โหลดไม่ได้
-3. `python3 tool/photos/fetch_photos.py` ดาวน์โหลด ครอป บีบอัด และเขียน `credits.json` ใหม่ทั้งหมด
+3. `python3 tool/photos/fetch_photos.py [id,id]` ดาวน์โหลด ครอป บีบอัด และเขียน `credits.json` ถ้าใส่ id จะโหลดเฉพาะ id นั้นและไม่แตะรูปอื่น ส่วนรูปของ id ที่เอาออกจาก `picks.json` แล้วจะถูกลบพร้อมเครดิตทุกครั้ง (ใส่ `''` ถ้าจะลบอย่างเดียว)
 
 เทสต์ใน `test/data/photo_catalog_test.dart` ตรวจว่าทุกรูปมีเครดิต ทุกเครดิตมีไฟล์และที่มา รูปจาก Commons มี license ที่ใช้ได้ และทุก Place ทุกจังหวัดกับทุกหมวดมีรูป
 

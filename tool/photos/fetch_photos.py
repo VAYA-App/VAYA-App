@@ -2,7 +2,12 @@
 
 Run from the repo root (needs Pillow):
 
-    python3 tool/photos/fetch_photos.py
+    python3 tool/photos/fetch_photos.py [id,id,...]
+
+With ids it fetches only those and keeps every other photo as it is, so
+changing one pick does not download them all again. Either way, photos whose
+id is no longer in picks.json are deleted with their credit; pass '' to only
+do that.
 
 Reads tool/photos/picks.json:
 
@@ -25,6 +30,7 @@ import html
 import io
 import json
 import re
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -97,40 +103,70 @@ def main() -> None:
     heroes = {p["id"] for p in provinces}
     OUT.mkdir(parents=True, exist_ok=True)
 
-    credits = []
+    only = set(filter(None, sys.argv[1].split(","))) if len(sys.argv) > 1 else None
+    if only and not only <= picks.keys():
+        sys.exit(f"not in picks.json: {', '.join(sorted(only - picks.keys()))}")
+
+    manifest = OUT / "credits.json"
+    old = json.loads(manifest.read_text())["photos"] if manifest.exists() else []
+    credits = {c["id"]: c for c in old if c["id"] in picks}
+    for gone in {c["id"] for c in old} - picks.keys():
+        (OUT / f"{gone}.webp").unlink(missing_ok=True)
+        print("removed", gone, flush=True)
+
+    failed = []
     for photo_id, pick in sorted(picks.items()):
-        size = HERO if photo_id in heroes else CARD
-        if "url" in pick:
-            img = Image.open(io.BytesIO(get(pick["url"], pick["source"])))
-            site = urllib.parse.urlsplit(pick["source"]).hostname
-            credit = {
-                "title": "ภาพจากเว็บ",
-                "author": site,
-                "licence": WEB_LICENCE,
-                "licenceUrl": None,
-                "source": pick["source"],
-            }
-        else:
-            meta = info(pick["file"], size[0] * 2)
-            ext = meta.get("extmetadata", {})
-            img = Image.open(io.BytesIO(get(meta["thumburl"])))
-            credit = {
-                "title": pick["file"].removeprefix("File:").rsplit(".", 1)[0],
-                "author": plain(ext.get("Artist", {}).get("value", "ไม่ระบุ")),
-                "licence": ext.get("LicenseShortName", {}).get("value", ""),
-                "licenceUrl": ext.get("LicenseUrl", {}).get("value"),
-                "source": meta["descriptionurl"],
-            }
-            time.sleep(0.5)  # stay polite to the Commons API
-        crop(img, size, pick.get("focus")).save(
-            OUT / f"{photo_id}.webp", "WEBP", quality=QUALITY, method=6
-        )
-        credits.append({"id": photo_id, **credit})
+        if only is not None and photo_id not in only:
+            continue
+        try:
+            credits[photo_id] = fetch(photo_id, pick, photo_id in heroes)
+        except Exception as e:  # one dead link must not lose the rest
+            failed.append(photo_id)
+            print("failed", photo_id, e, flush=True)
+            continue
         print("ok", photo_id, flush=True)
 
-    (OUT / "credits.json").write_text(
-        json.dumps({"photos": credits}, ensure_ascii=False, indent=2) + "\n"
+    manifest.write_text(
+        json.dumps(
+            {"photos": [credits[i] for i in sorted(credits)]},
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
     )
+    if failed:
+        sys.exit(f"failed: {','.join(failed)}")
+
+
+def fetch(photo_id: str, pick: dict, hero: bool) -> dict:
+    """Downloads, crops and saves one photo, and returns its credit."""
+    size = HERO if hero else CARD
+    if "url" in pick:
+        img = Image.open(io.BytesIO(get(pick["url"], pick["source"])))
+        site = urllib.parse.urlsplit(pick["source"]).hostname
+        credit = {
+            "title": "ภาพจากเว็บ",
+            "author": site,
+            "licence": WEB_LICENCE,
+            "licenceUrl": None,
+            "source": pick["source"],
+        }
+    else:
+        meta = info(pick["file"], size[0] * 2)
+        ext = meta.get("extmetadata", {})
+        img = Image.open(io.BytesIO(get(meta["thumburl"])))
+        credit = {
+            "title": pick["file"].removeprefix("File:").rsplit(".", 1)[0],
+            "author": plain(ext.get("Artist", {}).get("value", "ไม่ระบุ")),
+            "licence": ext.get("LicenseShortName", {}).get("value", ""),
+            "licenceUrl": ext.get("LicenseUrl", {}).get("value"),
+            "source": meta["descriptionurl"],
+        }
+        time.sleep(0.5)  # stay polite to the Commons API
+    crop(img, size, pick.get("focus")).save(
+        OUT / f"{photo_id}.webp", "WEBP", quality=QUALITY, method=6
+    )
+    return {"id": photo_id, **credit}
 
 
 if __name__ == "__main__":
