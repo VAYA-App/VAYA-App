@@ -44,7 +44,7 @@ void main() {
         await repo.saveTrip(
           Trip(
             id: id,
-            ownerUid: 'u1',
+            ownerUid: MockAuthRepository.demoUser.uid,
             createdAt: DateTime(2026, 10, 1),
             updatedAt: DateTime(2026, 10, 1),
             request: request.copyWith(startDate: start, endDate: end),

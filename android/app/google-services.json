@@ -12,7 +12,20 @@
           "package_name": "com.vaya.vaya_app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "694490566732-05p35itu91dvrcvdk7img0udl5rhho8p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vaya.vaya_app",
+            "certificate_hash": "962ea715393db4e1106b0c83c7cec0f756ca4014"
+          }
+        },
+        {
+          "client_id": "694490566732-43bvsdf19h225p4urbm24vkatk1jjj8t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCM1VpaSJec9N8OFmjmvVm3_0us057y8ls"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "694490566732-43bvsdf19h225p4urbm24vkatk1jjj8t.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "694490566732-7jkt031lq9jvbah2e6fgqpvrmsumjvd4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.vaya.vayaApp"
+              }
+            }
+          ]
         }
       }
     }

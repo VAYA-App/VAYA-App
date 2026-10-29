@@ -6,6 +6,7 @@ import '../../app/providers/planner_providers.dart';
 import '../../domain/domain.dart';
 import '../../planner/default_over_budget_advisor.dart';
 import '../../planner/plan_editor.dart';
+import '../profile/current_user_provider.dart';
 
 /// Id that opens the bundled mock plan (`assets/mock/`).
 const mockTripId = 'mock';
@@ -55,7 +56,25 @@ class DraftTripsNotifier extends Notifier<Map<String, DraftTrip>> {
   var _lastId = 0;
 
   @override
-  Map<String, DraftTrip> build() => const {};
+  Map<String, DraftTrip> build() {
+    ref.listen(currentUserProvider, (prev, next) {
+      final prevUid = prev?.value?.uid;
+      final nextUid = next.value?.uid;
+      if (prevUid != null && prevUid != nextUid) {
+        state = const {};
+      }
+    });
+    return const {};
+  }
+
+  /// Removes a draft after it has been saved.
+  void remove(String id) {
+    if (!state.containsKey(id)) return;
+    state = {
+      for (final entry in state.entries)
+        if (entry.key != id) entry.key: entry.value,
+    };
+  }
 
   /// Keeps [plan] and returns the trip id that opens it.
   String add(TripPlan plan, TripRequest request) {
