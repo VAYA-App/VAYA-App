@@ -48,6 +48,8 @@ jobs:
         with:
           name: coverage
           path: coverage/lcov.info
+          # Free plan storage is small; old runs filled it (#203).
+          retention-days: 3
 
   build:
     name: build web and android
@@ -78,6 +80,8 @@ jobs:
         with:
           name: vaya-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
+          # Free plan storage is small; old runs filled it (#203).
+          retention-days: 3
 
   firestore-rules:
     name: firestore security rules
