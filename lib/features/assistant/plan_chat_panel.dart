@@ -6,6 +6,7 @@ import '../../app/providers/planner_providers.dart';
 import '../../domain/domain.dart';
 import '../../planner/plan_chat.dart';
 import '../../planner/plan_editor.dart';
+import '../../shared/formatters.dart';
 import '../../shared/widgets/mascot_view.dart';
 import '../trip_plan/trip_plan_view_provider.dart';
 
@@ -128,12 +129,25 @@ class _PlanChatPanelState extends ConsumerState<PlanChatPanel> {
         _tripId = id;
         widget.onTripChanged?.call(id);
       }
-      _add(_Line.ai('เรียบร้อย! ปรับแผนและคำนวณค่าใช้จ่ายใหม่ให้แล้ว'));
+      final after = await ref.read(tripPlanViewProvider(_tripId).future);
+      _add(_Line.ai(_doneText(line.plan, after?.plan)));
     } catch (_) {
       _add(_Line.ai('ปรับแผนไม่สำเร็จ ลองขอใหม่อีกครั้งนะ'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// What changed in the total, worked out here from the two plans so the
+  /// figure never comes from the AI (ADR-0001).
+  String _doneText(TripPlan? before, TripPlan? after) {
+    const done = 'เรียบร้อย! ปรับแผนและคำนวณค่าใช้จ่ายใหม่ให้แล้ว';
+    if (before == null || after == null) return done;
+    final change = after.cost.total - before.cost.total;
+    if (change == 0) return '$done ยอดรวมเท่าเดิม';
+    final direction = change > 0 ? 'เพิ่มขึ้น' : 'ลดลง';
+    return '$done ยอดรวม$direction ${formatBaht(change.abs())} '
+        'เป็น ${formatBaht(after.cost.total)}';
   }
 
   @override
