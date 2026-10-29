@@ -37,8 +37,8 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return repository;
 });
 
-/// In memory by default, for tests; `main.dart` overrides it with the
-/// local Hive database (#142). Firestore is deferred (#41).
+/// In memory by default, for tests; `main.dart` overrides it with Firestore
+/// (#41) or, where Firebase is not set up, the local Hive database (#142).
 final tripRepositoryProvider = Provider<TripRepository>((ref) {
   final repository = InMemoryTripRepository();
   ref.onDispose(repository.dispose);

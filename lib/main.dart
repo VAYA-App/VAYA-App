@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,9 @@ import 'package:material_ui/material_ui.dart';
 import 'app/app.dart';
 import 'app/providers/data_providers.dart';
 import 'app/theme/theme_mode_provider.dart';
+import 'data/firestore_trip_repository.dart';
 import 'data/hive_trip_repository.dart';
+import 'data/trip_repository.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -33,9 +36,14 @@ Future<void> main() async {
       systemNavigationBarContrastEnforced: false,
     ),
   );
-  // Saved trips live in a local database until Firestore is set up (#142).
+  // Saved trips go to Firestore where Firebase started (Android, #41) and
+  // to the local Hive database everywhere else (#142).
   await Hive.initFlutter();
-  final trips = await HiveTripRepository.open();
+  final TripRepository trips = Firebase.apps.isEmpty
+      ? await HiveTripRepository.open()
+      : FirestoreTripRepository(
+          currentUid: () => FirebaseAuth.instance.currentUser?.uid,
+        );
   final feedback = await Hive.openBox<String>(TasteProfileNotifier.boxName);
   final settings = await Hive.openBox<String>(ThemeModeNotifier.boxName);
   runApp(
