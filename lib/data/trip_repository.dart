@@ -1,7 +1,7 @@
 import '../domain/domain.dart';
 
 /// Saved trips of the signed-in user at Firestore `trips/{id}`.
-/// Implemented in #41.
+/// Implemented on Firestore in #41 and on Hive for the other platforms.
 abstract interface class TripRepository {
   /// The user's trips, most recently updated first.
   Stream<List<Trip>> watchMyTrips();

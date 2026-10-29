@@ -3,8 +3,7 @@ import 'dart:async';
 import '../../domain/domain.dart';
 import '../trip_repository.dart';
 
-/// Keeps trips in memory until Firestore is set up (deferred, see #41).
-/// Trips are lost when the app restarts.
+/// Keeps trips in memory, for tests. Trips are lost when the app restarts.
 class InMemoryTripRepository implements TripRepository {
   final _trips = <String, Trip>{};
   final _changes = StreamController<List<Trip>>.broadcast();
