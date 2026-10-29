@@ -118,7 +118,7 @@ void main() {
     expect(find.text('เลือกจังหวัดนี้'), findsNWidgets(2));
     expect(find.text('แนะนำ'), findsOneWidget);
     expect(find.text('ทะเลใกล้กรุงเทพฯ มีคาเฟ่ริมหาด'), findsOneWidget);
-    expect(find.textContaining('เริ่มต้น ~฿4,800 · พ.ย.'), findsOneWidget);
+    expect(find.textContaining('ถูกสุด ~฿4,800 · พ.ย.'), findsOneWidget);
     expect(find.text('ทะเล'), findsOneWidget);
 
     // Opened on its own: the demo request, with no Destination.
