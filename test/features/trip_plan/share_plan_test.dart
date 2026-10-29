@@ -77,4 +77,48 @@ void main() {
     expect(shared.single.$1, tripSummaryText(view));
     expect(shared.single.$2, isNotNull);
   });
+
+  testWidgets('Back closes the share menu and keeps the plan', (tester) async {
+    tester.view.physicalSize = const Size(1400, 900);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    await tester.runAsync(() async {
+      await container.read(placeCatalogProvider.future);
+      await container.read(tripPlanViewProvider(mockTripId).future);
+    });
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const TripPlanScreen(tripId: mockTripId),
+                  ),
+                ),
+                child: const Text('open plan'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open plan'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('แชร์แผน'));
+    await tester.pumpAndSettle();
+    expect(find.text('แชร์เป็นข้อความ'), findsOneWidget);
+
+    // The system Back button.
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('แชร์เป็นข้อความ'), findsNothing);
+    expect(find.byType(TripPlanScreen), findsOneWidget);
+  });
 }

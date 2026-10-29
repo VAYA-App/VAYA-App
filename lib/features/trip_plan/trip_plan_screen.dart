@@ -355,25 +355,31 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
         title: const Text('แผนการเดินทาง'),
         actions: [
           Consumer(
-            builder: (context, ref, _) => MenuAnchor(
-              menuChildren: [
-                MenuItemButton(
-                  leadingIcon: const Icon(Icons.notes_outlined),
-                  onPressed: () => _share(context, ref),
-                  child: const Text('แชร์เป็นข้อความ'),
+            // A route, not an overlay, so the system Back closes the menu
+            // and keeps the plan.
+            builder: (context, ref, _) => PopupMenuButton<_ShareAction>(
+              icon: const Icon(Icons.ios_share_outlined),
+              tooltip: 'แชร์แผน',
+              onSelected: (action) => switch (action) {
+                _ShareAction.text => _share(context, ref),
+                _ShareAction.calendar => _exportCalendar(context, ref),
+              },
+              itemBuilder: (context) => const [
+                PopupMenuItem(
+                  value: _ShareAction.text,
+                  child: ListTile(
+                    leading: Icon(Icons.notes_outlined),
+                    title: Text('แชร์เป็นข้อความ'),
+                  ),
                 ),
-                MenuItemButton(
-                  leadingIcon: const Icon(Icons.event_available_outlined),
-                  onPressed: () => _exportCalendar(context, ref),
-                  child: const Text('เพิ่มลงปฏิทิน'),
+                PopupMenuItem(
+                  value: _ShareAction.calendar,
+                  child: ListTile(
+                    leading: Icon(Icons.event_available_outlined),
+                    title: Text('เพิ่มลงปฏิทิน'),
+                  ),
                 ),
               ],
-              builder: (context, controller, _) => IconButton(
-                icon: const Icon(Icons.ios_share_outlined),
-                tooltip: 'แชร์แผน',
-                onPressed: () =>
-                    controller.isOpen ? controller.close() : controller.open(),
-              ),
             ),
           ),
           if (widget.view.savedTrip case final trip?) _TripMenu(trip: trip),
@@ -437,23 +443,28 @@ class _TripMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return MenuAnchor(
-      menuChildren: [
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.delete_outline),
-          onPressed: () => _confirmDelete(context, ref),
-          child: const Text('ลบทริป'),
+    return PopupMenuButton<_TripAction>(
+      icon: const Icon(Icons.more_vert),
+      tooltip: 'ตัวเลือกเพิ่มเติม',
+      onSelected: (action) => switch (action) {
+        _TripAction.delete => _confirmDelete(context, ref),
+      },
+      itemBuilder: (context) => const [
+        PopupMenuItem(
+          value: _TripAction.delete,
+          child: ListTile(
+            leading: Icon(Icons.delete_outline),
+            title: Text('ลบทริป'),
+          ),
         ),
       ],
-      builder: (context, controller, _) => IconButton(
-        icon: const Icon(Icons.more_vert),
-        tooltip: 'ตัวเลือกเพิ่มเติม',
-        onPressed: () =>
-            controller.isOpen ? controller.close() : controller.open(),
-      ),
     );
   }
 }
+
+enum _ShareAction { text, calendar }
+
+enum _TripAction { delete }
 
 /// Saving the plan (#43) and editing it with the AI chat (#46).
 class _BottomActions extends ConsumerStatefulWidget {
