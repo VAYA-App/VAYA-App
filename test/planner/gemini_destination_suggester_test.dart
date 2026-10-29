@@ -62,7 +62,19 @@ void main() {
   setUpAll(() async {
     final container = ProviderContainer();
     addTearDown(container.dispose);
-    catalog = await container.read(placeCatalogProvider.future);
+    // The scripted answers rank Bangkok and Chonburi, so keep only those.
+    final all = await container.read(placeCatalogProvider.future);
+    const two = {'bangkok', 'chonburi'};
+    catalog = PlaceCatalog(
+      provinces: [
+        for (final p in all.provinces)
+          if (two.contains(p.id)) p,
+      ],
+      places: [
+        for (final p in all.places)
+          if (two.contains(p.provinceId)) p,
+      ],
+    );
     calculator = await container.read(costCalculatorProvider.future);
   });
 

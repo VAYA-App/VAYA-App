@@ -196,11 +196,17 @@ class _Provinces extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Row(
-      children: [
-        for (final (i, p) in provinces.indexed) ...[
-          if (i > 0) const SizedBox(width: 12),
-          Expanded(
+    // Eight provinces no longer fit side by side, so they scroll sideways.
+    return SizedBox(
+      height: 120,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: provinces.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 12),
+        itemBuilder: (context, i) {
+          final p = provinces[i];
+          return SizedBox(
+            width: 168,
             child: Semantics(
               selected: p.id == selected,
               button: true,
@@ -216,32 +222,33 @@ class _Provinces extends StatelessWidget {
                 child: InkWell(
                   onTap: () => onSelect(p.id),
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Positioned.fill(
-                        child: PlacePhoto(id: p.id, label: p.name),
-                      ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 120),
-                        child: PhotoScrim(
-                          child: Container(
-                            alignment: Alignment.bottomLeft,
-                            padding: const EdgeInsets.fromLTRB(14, 40, 14, 12),
-                            child: Builder(
-                              builder: (context) {
-                                final text = Theme.of(context).textTheme;
-                                return Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(p.name, style: text.titleMedium),
-                                    Text(
-                                      '${counts[p.id]} สถานที่',
-                                      style: text.bodySmall,
-                                    ),
-                                  ],
-                                );
-                              },
-                            ),
+                      PlacePhoto(id: p.id, label: p.name),
+                      PhotoScrim(
+                        child: Container(
+                          alignment: Alignment.bottomLeft,
+                          padding: const EdgeInsets.fromLTRB(14, 40, 14, 12),
+                          child: Builder(
+                            builder: (context) {
+                              final text = Theme.of(context).textTheme;
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    p.name,
+                                    style: text.titleMedium,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    '${counts[p.id]} สถานที่',
+                                    style: text.bodySmall,
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
                       ),
@@ -250,9 +257,9 @@ class _Provinces extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-        ],
-      ],
+          );
+        },
+      ),
     );
   }
 }

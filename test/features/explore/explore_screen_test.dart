@@ -36,15 +36,27 @@ void main() {
     return container;
   }
 
+  /// The province list pushes the rest below the fold, and the list builds
+  /// lazily, so scroll [finder] into view first.
+  Future<void> show(WidgetTester tester, Finder finder, {double by = 200}) =>
+      tester.scrollUntilVisible(
+        finder,
+        by,
+        scrollable: find.byType(Scrollable).first,
+      );
+
   testWidgets('narrows places by search, then opens one to plan a trip', (
     tester,
   ) async {
     final c = await pumpExplore(tester);
     final places = c.read(placeCatalogProvider).requireValue.places;
+    await show(tester, find.text('พบ ${places.length} สถานที่'));
     expect(find.text('พบ ${places.length} สถานที่'), findsOneWidget);
 
+    await show(tester, find.byType(SearchBar), by: -200);
     await tester.enterText(find.byType(SearchBar), 'เกาะล้าน');
     await tester.pumpAndSettle();
+    await show(tester, find.widgetWithText(PlaceTile, 'เกาะล้าน'));
     expect(find.text('พบ 1 สถานที่'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(PlaceTile, 'เกาะล้าน'));
@@ -71,10 +83,13 @@ void main() {
 
     await tester.tap(find.text('ชลบุรี').first);
     await tester.pumpAndSettle();
+    await show(tester, find.text('พบ ${chonburi.length} สถานที่'));
     expect(find.text('พบ ${chonburi.length} สถานที่'), findsOneWidget);
 
+    await show(tester, find.text('พัก'), by: -200);
     await tester.tap(find.text('พัก'));
     await tester.pumpAndSettle();
+    await show(tester, find.text('พบ ${stays.length} สถานที่'));
     expect(find.text('พบ ${stays.length} สถานที่'), findsOneWidget);
   });
 }

@@ -13,6 +13,34 @@
           "bus": { "durationMin": 150, "farePerPerson": 131 },
           "train": { "durationMin": 240, "farePerPerson": 31 },
           "car": { "durationMin": 120, "distanceKm": 150, "toll": 120 }
+        },
+        "chiang-mai": {
+          "bus": { "durationMin": 600, "farePerPerson": 650 },
+          "train": { "durationMin": 690, "farePerPerson": 800 },
+          "car": { "durationMin": 670, "distanceKm": 685, "toll": 50 }
+        },
+        "ayutthaya": {
+          "bus": { "durationMin": 90, "farePerPerson": 70 },
+          "train": { "durationMin": 90, "farePerPerson": 20 },
+          "car": { "durationMin": 80, "distanceKm": 80, "toll": 50 }
+        },
+        "phuket": {
+          "bus": { "durationMin": 750, "farePerPerson": 850 },
+          "car": { "durationMin": 840, "distanceKm": 835, "toll": 50 }
+        },
+        "krabi": {
+          "bus": { "durationMin": 720, "farePerPerson": 800 },
+          "car": { "durationMin": 730, "distanceKm": 775, "toll": 50 }
+        },
+        "kanchanaburi": {
+          "bus": { "durationMin": 150, "farePerPerson": 120 },
+          "train": { "durationMin": 180, "farePerPerson": 25 },
+          "car": { "durationMin": 120, "distanceKm": 125, "toll": 50 }
+        },
+        "prachuap-khiri-khan": {
+          "bus": { "durationMin": 210, "farePerPerson": 200 },
+          "train": { "durationMin": 240, "farePerPerson": 44 },
+          "car": { "durationMin": 190, "distanceKm": 190, "toll": 50 }
         }
       }
     },
@@ -29,6 +57,270 @@
           "bus": { "durationMin": 150, "farePerPerson": 131 },
           "train": { "durationMin": 240, "farePerPerson": 31 },
           "car": { "durationMin": 120, "distanceKm": 150, "toll": 120 }
+        },
+        "chiang-mai": {
+          "bus": { "durationMin": 720, "farePerPerson": 850 },
+          "car": { "durationMin": 770, "distanceKm": 790, "toll": 170 }
+        },
+        "ayutthaya": {
+          "bus": { "durationMin": 240, "farePerPerson": 250 },
+          "car": { "durationMin": 170, "distanceKm": 185, "toll": 120 }
+        },
+        "phuket": {
+          "bus": { "durationMin": 840, "farePerPerson": 1000 },
+          "car": { "durationMin": 940, "distanceKm": 945, "toll": 170 }
+        },
+        "krabi": {
+          "bus": { "durationMin": 840, "farePerPerson": 950 },
+          "car": { "durationMin": 820, "distanceKm": 880, "toll": 170 }
+        },
+        "kanchanaburi": {
+          "bus": { "durationMin": 300, "farePerPerson": 300 },
+          "car": { "durationMin": 230, "distanceKm": 250, "toll": 170 }
+        },
+        "prachuap-khiri-khan": {
+          "bus": { "durationMin": 330, "farePerPerson": 350 },
+          "car": { "durationMin": 280, "distanceKm": 300, "toll": 170 }
+        }
+      }
+    },
+    {
+      "id": "chiang-mai",
+      "name": "เชียงใหม่",
+      "center": { "lat": 18.7883, "lng": 98.9853 },
+      "regionTag": "north",
+      "tags": ["templeHistory", "nature", "cafe", "localFood", "artCulture", "viewpoint"],
+      "seasonality": ["good", "good", "avoid", "avoid", "ok", "ok", "ok", "ok", "ok", "ok", "good", "good"],
+      "seasonNote": "พ.ย.–ก.พ. อากาศเย็นสบาย มี.ค.–เม.ย. ร้อนและมีหมอกควัน PM2.5 หน้าฝนป่าเขียวแต่ทางขึ้นดอยลื่น",
+      "intercity": {
+        "bangkok": {
+          "bus": { "durationMin": 600, "farePerPerson": 650 },
+          "train": { "durationMin": 690, "farePerPerson": 800 },
+          "car": { "durationMin": 670, "distanceKm": 685, "toll": 50 }
+        },
+        "chonburi": {
+          "bus": { "durationMin": 720, "farePerPerson": 850 },
+          "car": { "durationMin": 770, "distanceKm": 790, "toll": 170 }
+        },
+        "ayutthaya": {
+          "bus": { "durationMin": 540, "farePerPerson": 550 },
+          "train": { "durationMin": 600, "farePerPerson": 750 },
+          "car": { "durationMin": 600, "distanceKm": 615, "toll": 0 }
+        },
+        "phuket": {
+          "bus": { "durationMin": 1320, "farePerPerson": 1500 },
+          "car": { "durationMin": 1510, "distanceKm": 1525, "toll": 50 }
+        },
+        "krabi": {
+          "bus": { "durationMin": 1320, "farePerPerson": 1450 },
+          "car": { "durationMin": 1390, "distanceKm": 1460, "toll": 50 }
+        },
+        "kanchanaburi": {
+          "bus": { "durationMin": 780, "farePerPerson": 800 },
+          "car": { "durationMin": 710, "distanceKm": 700, "toll": 0 }
+        },
+        "prachuap-khiri-khan": {
+          "bus": { "durationMin": 840, "farePerPerson": 900 },
+          "car": { "durationMin": 850, "distanceKm": 880, "toll": 50 }
+        }
+      }
+    },
+    {
+      "id": "ayutthaya",
+      "name": "พระนครศรีอยุธยา",
+      "center": { "lat": 14.3532, "lng": 100.5689 },
+      "regionTag": "central",
+      "tags": ["templeHistory", "artCulture", "localFood", "family", "shopping", "cafe"],
+      "seasonality": ["good", "good", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "good", "good"],
+      "seasonNote": "พ.ย.–ก.พ. อากาศดี เหมาะเดินชมวัด มี.ค.–พ.ค. ร้อนจัด ควรเที่ยวช่วงเช้าและเย็น",
+      "intercity": {
+        "bangkok": {
+          "bus": { "durationMin": 90, "farePerPerson": 70 },
+          "train": { "durationMin": 90, "farePerPerson": 20 },
+          "car": { "durationMin": 80, "distanceKm": 80, "toll": 50 }
+        },
+        "chonburi": {
+          "bus": { "durationMin": 240, "farePerPerson": 250 },
+          "car": { "durationMin": 170, "distanceKm": 185, "toll": 120 }
+        },
+        "chiang-mai": {
+          "bus": { "durationMin": 540, "farePerPerson": 550 },
+          "train": { "durationMin": 600, "farePerPerson": 750 },
+          "car": { "durationMin": 600, "distanceKm": 615, "toll": 0 }
+        },
+        "phuket": {
+          "bus": { "durationMin": 840, "farePerPerson": 900 },
+          "car": { "durationMin": 910, "distanceKm": 915, "toll": 50 }
+        },
+        "krabi": {
+          "bus": { "durationMin": 810, "farePerPerson": 850 },
+          "car": { "durationMin": 790, "distanceKm": 850, "toll": 50 }
+        },
+        "kanchanaburi": {
+          "bus": { "durationMin": 210, "farePerPerson": 200 },
+          "car": { "durationMin": 160, "distanceKm": 150, "toll": 0 }
+        },
+        "prachuap-khiri-khan": {
+          "bus": { "durationMin": 300, "farePerPerson": 300 },
+          "car": { "durationMin": 260, "distanceKm": 270, "toll": 50 }
+        }
+      }
+    },
+    {
+      "id": "phuket",
+      "name": "ภูเก็ต",
+      "center": { "lat": 7.8804, "lng": 98.3923 },
+      "regionTag": "south",
+      "tags": ["beach", "seafood", "nightlife", "viewpoint", "wellness", "adventure"],
+      "seasonality": ["good", "good", "good", "good", "ok", "ok", "ok", "ok", "avoid", "ok", "good", "good"],
+      "seasonNote": "พ.ย.–เม.ย. ทะเลสงบ น้ำใส พ.ค.–ต.ค. มรสุม คลื่นแรงบางวัน ก.ย. ฝนชุกที่สุด",
+      "intercity": {
+        "bangkok": {
+          "bus": { "durationMin": 750, "farePerPerson": 850 },
+          "car": { "durationMin": 840, "distanceKm": 835, "toll": 50 }
+        },
+        "chonburi": {
+          "bus": { "durationMin": 840, "farePerPerson": 1000 },
+          "car": { "durationMin": 940, "distanceKm": 945, "toll": 170 }
+        },
+        "chiang-mai": {
+          "bus": { "durationMin": 1320, "farePerPerson": 1500 },
+          "car": { "durationMin": 1510, "distanceKm": 1525, "toll": 50 }
+        },
+        "ayutthaya": {
+          "bus": { "durationMin": 840, "farePerPerson": 900 },
+          "car": { "durationMin": 910, "distanceKm": 915, "toll": 50 }
+        },
+        "krabi": {
+          "bus": { "durationMin": 210, "farePerPerson": 200 },
+          "car": { "durationMin": 190, "distanceKm": 170, "toll": 0 }
+        },
+        "kanchanaburi": {
+          "bus": { "durationMin": 780, "farePerPerson": 850 },
+          "car": { "durationMin": 870, "distanceKm": 855, "toll": 0 }
+        },
+        "prachuap-khiri-khan": {
+          "bus": { "durationMin": 570, "farePerPerson": 700 },
+          "car": { "durationMin": 660, "distanceKm": 680, "toll": 0 }
+        }
+      }
+    },
+    {
+      "id": "krabi",
+      "name": "กระบี่",
+      "center": { "lat": 8.0863, "lng": 98.9063 },
+      "regionTag": "south",
+      "tags": ["beach", "nature", "adventure", "viewpoint", "seafood", "wellness"],
+      "seasonality": ["good", "good", "good", "good", "ok", "ok", "ok", "ok", "avoid", "ok", "good", "good"],
+      "seasonNote": "พ.ย.–เม.ย. ทะเลสงบ เหมาะเที่ยวเกาะ พ.ค.–ต.ค. มรสุม เรือบางเส้นทางงดวิ่ง",
+      "intercity": {
+        "bangkok": {
+          "bus": { "durationMin": 720, "farePerPerson": 800 },
+          "car": { "durationMin": 730, "distanceKm": 775, "toll": 50 }
+        },
+        "chonburi": {
+          "bus": { "durationMin": 840, "farePerPerson": 950 },
+          "car": { "durationMin": 820, "distanceKm": 880, "toll": 170 }
+        },
+        "chiang-mai": {
+          "bus": { "durationMin": 1320, "farePerPerson": 1450 },
+          "car": { "durationMin": 1390, "distanceKm": 1460, "toll": 50 }
+        },
+        "ayutthaya": {
+          "bus": { "durationMin": 810, "farePerPerson": 850 },
+          "car": { "durationMin": 790, "distanceKm": 850, "toll": 50 }
+        },
+        "phuket": {
+          "bus": { "durationMin": 210, "farePerPerson": 200 },
+          "car": { "durationMin": 190, "distanceKm": 170, "toll": 0 }
+        },
+        "kanchanaburi": {
+          "bus": { "durationMin": 750, "farePerPerson": 850 },
+          "car": { "durationMin": 760, "distanceKm": 790, "toll": 0 }
+        },
+        "prachuap-khiri-khan": {
+          "bus": { "durationMin": 540, "farePerPerson": 650 },
+          "car": { "durationMin": 540, "distanceKm": 585, "toll": 0 }
+        }
+      }
+    },
+    {
+      "id": "kanchanaburi",
+      "name": "กาญจนบุรี",
+      "center": { "lat": 14.0228, "lng": 99.5328 },
+      "regionTag": "west",
+      "tags": ["nature", "templeHistory", "adventure", "viewpoint", "family", "wellness"],
+      "seasonality": ["good", "good", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "good", "good"],
+      "seasonNote": "พ.ย.–ก.พ. อากาศเย็นสบาย หน้าฝนน้ำตกสวยแต่ทางลื่น มี.ค.–พ.ค. ร้อน",
+      "intercity": {
+        "bangkok": {
+          "bus": { "durationMin": 150, "farePerPerson": 120 },
+          "train": { "durationMin": 180, "farePerPerson": 25 },
+          "car": { "durationMin": 120, "distanceKm": 125, "toll": 50 }
+        },
+        "chonburi": {
+          "bus": { "durationMin": 300, "farePerPerson": 300 },
+          "car": { "durationMin": 230, "distanceKm": 250, "toll": 170 }
+        },
+        "chiang-mai": {
+          "bus": { "durationMin": 780, "farePerPerson": 800 },
+          "car": { "durationMin": 710, "distanceKm": 700, "toll": 0 }
+        },
+        "ayutthaya": {
+          "bus": { "durationMin": 210, "farePerPerson": 200 },
+          "car": { "durationMin": 160, "distanceKm": 150, "toll": 0 }
+        },
+        "phuket": {
+          "bus": { "durationMin": 780, "farePerPerson": 850 },
+          "car": { "durationMin": 870, "distanceKm": 855, "toll": 0 }
+        },
+        "krabi": {
+          "bus": { "durationMin": 750, "farePerPerson": 850 },
+          "car": { "durationMin": 760, "distanceKm": 790, "toll": 0 }
+        },
+        "prachuap-khiri-khan": {
+          "bus": { "durationMin": 270, "farePerPerson": 250 },
+          "car": { "durationMin": 220, "distanceKm": 210, "toll": 0 }
+        }
+      }
+    },
+    {
+      "id": "prachuap-khiri-khan",
+      "name": "ประจวบคีรีขันธ์",
+      "center": { "lat": 12.5684, "lng": 99.9577 },
+      "regionTag": "west",
+      "tags": ["beach", "seafood", "family", "wellness", "viewpoint", "nature"],
+      "seasonality": ["good", "good", "good", "good", "ok", "ok", "ok", "ok", "ok", "ok", "ok", "good"],
+      "seasonNote": "ธ.ค.–เม.ย. ทะเลสงบ ฟ้าใส ก.ย.–พ.ย. ฝนชุกที่สุด แต่เที่ยวหัวหินได้ทั้งปี",
+      "intercity": {
+        "bangkok": {
+          "bus": { "durationMin": 210, "farePerPerson": 200 },
+          "train": { "durationMin": 240, "farePerPerson": 44 },
+          "car": { "durationMin": 190, "distanceKm": 190, "toll": 50 }
+        },
+        "chonburi": {
+          "bus": { "durationMin": 330, "farePerPerson": 350 },
+          "car": { "durationMin": 280, "distanceKm": 300, "toll": 170 }
+        },
+        "chiang-mai": {
+          "bus": { "durationMin": 840, "farePerPerson": 900 },
+          "car": { "durationMin": 850, "distanceKm": 880, "toll": 50 }
+        },
+        "ayutthaya": {
+          "bus": { "durationMin": 300, "farePerPerson": 300 },
+          "car": { "durationMin": 260, "distanceKm": 270, "toll": 50 }
+        },
+        "phuket": {
+          "bus": { "durationMin": 570, "farePerPerson": 700 },
+          "car": { "durationMin": 660, "distanceKm": 680, "toll": 0 }
+        },
+        "krabi": {
+          "bus": { "durationMin": 540, "farePerPerson": 650 },
+          "car": { "durationMin": 540, "distanceKm": 585, "toll": 0 }
+        },
+        "kanchanaburi": {
+          "bus": { "durationMin": 270, "farePerPerson": 250 },
+          "car": { "durationMin": 220, "distanceKm": 210, "toll": 0 }
         }
       }
     }
