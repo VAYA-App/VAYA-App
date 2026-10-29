@@ -91,6 +91,13 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
+      # The emulator needs about 7.4 GB free and the runner has about 5 GB, so
+      # drop toolchains this job never uses.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+
       # The full trip flow on a real app (#146). Without a Gemini key the
       # planner uses its fallbacks, so every run is the same.
       - uses: reactivecircus/android-emulator-runner@v2
@@ -99,8 +106,6 @@ jobs:
           target: google_apis
           arch: x86_64
           disable-animations: true
-          # The default 6 GB userdata partition does not fit on the runner.
-          disk-size: 4096M
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
           script: flutter test integration_test/trip_flow_test.dart -d emulator-5554
 
