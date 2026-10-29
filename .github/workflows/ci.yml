@@ -45,9 +45,13 @@ jobs:
       - run: dart run tool/check_coverage.dart 70
 
       - uses: actions/upload-artifact@v4
+        # An upload is a convenience; a full quota must not fail CI (#203).
+        continue-on-error: true
         with:
           name: coverage
           path: coverage/lcov.info
+          # Free plan storage is small; old runs filled it (#203).
+          retention-days: 3
 
   build:
     name: build web and android
@@ -75,9 +79,13 @@ jobs:
       - run: flutter build apk --debug
 
       - uses: actions/upload-artifact@v4
+        # An upload is a convenience; a full quota must not fail CI (#203).
+        continue-on-error: true
         with:
           name: vaya-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
+          # Free plan storage is small; old runs filled it (#203).
+          retention-days: 3
 
   firestore-rules:
     name: firestore security rules
