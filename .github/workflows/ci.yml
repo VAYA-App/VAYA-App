@@ -1,6 +1,11 @@
-# Checks every PR into main and every commit on main after a merge (#118):
-# format, analyze, tests with a coverage minimum, a web and Android build
-# (#147) and the Firestore security rules (#145).
+# Checks every PR into main and every commit on main after a merge (#118).
+# The jobs run as a pipeline, so the Actions graph reads left to right:
+#
+#   lint ─┬─ unit ────────┬─ coverage ─┬─ build web
+#         ├─ widget ──────┘            └─ build android
+#         ├─ integration ──────────────┘
+#         └─ security ─────────────────┘
+#
 # The repo is private on the free plan, so this cannot block a merge; it
 # shows ✅/❌ on the PR and on the commit instead. See CONTRIBUTING.md.
 name: CI
@@ -19,76 +24,85 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  check:
-    name: format, analyze, test
+  lint:
+    name: 1 · Lint (format + analyze)
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.44.4
-          cache: true
-
-      - run: flutter pub get
+      - uses: ./.github/actions/setup-flutter
 
       - name: dart format (check only)
         run: dart format --output=none --set-exit-if-changed lib test integration_test tool
 
       - run: flutter analyze
 
-      - run: flutter test --coverage
-
-      # Line coverage of lib/ must stay at 70% or more (#147).
-      - run: dart run tool/check_coverage.dart 70
-
-      - uses: actions/upload-artifact@v4
-        # An upload is a convenience; a full quota must not fail CI (#203).
-        continue-on-error: true
-        with:
-          name: coverage
-          path: coverage/lcov.info
-          # Free plan storage is small; old runs filled it (#203).
-          retention-days: 3
-
-  build:
-    name: build web and android
+  unit:
+    name: 2 · Test · Unit
+    needs: lint
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
 
-      # Gradle for the Android build needs Java 17.
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          flutter-version: 3.44.4
-          cache: true
-
-      - run: flutter pub get
-
-      - run: flutter build web --release
-
-      - run: flutter build apk --debug
+      # Domain rules, the planner pipeline, data, storage and the AI client.
+      - run: flutter test --coverage test/domain test/planner test/data test/ai test/assets
 
       - uses: actions/upload-artifact@v4
-        # An upload is a convenience; a full quota must not fail CI (#203).
-        continue-on-error: true
         with:
-          name: vaya-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
-          # Free plan storage is small; old runs filled it (#203).
-          retention-days: 3
+          name: lcov-unit
+          path: coverage/lcov.info
+          retention-days: 1
 
-  firestore-rules:
-    name: firestore security rules
+  widget:
+    name: 2 · Test · Widget
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
+
+      # Every screen, the shared widgets and the app shell (router, auth guard).
+      - run: flutter test --coverage test/features test/shared test/app test/_preview
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lcov-widget
+          path: coverage/lcov.info
+          retention-days: 1
+
+  integration:
+    name: 2 · Test · Integration (Android emulator)
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
+
+      # The emulator needs hardware acceleration on the Linux runner.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      # The full trip flow on a real app (#146). Without a Gemini key the
+      # planner uses its fallbacks, so every run is the same.
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
+          script: flutter test integration_test/trip_flow_test.dart -d emulator-5554
+
+  security:
+    name: 2 · Test · Security (Firestore rules)
+    needs: lint
     runs-on: ubuntu-latest
     timeout-minutes: 15
     defaults:
@@ -112,3 +126,48 @@ jobs:
       - run: npm ci
 
       - run: npx --yes firebase-tools@14 emulators:exec --only firestore --project demo-vaya --config ../firebase.json "node --test"
+
+  coverage:
+    name: 3 · Coverage ≥ 70%
+    needs: [unit, widget]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ./.github/actions/setup-flutter
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: lcov-*
+
+      # Line coverage of lib/ over unit and widget tests together (#147).
+      - run: dart run tool/check_coverage.dart 70 lcov-unit/lcov.info lcov-widget/lcov.info
+
+  build:
+    name: 4 · Build · ${{ matrix.target }}
+    needs: [coverage, integration, security]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        target: [web, android]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-flutter
+
+      - if: matrix.target == 'web'
+        run: flutter build web --release
+
+      - if: matrix.target == 'android'
+        run: flutter build apk --debug
+
+      - if: matrix.target == 'android'
+        uses: actions/upload-artifact@v4
+        # An upload is a convenience; a full quota must not fail CI (#203).
+        continue-on-error: true
+        with:
+          name: vaya-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          # Free plan storage is small; old runs filled it (#203).
+          retention-days: 3

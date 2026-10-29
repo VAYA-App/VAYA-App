@@ -90,7 +90,7 @@ git branch -D feat/18-trip-request-form
 
 ## CI (GitHub Actions)
 
-[`.github/workflows/ci.yml`](.github/workflows/ci.yml) รัน `dart format` (ตรวจอย่างเดียว), `flutter analyze` และ `flutter test` ด้วย Flutter 3.44.4 ใช้เวลาราว 3–5 นาที
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) รันเป็นขั้น lint → test (unit, widget, integration, security) → coverage → build ด้วย Flutter 3.44.4 ใช้เวลาราว 15–25 นาที รายละเอียดแต่ละขั้นอยู่ใน [docs/TESTING.md](docs/TESTING.md#github-actions)
 
 | เมื่อไร | ดูผลที่ไหน |
 |---|---|
