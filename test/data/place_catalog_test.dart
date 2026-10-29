@@ -15,8 +15,17 @@ void main() {
     catalog = await loadPlaceCatalog(rootBundle);
   });
 
-  test('loads Bangkok and Chonburi with places in every category', () {
-    expect(catalog.provinces.map((p) => p.id), ['bangkok', 'chonburi']);
+  test('loads every province with places in every category', () {
+    expect(catalog.provinces.map((p) => p.id), [
+      'bangkok',
+      'chonburi',
+      'chiang-mai',
+      'ayutthaya',
+      'phuket',
+      'krabi',
+      'kanchanaburi',
+      'prachuap-khiri-khan',
+    ]);
     for (final province in catalog.provinces) {
       expect(province.seasonality, hasLength(12));
       for (final category in PlaceCategory.values) {
