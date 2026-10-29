@@ -1,0 +1,22 @@
+# The setup every CI job shares: Java for Gradle, the pinned Flutter and
+# the packages. Kept in one place so the jobs cannot drift apart.
+name: Set up Flutter
+description: Java 17, Flutter 3.44.4 and flutter pub get
+
+runs:
+  using: composite
+  steps:
+    # Gradle for the Android build and emulator needs Java 17.
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: 17
+
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: stable
+        flutter-version: 3.44.4
+        cache: true
+
+    - run: flutter pub get
+      shell: bash
