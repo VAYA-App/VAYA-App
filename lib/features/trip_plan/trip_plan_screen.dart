@@ -381,6 +381,7 @@ class _TripPlanBodyState extends ConsumerState<_TripPlanBody> {
       ),
       body: SafeArea(child: body),
       bottomNavigationBar: _BottomActions(
+        tripId: widget.tripId,
         view: widget.view,
         onAskAi: _openChat,
       ),
@@ -456,7 +457,13 @@ class _TripMenu extends ConsumerWidget {
 
 /// Saving the plan (#43) and editing it with the AI chat (#46).
 class _BottomActions extends ConsumerStatefulWidget {
-  const _BottomActions({required this.view, required this.onAskAi});
+  const _BottomActions({
+    required this.tripId,
+    required this.view,
+    required this.onAskAi,
+  });
+
+  final String tripId;
 
   final TripPlanView view;
   final VoidCallback onAskAi;
@@ -486,6 +493,7 @@ class _BottomActionsState extends ConsumerState<_BottomActions> {
               plan: widget.view.plan,
             ),
           );
+      ref.read(draftTripsProvider.notifier).remove(widget.tripId);
       messenger.showSnackBar(const SnackBar(content: Text('บันทึกแล้ว')));
       // Reopen as the saved trip, so saving twice is not possible and the
       // delete menu appears.

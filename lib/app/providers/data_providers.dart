@@ -46,8 +46,22 @@ final tripRepositoryProvider = Provider<TripRepository>((ref) {
 });
 
 /// Real-time stream of the current user's saved trips (#42).
+final _authStateChangesProvider = StreamProvider<AppUser?>(
+  (ref) => ref.watch(authRepositoryProvider).authStateChanges(),
+);
 final savedTripsProvider = StreamProvider<List<Trip>>((ref) {
-  return ref.watch(tripRepositoryProvider).watchMyTrips();
+  final auth = ref.watch(authRepositoryProvider);
+  final user = ref.watch(_authStateChangesProvider).value ?? auth.currentUser;
+  if (user == null) return Stream.value(const []);
+  return ref
+      .watch(tripRepositoryProvider)
+      .watchMyTrips()
+      .map(
+        (trips) => [
+          for (final trip in trips)
+            if (trip.ownerUid == user.uid) trip,
+        ],
+      );
 });
 
 /// Where Place Feedback is kept: place id → `like` / `dislike`. `main.dart`
