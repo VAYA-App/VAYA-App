@@ -9,6 +9,17 @@ import 'package:vaya_app/domain/domain.dart';
 const _bounds = {
   'bangkok': (minLat: 13.49, maxLat: 13.96, minLng: 100.32, maxLng: 100.94),
   'chonburi': (minLat: 12.50, maxLat: 13.60, minLng: 100.70, maxLng: 101.60),
+  'chiang-mai': (minLat: 17.24, maxLat: 20.15, minLng: 98.00, maxLng: 99.58),
+  'ayutthaya': (minLat: 14.10, maxLat: 14.68, minLng: 100.21, maxLng: 100.83),
+  'phuket': (minLat: 7.26, maxLat: 8.21, minLng: 98.06, maxLng: 98.50),
+  'krabi': (minLat: 7.07, maxLat: 8.69, minLng: 98.59, maxLng: 99.42),
+  'kanchanaburi': (minLat: 13.72, maxLat: 15.67, minLng: 98.18, maxLng: 99.88),
+  'prachuap-khiri-khan': (
+    minLat: 10.95,
+    maxLat: 12.67,
+    minLng: 99.14,
+    maxLng: 100.46,
+  ),
 };
 
 /// Minimum Attractions, Restaurants and Accommodations per province (#21,
