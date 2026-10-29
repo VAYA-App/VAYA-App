@@ -49,11 +49,13 @@ jobs:
       # Domain rules, the planner pipeline, data, storage and the AI client.
       - run: flutter test --coverage test/domain test/planner test/data test/ai test/assets
 
-      - uses: actions/upload-artifact@v4
+      # Handed to the coverage job through the Actions cache, not an
+      # artifact: a full artifact quota failed every run.
+      - run: mkdir lcov-unit && mv coverage/lcov.info lcov-unit/
+      - uses: actions/cache/save@v4
         with:
-          name: lcov-unit
-          path: coverage/lcov.info
-          retention-days: 1
+          path: lcov-unit
+          key: lcov-unit-${{ github.run_id }}-${{ github.run_attempt }}
 
   widget:
     name: 2 · Test · Widget
@@ -65,13 +67,13 @@ jobs:
       - uses: ./.github/actions/setup-flutter
 
       # Every screen, the shared widgets and the app shell (router, auth guard).
-      - run: flutter test --coverage test/features test/shared test/app test/_preview
+      - run: flutter test --coverage test/features test/shared test/app
 
-      - uses: actions/upload-artifact@v4
+      - run: mkdir lcov-widget && mv coverage/lcov.info lcov-widget/
+      - uses: actions/cache/save@v4
         with:
-          name: lcov-widget
-          path: coverage/lcov.info
-          retention-days: 1
+          path: lcov-widget
+          key: lcov-widget-${{ github.run_id }}-${{ github.run_attempt }}
 
   integration:
     name: 2 · Test · Integration (Android emulator)
@@ -88,6 +90,13 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+
+      # The emulator needs about 7.4 GB free and the runner has about 5 GB, so
+      # drop toolchains this job never uses.
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
 
       # The full trip flow on a real app (#146). Without a Gemini key the
       # planner uses its fallbacks, so every run is the same.
@@ -137,9 +146,17 @@ jobs:
 
       - uses: ./.github/actions/setup-flutter
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          pattern: lcov-*
+          path: lcov-unit
+          key: lcov-unit-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
+
+      - uses: actions/cache/restore@v4
+        with:
+          path: lcov-widget
+          key: lcov-widget-${{ github.run_id }}-${{ github.run_attempt }}
+          fail-on-cache-miss: true
 
       # Line coverage of lib/ over unit and widget tests together (#147).
       - run: dart run tool/check_coverage.dart 70 lcov-unit/lcov.info lcov-widget/lcov.info

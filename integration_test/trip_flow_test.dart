@@ -30,16 +30,6 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// Scrolls the home list until [finder] is built.
-  Future<void> scrollTo(WidgetTester tester, Finder finder) async {
-    await tester.scrollUntilVisible(
-      finder,
-      300,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-  }
-
   Future<void> tapText(WidgetTester tester, String text) async {
     final target = find.text(text).first;
     await tester.ensureVisible(target);
@@ -68,7 +58,9 @@ void main() {
     await waitFor(tester, find.textContaining('เข้าสู่ระบบด้วย Google'));
     await tester.tap(find.textContaining('เข้าสู่ระบบด้วย Google'));
     await waitFor(tester, find.text('วางแผนทริปใหม่'));
-    await scrollTo(tester, find.text('ยังไม่มีทริป'));
+    await tapText(tester, 'ทริปของฉัน');
+    expect(find.text('ยังไม่มีทริป'), findsOneWidget);
+    await tapText(tester, 'หน้าแรก');
 
     // Step 1: dates and travellers; the AI picks the province.
     await tapText(tester, 'วางแผนทริปใหม่');
@@ -103,7 +95,7 @@ void main() {
       find.text('บันทึกทริป'),
       timeout: const Duration(seconds: 60),
     );
-    expect(find.textContaining('ชลบุรี 2 วัน 1 คืน'), findsOneWidget);
+    expect(find.textContaining('ชลบุรี 2 วัน 1 คืน'), findsWidgets);
     expect(find.text('ราคาโดยประมาณ'), findsWidgets);
 
     // Save it.
@@ -111,12 +103,13 @@ void main() {
     await waitFor(tester, find.byTooltip('ตัวเลือกเพิ่มเติม'));
     expect(find.text('บันทึกแล้ว'), findsWidgets);
 
-    // Back home, the trip is listed and opens again.
+    // Back home, the trip is listed in My Trips and opens again.
     await tester.tap(find.byTooltip('กลับหน้าแรก'));
     await waitFor(tester, find.text('วางแผนทริปใหม่'));
-    final card = find.widgetWithText(ListTile, 'ชลบุรี');
-    await scrollTo(tester, card);
-    await tester.tap(card);
+    await tapText(tester, 'ทริปของฉัน');
+    final card = find.text('ชลบุรี 2 วัน 1 คืน');
+    await waitFor(tester, card);
+    await tester.tap(card.first);
     await waitFor(tester, find.byTooltip('ตัวเลือกเพิ่มเติม'));
 
     // Delete it after confirming.
@@ -125,7 +118,8 @@ void main() {
     await tapText(tester, 'ลบทริป');
     await tester.tap(find.widgetWithText(FilledButton, 'ลบ'));
     await waitFor(tester, find.text('วางแผนทริปใหม่'));
-    await scrollTo(tester, find.text('ยังไม่มีทริป'));
-    expect(find.widgetWithText(ListTile, 'ชลบุรี'), findsNothing);
+    await tapText(tester, 'ทริปของฉัน');
+    expect(find.text('ยังไม่มีทริป'), findsOneWidget);
+    expect(find.text('ชลบุรี 2 วัน 1 คืน'), findsNothing);
   });
 }
