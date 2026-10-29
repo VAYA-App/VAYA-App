@@ -16,10 +16,11 @@ void main() {
     shortDescription: '',
   );
 
-  test('Google Maps puts the pin on the coordinates', () {
+  test('Google Maps pins the coordinates and labels the pin with the name', () {
     final uri = placeMapUri(place, platform: TargetPlatform.android);
-    expect(uri.host, 'www.google.com');
-    expect(uri.queryParameters['query'], '12.92,100.78');
+    expect(uri.scheme, 'https');
+    expect(uri.host, 'maps.google.com');
+    expect(uri.queryParameters['q'], '12.92,100.78(เกาะล้าน)');
   });
 
   test('Apple Maps on iOS shows the place name on the pin', () {
