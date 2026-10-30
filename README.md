@@ -31,16 +31,18 @@
 
 ## ภาพหน้าจอ
 
-| ค้นหาไอเดียและผู้ช่วย AI | ฟอร์มวางแผนทริป 4 ขั้น |
-|---|---|
-| ![Discovery and assistant](docs/images/screenshots/flow1_discovery_assistant.png) | ![Trip request wizard](docs/images/screenshots/flow2_trip_request_wizard.png) |
-| **แผนทริปจาก AI และแผนที่** | **คำแนะนำจังหวัด โปรไฟล์ และระบบ** |
-| ![AI plan and map](docs/images/screenshots/flow3_ai_plan_and_map.png) | ![Suggestions and system](docs/images/screenshots/flow4_suggestions_system.png) |
+▶️ [ดูวิดีโอแนะนำแอป](https://github.com/VAYA-App/VAYA-App/releases/download/v1.0.0/vaya-promo-16x9.mp4) (แนวตั้งสำหรับมือถือ: [vaya-promo-9x16.mp4](https://github.com/VAYA-App/VAYA-App/releases/download/v1.0.0/vaya-promo-9x16.mp4))
+
+| หน้าแรก | ไปไหน เมื่อไร กี่คน | สไตล์ที่ชอบ | แนะนำจังหวัด | แผนและงบ |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="docs/images/screenshots/home.jpg" width="160" alt="หน้าแรก"> | <img src="docs/images/screenshots/step1_filled.jpg" width="160" alt="ฟอร์มขั้นที่ 1"> | <img src="docs/images/screenshots/step3_filled.jpg" width="160" alt="ฟอร์มขั้นที่ 3"> | <img src="docs/images/screenshots/suggestions.jpg" width="160" alt="แนะนำจังหวัด"> | <img src="docs/images/screenshots/plan.jpg" width="160" alt="แผนทริปและ Over Budget"> |
+| **ไทม์ไลน์** | **แผนที่** | **รายละเอียดจุดแวะ** | **สำรวจ** | **ทริปของฉัน** |
+| <img src="docs/images/screenshots/timeline.jpg" width="160" alt="ไทม์ไลน์รายวัน"> | <img src="docs/images/screenshots/map_day1.jpg" width="160" alt="แผนที่เส้นทาง"> | <img src="docs/images/screenshots/stop_detail.jpg" width="160" alt="รายละเอียดจุดแวะ"> | <img src="docs/images/screenshots/explore.jpg" width="160" alt="สำรวจสถานที่"> | <img src="docs/images/screenshots/mytrips.jpg" width="160" alt="ทริปของฉัน"> |
 
 ## ฟีเจอร์
 
 - **เข้าสู่ระบบ** ด้วยบัญชี Google ผ่าน Firebase Auth
-- **ฟอร์ม Trip Request 4 ขั้น**: วันที่, งบและจำนวนคน, วิธีเดินทาง, สไตล์การเที่ยว (ถ้าต้นทางกับปลายทางเป็นจังหวัดเดียวกัน ฟอร์มข้ามขั้นเดินทางข้ามเมืองให้)
+- **ฟอร์ม Trip Request 3 ขั้น**: ไปไหน เมื่อไร กี่คน, งบและจังหวะการเที่ยว, สไตล์ที่ชอบ (ยังไม่รู้จะไปไหนก็ให้ AI เลือกจังหวัดได้)
 - **แนะนำจังหวัด** จาก 8 จังหวัด (กรุงเทพฯ, ชลบุรี, เชียงใหม่, พระนครศรีอยุธยา, ภูเก็ต, กระบี่, กาญจนบุรี, ประจวบคีรีขันธ์) กรองด้วยงบก่อน แล้วให้ Gemini จัดอันดับตามความชอบ
 - **สร้างแผนรายวัน**: Gemini เลือกสถานที่ลงแต่ละช่วงเวลา ส่วนโค้ดจัดลำดับเส้นทาง เวลาแต่ละจุด และที่พัก
 - **คำนวณค่าใช้จ่าย** แยกหมวด (เดินทางข้ามเมือง, เดินทางในเมือง, ที่พัก, อาหาร, ค่าเข้าชม, เผื่อ) แบบ deterministic
