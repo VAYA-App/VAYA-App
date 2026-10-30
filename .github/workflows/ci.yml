@@ -98,6 +98,23 @@ jobs:
           sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/.ghcup /opt/hostedtoolcache/CodeQL /usr/local/share/boost
           df -h /
 
+      # Gradle asks for an 8 GB heap (android/gradle.properties) and the
+      # Kotlin daemon takes as much again. Next to the emulator that ran the
+      # runner out of memory and GitHub shut it down mid-build. The user
+      # gradle.properties wins over the project one, so cap it for CI only.
+      - name: Cap Gradle memory
+        run: |
+          mkdir -p ~/.gradle
+          cat >> ~/.gradle/gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=1g
+          kotlin.daemon.jvmargs=-Xmx2g
+          EOF
+
+      # Compile the test app before the emulator boots, so the heavy Gradle
+      # build never shares memory with it. The run below then only reuses it.
+      - name: Build the test app
+        run: flutter build apk --debug --target=integration_test/trip_flow_test.dart
+
       # The full trip flow on a real app (#146). Without a Gemini key the
       # planner uses its fallbacks, so every run is the same.
       - uses: reactivecircus/android-emulator-runner@v2
