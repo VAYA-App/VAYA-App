@@ -1,0 +1,44 @@
+# Builds the Android APK for a GitHub Release and attaches it to that
+# release as vaya-<version>.apk. Runs when a release is published, or by
+# hand for a release that already exists.
+#
+# The APK is signed with the debug key (android/app/build.gradle.kts), so it
+# is for demos, not for Google Play.
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to build and attach the APK to (e.g. v1.0.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: Build and attach APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      TAG: ${{ github.event.release.tag_name || inputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - uses: ./.github/actions/setup-flutter
+
+      # v1.0.0 -> build name 1.0.0, so the app shows the release's version.
+      - run: flutter build apk --release --build-name "${TAG#v}"
+
+      - name: Attach to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          apk="vaya-${TAG#v}.apk"
+          mv build/app/outputs/flutter-apk/app-release.apk "$apk"
+          gh release upload "$TAG" "$apk" --clobber
