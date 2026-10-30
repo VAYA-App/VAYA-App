@@ -79,7 +79,7 @@ jobs:
     name: 2 · Test · Integration (Android emulator)
     needs: lint
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-flutter
@@ -124,7 +124,12 @@ jobs:
           arch: x86_64
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-          script: flutter test integration_test/trip_flow_test.dart -d emulator-5554
+          # Android keeps optimising apps for a while after boot, and a test
+          # started at once hung with no output until the job timed out. Give
+          # it a minute, cap each try at 15 minutes and retry a hang once.
+          script: |
+            sleep 60
+            timeout 15m flutter test integration_test/trip_flow_test.dart -d emulator-5554 || timeout 15m flutter test integration_test/trip_flow_test.dart -d emulator-5554
 
   security:
     name: 2 · Test · Security (Firestore rules)
