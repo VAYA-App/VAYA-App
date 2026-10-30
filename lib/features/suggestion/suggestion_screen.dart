@@ -253,12 +253,12 @@ class _SuggestionCard extends StatelessWidget {
           ],
           const SizedBox(height: 12),
           Text(
-            'เริ่มต้น ~${formatBaht(suggestion.minimumCost)} · '
+            'ถูกสุด ~${formatBaht(suggestion.minimumCost)} · '
             '${formatThaiMonth(month)} ${season.label}',
             style: theme.textTheme.labelLarge?.copyWith(color: colors.primary),
           ),
           Text(
-            'ราคาโดยประมาณ ทั้งทริป',
+            'ทั้งทริปแบบประหยัดที่สุด แผนจริงมักสูงกว่านี้',
             style: theme.textTheme.labelSmall?.copyWith(
               color: colors.onSurfaceVariant,
             ),

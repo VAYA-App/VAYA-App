@@ -5,6 +5,7 @@ import 'package:vaya_app/app/providers/data_providers.dart';
 import 'package:vaya_app/app/providers/mock_providers.dart';
 import 'package:vaya_app/features/assistant/plan_chat_panel.dart';
 import 'package:vaya_app/features/trip_plan/trip_plan_view_provider.dart';
+import 'package:vaya_app/shared/formatters.dart';
 import 'package:vaya_app/shared/widgets/mascot_view.dart';
 
 void main() {
@@ -83,6 +84,13 @@ void main() {
     expect(find.text('เปลี่ยนเลย'), findsNothing);
     final after = container.read(draftTripsProvider)['draft-1']!.plan;
     expect(identical(after, before), isFalse);
+    // The reply says how the total moved, worked out from the two plans.
+    final change = after.cost.total - before.cost.total;
+    final said = change == 0
+        ? 'ยอดรวมเท่าเดิม'
+        : 'ยอดรวม${change > 0 ? 'เพิ่มขึ้น' : 'ลดลง'} ${formatBaht(change.abs())} '
+              'เป็น ${formatBaht(after.cost.total)}';
+    expect(find.textContaining(said), findsOneWidget);
   });
 
   testWidgets('declining keeps the plan', (tester) async {
